@@ -43,6 +43,10 @@ This will:
 - **Borders** - Visual window borders
 - **SwipeAeroSpace** - 3-finger swipe gestures for workspace switching
 - **Nerd Fonts** - Developer-friendly fonts with icon support
+- **ChatGPT** - AI assistant desktop app
+- **Codex** - AI code assistant
+- **Dozer** - Hide menu bar icons
+- **Sublime Text** - Text editor
 
 ### Development Tools
 - **Cursor** - AI-powered code editor
@@ -52,12 +56,21 @@ This will:
 - **Sequel Ace** - MySQL/MariaDB database management
 - **VSCode** - Popular code editor
 - **Composer** - PHP dependency manager
+- **LazyDocker** - Terminal UI for Docker
+- **LazyGit** - Terminal UI for Git
+- **Node.js** - JavaScript runtime (includes Yarn)
+- **pipx** - Python application installer
+- **rbenv** - Ruby version manager
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator
 - **Alt-Tab** - Windows-style alt-tab for macOS
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
+- **btop** - System resource monitor
+- **Neovim** - Modern Vim-based text editor
+- **Platform.sh CLI** - Platform.sh command-line tool
+- **tmux** - Terminal multiplexer
 
 ### System Configuration
 - **macOS Settings** - Optimized system preferences for development workflow
@@ -243,20 +256,37 @@ pgrep -x "sketchybar" || brew services restart sketchybar
 **Window Management:**
 - `Ctrl+Alt+H/J/K/L` - Focus window (left/down/up/right)
 - `Alt+Shift+H/J/K/L` - Move window (left/down/up/right)
-- `Alt+Minus/Equal` - Resize window
-- `Alt+Slash` - Toggle horizontal/vertical layout
+- `Alt+Minus/Equal` - Resize window (decrease/increase)
+- `Alt+Slash` - Toggle horizontal/vertical tiles layout
+- `Alt+Comma` - Toggle horizontal/vertical accordion layout
 - `Alt+F` - Toggle floating/tiling mode
+- `Alt+Shift+Semicolon` - Enter service mode
 
 **Workspaces:**
 - `Alt+1-9/0` - Switch to workspace 1-10
 - `Alt+Shift+1-9/0` - Move window to workspace 1-10
-- `Three-finger swipe` - Swipe left/right to switch workspaces
+- `Alt+Left/Right` - Switch to previous/next workspace
+- `Cmd+Alt+Left/Right` - Move window to previous/next workspace
+- `Three-finger swipe` - Swipe left/right to switch workspaces (via SwipeAeroSpace)
+
+**Service Mode:**
+- `Alt+Shift+Semicolon` - Enter service mode
+- `Esc` - Exit service mode and reload config
+- `R` - Reset layout (flatten workspace tree)
+- `F` - Toggle floating/tiling mode
+- `Backspace` - Close all windows except current
+- `Alt+Shift+H/J/K/L` - Join with adjacent window (left/down/up/right)
+- `Up/Down` - Volume up/down
+- `Shift+Down` - Mute volume (set to 0)
 
 **Quick Apps:**
 - `Ctrl+Alt+B` - Safari
 - `Ctrl+Alt+C` - Cursor
 - `Ctrl+Alt+T` - iTerm
 - `Ctrl+Alt+P` - PhpStorm
+- `Ctrl+Alt+Z` - Todoist
+- `Ctrl+Alt+N` - Notes (new note)
+- `Ctrl+Alt+M` - Mimestream
 
 ## Modular Installation
 
