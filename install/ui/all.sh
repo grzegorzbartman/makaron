@@ -6,6 +6,10 @@ source "$MAKARON_PATH/install/ui/borders.sh"
 source "$MAKARON_PATH/install/ui/aerospace.sh"
 source "$MAKARON_PATH/install/ui/sketchybar.sh"
 source "$MAKARON_PATH/install/ui/swipeaerospace.sh"
+source "$MAKARON_PATH/install/ui/chatgpt.sh"
+source "$MAKARON_PATH/install/ui/codex.sh"
+source "$MAKARON_PATH/install/ui/dozer.sh"
+source "$MAKARON_PATH/install/ui/sublime-text.sh"
 
 # Initialize default theme (tokyo-night)
 echo "Setting up default theme (Tokyo Night)..."
