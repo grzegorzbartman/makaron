@@ -4,13 +4,89 @@ set -e
 
 MAKARON_PATH="$HOME/.local/share/makaron"
 
-echo "Updating Makaron configuration..."
+# Install gum if not available
+install_gum_if_needed() {
+    if ! command -v gum &> /dev/null; then
+        echo "Installing gum..."
+        if [ -f "$MAKARON_PATH/install/tools/gum.sh" ]; then
+            bash "$MAKARON_PATH/install/tools/gum.sh" || true
+        else
+            if command -v brew &> /dev/null; then
+                brew install gum || true
+            fi
+        fi
+    fi
+}
+
+# Create backup snapshot
+create_backup() {
+    if ! command -v zip &> /dev/null; then
+        echo "❌ zip command is required for backup but not found!"
+        echo "Please install zip or run update without backup."
+        exit 1
+    fi
+
+    local backup_dir="$MAKARON_PATH/tmp"
+    mkdir -p "$backup_dir"
+
+    local timestamp=$(date +"%Y-%m-%d-%H-%M-%S")
+    local backup_file="$backup_dir/snapshot-backup-$timestamp.zip"
+
+    cd "$MAKARON_PATH"
+    zip -r "$backup_file" . -x ".git/*" ".git/**/*" "*.git*" > /dev/null 2>&1
+
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to create backup!"
+        exit 1
+    fi
+
+    echo "✅ Backup created successfully: $backup_file"
+    return 0
+}
+
+# Check if makaron exists
+if [ ! -d "$MAKARON_PATH" ]; then
+    echo "Makaron not found at $MAKARON_PATH"
+    echo "Please run the installation script first:"
+    echo "curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash"
+    exit 1
+fi
+
+# Install gum if needed
+install_gum_if_needed
+
+# Ask for confirmation
+echo ""
+echo "🔄 Makaron Update"
+echo "================="
+echo ""
+echo "This will update your Makaron configuration to the latest version."
+echo "A backup snapshot will be created first in:"
+echo "  $MAKARON_PATH/tmp/snapshot-backup-YYYY-MM-DD-HH-MM-SS.zip"
+echo ""
+echo "Are you sure you want to continue with the update?"
+echo ""
+
+if command -v gum &> /dev/null; then
+    if ! gum confirm "Continue with update?"; then
+        echo "Update cancelled."
+        exit 0
+    fi
+else
+    read -p "Continue with update? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Update cancelled."
+        exit 0
+    fi
+fi
 
 if [ -d "$MAKARON_PATH/.git" ]; then
     cd "$MAKARON_PATH"
 
     # Check for local changes
     if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo ""
         echo "❌ Local changes detected in makaron repository!"
         echo ""
         echo "You have uncommitted changes that would be overwritten by the update."
@@ -30,6 +106,12 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         exit 1
     fi
 
+    # Create backup
+    echo ""
+    echo "📦 Creating backup snapshot..."
+    create_backup
+    echo ""
+
     echo "Fetching latest changes..."
     git fetch origin main
     git reset --hard origin/main
@@ -47,7 +129,8 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         bash "$MAKARON_PATH/bin/makaron-reload-aerospace-sketchybar"
     fi
 
-    echo "Update completed successfully!"
+    echo ""
+    echo "✅ Update completed successfully!"
 else
     echo "Makaron not found at $MAKARON_PATH"
     echo "Please run the installation script first:"
