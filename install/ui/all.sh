@@ -8,6 +8,7 @@ source "$MAKARON_PATH/install/ui/sketchybar.sh"
 source "$MAKARON_PATH/install/ui/swipeaerospace.sh"
 source "$MAKARON_PATH/install/ui/chatgpt.sh"
 source "$MAKARON_PATH/install/ui/codex.sh"
+source "$MAKARON_PATH/install/ui/command-x.sh"
 source "$MAKARON_PATH/install/ui/dozer.sh"
 source "$MAKARON_PATH/install/ui/sublime-text.sh"
 
