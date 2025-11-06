@@ -27,4 +27,3 @@ fi
 
 # Individual installation scripts check if applications are already installed (idempotent)
 echo "Migration completed successfully"
-

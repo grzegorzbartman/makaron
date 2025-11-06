@@ -16,6 +16,7 @@ fi
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 THEME_DIR="$MAKARON_PATH/themes/$THEME_NAME"
 CURRENT_THEME_LINK="$MAKARON_PATH/current-theme"
+GHOSTTY_CONFIG="$MAKARON_PATH/configs/ghostty/config"
 
 # Check if theme exists
 if [ ! -d "$THEME_DIR" ]; then
@@ -25,11 +26,75 @@ fi
 
 echo "Switching to theme: $THEME_NAME"
 
+# Function to get Ghostty theme name (full name with variant)
+# Returns the complete theme name as it appears in Ghostty
+get_ghostty_theme() {
+    local theme="$1"
+    local mode="$2"
+
+    case "$theme" in
+        tokyo-night)
+            if [ "$mode" = "dark" ]; then
+                echo "TokyoNight Storm"
+            else
+                echo "TokyoNight Day"
+            fi
+            ;;
+        catppuccin|catppuccin-mocha-dark)
+            if [ "$mode" = "dark" ]; then
+                echo "Catppuccin Mocha"
+            else
+                echo "Catppuccin Latte"
+            fi
+            ;;
+        catppuccin-latte)
+            echo "Catppuccin Latte"
+            ;;
+        gruvbox)
+            if [ "$mode" = "dark" ]; then
+                echo "Gruvbox Dark"
+            else
+                echo "Gruvbox Light"
+            fi
+            ;;
+        nord)
+            if [ "$mode" = "dark" ]; then
+                echo "Nord"
+            else
+                echo "Nord Light"
+            fi
+            ;;
+        everforest)
+            if [ "$mode" = "dark" ]; then
+                echo "Everforest Dark Hard"
+            else
+                echo "Everforest Light Med"
+            fi
+            ;;
+        kanagawa)
+            echo "Kanagawa Dragon"
+            ;;
+        flexoki-light)
+            echo "Flexoki Light"
+            ;;
+        *)
+            # For unknown themes, try to construct a reasonable name
+            local base_name=$(echo "$theme" | sed 's/-\([a-z]\)/\U\1/g' | sed 's/^\([a-z]\)/\U\1/')
+            if [ "$mode" = "dark" ]; then
+                echo "$base_name Dark"
+            else
+                echo "$base_name Light"
+            fi
+            ;;
+    esac
+}
+
 # Update current-theme symlink
 rm -f "$CURRENT_THEME_LINK"
 ln -s "$THEME_DIR" "$CURRENT_THEME_LINK"
 
 # Set macOS appearance mode based on theme
+MODE="dark"  # default
 if [ -f "$THEME_DIR/mode" ]; then
     MODE=$(cat "$THEME_DIR/mode")
     if [ "$MODE" = "dark" ]; then
@@ -38,6 +103,45 @@ if [ -f "$THEME_DIR/mode" ]; then
     elif [ "$MODE" = "light" ]; then
         echo "Setting macOS appearance to Light Mode..."
         osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to false' 2>/dev/null || true
+    fi
+fi
+
+# Update Ghostty theme configuration
+if [ -f "$GHOSTTY_CONFIG" ]; then
+    DARK_THEME=$(get_ghostty_theme "$THEME_NAME" "dark")
+    LIGHT_THEME=$(get_ghostty_theme "$THEME_NAME" "light")
+
+    # Build theme string: dark:ThemeName, light:ThemeName
+    GHOSTTY_THEME_STRING="theme = dark:$DARK_THEME, light:$LIGHT_THEME"
+
+    # Update the theme line in Ghostty config
+    if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
+        # Replace existing theme line
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS uses BSD sed
+            sed -i '' "s|^theme = .*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+        else
+            # Linux uses GNU sed
+            sed -i "s|^theme = .*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+        fi
+        echo "Updated Ghostty theme configuration"
+
+        # Reload Ghostty configuration using SIGUSR2 signal
+        GHOSTTY_PID=$(pgrep -f "ghostty" | head -n 1)
+        if [ -n "$GHOSTTY_PID" ]; then
+            if kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null; then
+                echo "Reloaded Ghostty configuration (PID: $GHOSTTY_PID)"
+            else
+                echo "Note: Could not send reload signal. Press Cmd+Shift+, in Ghostty to reload config"
+            fi
+        else
+            echo "Note: Ghostty not running. Config will be loaded on next start"
+        fi
+    else
+        # Add theme line if it doesn't exist (shouldn't happen, but handle it)
+        echo "" >> "$GHOSTTY_CONFIG"
+        echo "$GHOSTTY_THEME_STRING" >> "$GHOSTTY_CONFIG"
+        echo "Added Ghostty theme configuration"
     fi
 fi
 
