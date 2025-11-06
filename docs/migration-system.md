@@ -49,50 +49,25 @@ When a user runs `makaron-update`:
 
 ## Creating Migrations
 
+> **📖 For detailed best practices and templates, see [migration-best-practices.md](./migration-best-practices.md)**
+
 ### File Naming Convention
 
 Migrations use Unix timestamp format: `{timestamp}.sh`
 
 Example: `1761363175.sh` (created on 2025-10-25)
 
-### Migration Template
+Generate timestamp: `date +%s`
 
-```bash
-#!/bin/bash
-
-# Migration: Brief description of what this migration does
-# More detailed explanation if needed
-
-set -e
-
-error_exit() {
-  echo -e "\033[31mERROR: Migration failed! Manual intervention required.\033[0m" >&2
-  exit 1
-}
-
-trap error_exit ERR
-
-echo "Running migration: Description"
-
-# Check if migration is needed (idempotent check)
-if [ condition_already_met ]; then
-    echo "Migration already applied, skipping"
-    exit 0
-fi
-
-# Perform migration steps
-# ...
-
-echo "Migration completed successfully"
-```
-
-### Best Practices
+### Quick Reference
 
 1. **Idempotent** - Migrations should be safe to run multiple times
 2. **Error handling** - Use `set -e` and trap errors
 3. **Exit 0 if already applied** - Check if work is already done
 4. **Clear messages** - Explain what's happening
 5. **Executable** - Set permissions: `chmod +x migrations/TIMESTAMP.sh`
+
+See [migration-best-practices.md](./migration-best-practices.md) for complete templates and patterns.
 
 ### Development Helper
 
