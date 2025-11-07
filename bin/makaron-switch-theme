@@ -77,6 +77,42 @@ get_ghostty_theme() {
         flexoki-light)
             echo "Flexoki Light"
             ;;
+        matte-black)
+            # Use One Dark as closest match for matte black minimalist theme
+            echo "One Dark"
+            ;;
+        osaka-jade)
+            # Use a dark green theme, closest available
+            if [ "$mode" = "dark" ]; then
+                echo "Everforest Dark Hard"
+            else
+                echo "Everforest Light Med"
+            fi
+            ;;
+        ristretto)
+            # Use warm dark theme, closest to coffee tones
+            if [ "$mode" = "dark" ]; then
+                echo "Gruvbox Dark"
+            else
+                echo "Gruvbox Light"
+            fi
+            ;;
+        rose-pine)
+            # Rose Pine theme
+            if [ "$mode" = "dark" ]; then
+                echo "Rosé Pine"
+            else
+                echo "Rosé Pine Dawn"
+            fi
+            ;;
+        droptica-dark)
+            # Use dark theme
+            if [ "$mode" = "dark" ]; then
+                echo "One Dark"
+            else
+                echo "One Light"
+            fi
+            ;;
         *)
             # For unknown themes, try to construct a reasonable name
             local base_name=$(echo "$theme" | sed 's/-\([a-z]\)/\U\1/g' | sed 's/^\([a-z]\)/\U\1/')
