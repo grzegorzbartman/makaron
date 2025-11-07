@@ -114,15 +114,15 @@ if [ -f "$GHOSTTY_CONFIG" ]; then
     # Build theme string: dark:ThemeName, light:ThemeName
     GHOSTTY_THEME_STRING="theme = dark:$DARK_THEME, light:$LIGHT_THEME"
 
-    # Update the theme line in Ghostty config
-    if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
-        # Replace existing theme line
+    # Check if theme line exists (with flexible spacing: theme=, theme =, theme  =, etc.)
+    if grep -qE "^[[:space:]]*theme[[:space:]]*=" "$GHOSTTY_CONFIG"; then
+        # Replace existing theme line (handles any spacing format)
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS uses BSD sed
-            sed -i '' "s|^theme = .*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+            # macOS uses BSD sed - match any spacing around theme and =
+            sed -i '' "s|^[[:space:]]*theme[[:space:]]*=.*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
         else
             # Linux uses GNU sed
-            sed -i "s|^theme = .*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+            sed -i "s|^[[:space:]]*theme[[:space:]]*=.*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
         fi
         echo "Updated Ghostty theme configuration"
 
