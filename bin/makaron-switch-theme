@@ -142,43 +142,82 @@ if [ -f "$THEME_DIR/mode" ]; then
     fi
 fi
 
-# Update Ghostty theme configuration
-if [ -f "$GHOSTTY_CONFIG" ]; then
-    DARK_THEME=$(get_ghostty_theme "$THEME_NAME" "dark")
-    LIGHT_THEME=$(get_ghostty_theme "$THEME_NAME" "light")
+# Function to update GHOSTTY_THEME environment variable in shell config
+update_ghostty_theme_env() {
+    local config_file="$1"
+    local theme_value="$2"
+    local export_line="export GHOSTTY_THEME=\"$theme_value\""
 
-    # Build theme string: dark:ThemeName, light:ThemeName
-    GHOSTTY_THEME_STRING="theme = dark:$DARK_THEME, light:$LIGHT_THEME"
-
-    # Check if theme line exists (with flexible spacing: theme=, theme =, theme  =, etc.)
-    if grep -qE "^[[:space:]]*theme[[:space:]]*=" "$GHOSTTY_CONFIG"; then
-        # Replace existing theme line (handles any spacing format)
+    # Remove old GHOSTTY_THEME entries if they exist
+    if [ -f "$config_file" ] && grep -q "^export GHOSTTY_THEME=" "$config_file" 2>/dev/null; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS uses BSD sed - match any spacing around theme and =
-            sed -i '' "s|^[[:space:]]*theme[[:space:]]*=.*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+            sed -i '' '/^export GHOSTTY_THEME=/d' "$config_file"
         else
-            # Linux uses GNU sed
-            sed -i "s|^[[:space:]]*theme[[:space:]]*=.*|$GHOSTTY_THEME_STRING|" "$GHOSTTY_CONFIG"
+            sed -i '/^export GHOSTTY_THEME=/d' "$config_file"
         fi
-        echo "Updated Ghostty theme configuration"
+    fi
 
-        # Reload Ghostty configuration using SIGUSR2 signal
-        GHOSTTY_PID=$(pgrep -f "ghostty" | head -n 1)
-        if [ -n "$GHOSTTY_PID" ]; then
-            if kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null; then
-                echo "Reloaded Ghostty configuration (PID: $GHOSTTY_PID)"
+    # Add new entry
+    echo "$export_line" >> "$config_file"
+}
+
+# Function to update Ghostty config file based on GHOSTTY_THEME variable
+update_ghostty_config_from_env() {
+    local theme_value="$1"
+
+    if [ -f "$GHOSTTY_CONFIG" ]; then
+        local theme_string="theme = $theme_value"
+
+        # Check if theme line exists (with flexible spacing: theme=, theme =, theme  =, etc.)
+        if grep -qE "^[[:space:]]*theme[[:space:]]*=" "$GHOSTTY_CONFIG"; then
+            # Replace existing theme line (handles any spacing format)
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                sed -i '' "s|^[[:space:]]*theme[[:space:]]*=.*|$theme_string|" "$GHOSTTY_CONFIG"
             else
-                echo "Note: Could not send reload signal. Press Cmd+Shift+, in Ghostty to reload config"
+                sed -i "s|^[[:space:]]*theme[[:space:]]*=.*|$theme_string|" "$GHOSTTY_CONFIG"
             fi
         else
-            echo "Note: Ghostty not running. Config will be loaded on next start"
+            # Add theme line if it doesn't exist
+            echo "" >> "$GHOSTTY_CONFIG"
+            echo "$theme_string" >> "$GHOSTTY_CONFIG"
         fi
-    else
-        # Add theme line if it doesn't exist (shouldn't happen, but handle it)
-        echo "" >> "$GHOSTTY_CONFIG"
-        echo "$GHOSTTY_THEME_STRING" >> "$GHOSTTY_CONFIG"
-        echo "Added Ghostty theme configuration"
     fi
+}
+
+# Update Ghostty theme configuration using environment variable
+DARK_THEME=$(get_ghostty_theme "$THEME_NAME" "dark")
+LIGHT_THEME=$(get_ghostty_theme "$THEME_NAME" "light")
+
+# Build theme string: dark:ThemeName, light:ThemeName
+GHOSTTY_THEME_VALUE="dark:$DARK_THEME, light:$LIGHT_THEME"
+
+# Update environment variable in shell config files
+ensure_shell_configs() {
+    touch "$HOME/.zshrc" 2>/dev/null || true
+    touch "$HOME/.bashrc" 2>/dev/null || true
+}
+
+ensure_shell_configs
+update_ghostty_theme_env "$HOME/.zshrc" "$GHOSTTY_THEME_VALUE"
+update_ghostty_theme_env "$HOME/.bashrc" "$GHOSTTY_THEME_VALUE"
+
+# Export for current session
+export GHOSTTY_THEME="$GHOSTTY_THEME_VALUE"
+
+# Update Ghostty config file based on environment variable
+update_ghostty_config_from_env "$GHOSTTY_THEME_VALUE"
+echo "Updated Ghostty theme configuration (using GHOSTTY_THEME environment variable)"
+
+# Reload Ghostty configuration using SIGUSR2 signal
+GHOSTTY_PID=$(pgrep -f "ghostty" | head -n 1)
+if [ -n "$GHOSTTY_PID" ]; then
+    if kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null; then
+        echo "Reloaded Ghostty configuration (PID: $GHOSTTY_PID)"
+    else
+        echo "Note: Could not send reload signal. Press Cmd+Shift+, in Ghostty to reload config"
+    fi
+else
+    echo "Note: Ghostty not running. Config will be loaded on next start"
 fi
 
 # Set wallpaper if backgrounds directory exists

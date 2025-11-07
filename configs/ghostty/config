@@ -3,7 +3,8 @@ clipboard-write = allow
 mouse-shift-capture = true
 cursor-click-to-move = true
 
-# Theme is dynamically managed by makaron-switch-theme
+# Theme is dynamically managed by makaron-switch-theme via GHOSTTY_THEME environment variable
+# This line is updated by makaron-switch-theme based on GHOSTTY_THEME variable
 theme = dark:TokyoNight Storm, light:TokyoNight Day
 
 font-family = "SF Mono"

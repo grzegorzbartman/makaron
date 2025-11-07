@@ -59,9 +59,52 @@ else
 fi
 echo ""
 
+# Check GHOSTTY_THEME environment variable
+echo "4. GHOSTTY_THEME environment variable:"
+if [ -n "$GHOSTTY_THEME" ]; then
+    echo "   ✓ Variable is set in current session"
+    echo "   Value: $GHOSTTY_THEME"
+else
+    echo "   ⚠️  Variable is NOT set in current session"
+fi
+
+# Check in .zshrc
+if [ -f "$HOME/.zshrc" ]; then
+    ZSHRC_THEME=$(grep "^export GHOSTTY_THEME=" "$HOME/.zshrc" | sed 's/^export GHOSTTY_THEME="\(.*\)"$/\1/' | head -n 1 || echo "")
+    if [ -n "$ZSHRC_THEME" ]; then
+        echo "   ✓ Found in .zshrc: $ZSHRC_THEME"
+    else
+        echo "   ⚠️  Not found in .zshrc"
+    fi
+else
+    echo "   ⚠️  .zshrc does not exist"
+fi
+
+# Check in .bashrc
+if [ -f "$HOME/.bashrc" ]; then
+    BASHRC_THEME=$(grep "^export GHOSTTY_THEME=" "$HOME/.bashrc" | sed 's/^export GHOSTTY_THEME="\(.*\)"$/\1/' | head -n 1 || echo "")
+    if [ -n "$BASHRC_THEME" ]; then
+        echo "   ✓ Found in .bashrc: $BASHRC_THEME"
+    else
+        echo "   ⚠️  Not found in .bashrc"
+    fi
+else
+    echo "   ⚠️  .bashrc does not exist"
+fi
+
+# Check sync function
+if [ -f "$HOME/.zshrc" ] && grep -q "update_ghostty_config_from_env" "$HOME/.zshrc" 2>/dev/null; then
+    echo "   ✓ Sync function found in .zshrc"
+elif [ -f "$HOME/.bashrc" ] && grep -q "update_ghostty_config_from_env" "$HOME/.bashrc" 2>/dev/null; then
+    echo "   ✓ Sync function found in .bashrc"
+else
+    echo "   ⚠️  Sync function not found in shell configs"
+fi
+echo ""
+
 # Check theme line in config
 if [ -f "$GHOSTTY_CONFIG" ]; then
-    echo "4. Theme line in config:"
+    echo "5. Theme line in config:"
     if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
         THEME_LINE=$(grep "^theme = " "$GHOSTTY_CONFIG")
         echo "   ✓ Found theme line:"
@@ -74,7 +117,7 @@ if [ -f "$GHOSTTY_CONFIG" ]; then
     echo ""
 
     # Check for variations
-    echo "5. Checking for theme line variations:"
+    echo "6. Checking for theme line variations:"
     if grep -q "^theme=" "$GHOSTTY_CONFIG"; then
         echo "   ⚠️  Found 'theme=' (no spaces) - this might be the issue!"
     fi
@@ -85,7 +128,7 @@ if [ -f "$GHOSTTY_CONFIG" ]; then
 fi
 
 # Check sed command
-echo "6. Testing sed command:"
+echo "7. Testing sed command:"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "   OS: macOS (BSD sed)"
     SED_TEST=$(echo "test line" | sed 's/test/TEST/' 2>&1)
@@ -107,7 +150,7 @@ echo ""
 
 # Test actual sed replacement
 if [ -f "$GHOSTTY_CONFIG" ] && [ -w "$GHOSTTY_CONFIG" ]; then
-    echo "7. Testing sed replacement (dry run):"
+    echo "8. Testing sed replacement (dry run):"
     TEST_STRING="theme = dark:TestTheme, light:TestTheme"
     if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -127,7 +170,7 @@ fi
 
 # Check if script is executable
 SCRIPT_PATH="$MAKARON_PATH/bin/makaron-switch-theme"
-echo "8. Script check:"
+echo "9. Script check:"
 if [ -f "$SCRIPT_PATH" ]; then
     echo "   ✓ Script exists"
     if [ -x "$SCRIPT_PATH" ]; then
