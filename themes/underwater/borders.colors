@@ -1,0 +1,7 @@
+#!/bin/bash
+# Underwater color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff6ba5bd
+export INACTIVE_BORDER_COLOR=0xffc5d5dd
+export BORDER_WIDTH=5.0
+
