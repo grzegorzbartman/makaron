@@ -1,4 +1,4 @@
-# Verdant Theme
+# Verdant Light Theme
 
 Light theme with mint-teal gradient wallpaper.
 
@@ -9,6 +9,6 @@ Wallpaper "The Verdant One" from the "Stripes" collection by Basic Apple Guy. So
 ## Usage
 
 ```bash
-makaron-theme-verdant
+makaron-theme-verdant-light
 ```
 
