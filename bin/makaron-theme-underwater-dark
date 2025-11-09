@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Underwater Dark theme
+"$(dirname "$0")/makaron-switch-theme" underwater-dark
+
