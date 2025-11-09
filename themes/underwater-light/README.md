@@ -1,4 +1,4 @@
-# Underwater Theme
+# Underwater Light Theme
 
 Light theme with cerulean blue gradient wallpaper.
 
@@ -9,6 +9,6 @@ Wallpaper "The Underwater One" from the "Stripes" collection by Basic Apple Guy.
 ## Usage
 
 ```bash
-makaron-theme-underwater
+makaron-theme-underwater-light
 ```
 
