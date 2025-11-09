@@ -33,7 +33,7 @@ create_backup() {
     local backup_file="$backup_dir/snapshot-backup-$timestamp.zip"
 
     cd "$MAKARON_PATH"
-    zip -r "$backup_file" . -x ".git/*" ".git/**/*" "*.git*" > /dev/null 2>&1
+    zip -r "$backup_file" . -x ".git/*" ".git/**/*" "*.git*" "tmp/*" "tmp/**/*" > /dev/null 2>&1
 
     if [ $? -ne 0 ]; then
         echo "❌ Failed to create backup!"
@@ -41,6 +41,14 @@ create_backup() {
     fi
 
     echo "✅ Backup created successfully: $backup_file"
+
+    # Keep only last 5 backups
+    local backup_count=$(ls -1 "$backup_dir"/snapshot-backup-*.zip 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$backup_count" -gt 5 ]; then
+        echo "🧹 Cleaning old backups (keeping last 5)..."
+        ls -1t "$backup_dir"/snapshot-backup-*.zip | tail -n +6 | xargs rm -f
+    fi
+
     return 0
 }
 
