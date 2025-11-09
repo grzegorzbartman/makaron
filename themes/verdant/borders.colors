@@ -1,0 +1,7 @@
+#!/bin/bash
+# Verdant color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff4a8a7e
+export INACTIVE_BORDER_COLOR=0xffb5d4c0
+export BORDER_WIDTH=5.0
+
