@@ -90,6 +90,7 @@ echo "  makaron-ui-start                    - Start UI components (AeroSpace, Sk
 echo "  makaron-ui-stop                     - Stop UI components"
 echo "  makaron-update                      - Update the configuration"
 echo "  makaron-reload-aerospace-sketchybar - Reload all configurations"
+echo "  makaron-debug                       - Show system diagnostic information"
 echo ""
 echo "To enable the UI components, run: makaron-ui-start"
 echo ""
