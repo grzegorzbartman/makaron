@@ -30,11 +30,12 @@ else
     echo "  ⚠️  SketchyBar not installed"
 fi
 
-# Stop Borders service
+# Stop Borders (process and service)
 if command -v borders &> /dev/null; then
-    if brew services list | grep -q "borders.*started"; then
+    if pgrep -f "borders" > /dev/null; then
         echo "  Stopping Borders..."
-        brew services stop borders 2>/dev/null
+        killall borders 2>/dev/null
+        brew services stop borders 2>/dev/null || true
         echo "  ✓ Borders stopped"
     else
         echo "  ⚠️  Borders not running"
