@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stop AeroSpace, SketchyBar, Borders, and SwipeAeroSpace
+# Stop AeroSpace, SketchyBar, and Borders
 
 echo "🛑 Stopping Makaron UI components..."
 echo ""
@@ -42,17 +42,6 @@ if command -v borders &> /dev/null; then
     fi
 else
     echo "  ⚠️  Borders not installed"
-fi
-
-# Quit SwipeAeroSpace
-if [ -d "/Applications/SwipeAeroSpace.app" ]; then
-    if pgrep -f "SwipeAeroSpace" > /dev/null; then
-        echo "  Quitting SwipeAeroSpace..."
-        killall SwipeAeroSpace 2>/dev/null
-        echo "  ✓ SwipeAeroSpace quit"
-    else
-        echo "  ⚠️  SwipeAeroSpace not running"
-    fi
 fi
 
 # Show Dock (disable autohide)

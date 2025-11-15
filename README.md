@@ -41,7 +41,6 @@ This will:
 - **AeroSpace** - Modern tiling window manager
 - **SketchyBar** - Custom status bar
 - **Borders** - Visual window borders
-- **SwipeAeroSpace** - 3-finger swipe gestures for workspace switching
 - **Nerd Fonts** - Developer-friendly fonts with icon support
 - **ChatGPT** - AI assistant desktop app
 - **Codex** - AI code assistant
@@ -107,7 +106,7 @@ This command will:
 After installation, you'll have access to these commands:
 
 - **`makaron-update`** - Update configuration to latest version
-- **`makaron-reload-aerospace-sketchybar`** - Reload all configurations (AeroSpace, SketchyBar, SwipeAeroSpace)
+- **`makaron-reload-aerospace-sketchybar`** - Reload all configurations (AeroSpace, SketchyBar)
 - **`makaron-reinstall`** - Complete reinstall from scratch
 - **`makaron-migrate`** - Run pending migrations
 - **`makaron-migration-status`** - Show migration status
@@ -267,7 +266,6 @@ pgrep -x "sketchybar" || brew services restart sketchybar
 - `Alt+Shift+1-9/0` - Move window to workspace 1-10
 - `Alt+Left/Right` - Switch to previous/next workspace
 - `Cmd+Alt+Left/Right` - Move window to previous/next workspace
-- `Three-finger swipe` - Swipe left/right to switch workspaces (via SwipeAeroSpace)
 
 **Service Mode:**
 - `Alt+Shift+Semicolon` - Enter service mode

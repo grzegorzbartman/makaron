@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start and reload AeroSpace, SketchyBar, Borders, and SwipeAeroSpace
+# Start and reload AeroSpace, SketchyBar, and Borders
 
 # Set MAKARON_PATH
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
@@ -71,18 +71,6 @@ if command -v borders &> /dev/null; then
     echo "  ✓ Borders started with theme colors"
 else
     echo "  ⚠️  Borders not installed"
-fi
-
-# Start SwipeAeroSpace if installed
-if [ -d "/Applications/SwipeAeroSpace.app" ]; then
-    if ! pgrep -f "SwipeAeroSpace" > /dev/null; then
-        echo "  Starting SwipeAeroSpace..."
-        open -a SwipeAeroSpace
-        sleep 1
-        echo "  ✓ SwipeAeroSpace started"
-    else
-        echo "  ✓ SwipeAeroSpace already running"
-    fi
 fi
 
 # Hide Dock (enable autohide)

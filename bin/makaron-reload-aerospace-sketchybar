@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick reload script for AeroSpace, SketchyBar, and SwipeAeroSpace
+# Quick reload script for AeroSpace and SketchyBar
 
 # Check if AeroSpace is running, start if not
 if ! pgrep -f "AeroSpace" > /dev/null; then
@@ -13,15 +13,6 @@ if ! pgrep -f "sketchybar" > /dev/null; then
     echo "SketchyBar not running, starting..."
     brew services start sketchybar
     sleep 2  # Give it time to start
-fi
-
-# Check if SwipeAeroSpace is running, start if not
-if ! pgrep -f "SwipeAeroSpace" > /dev/null; then
-    if [ -d "/Applications/SwipeAeroSpace.app" ]; then
-        echo "SwipeAeroSpace not running, starting..."
-        open -a SwipeAeroSpace
-        sleep 1  # Give it time to start
-    fi
 fi
 
 # Now reload the configurations
