@@ -85,12 +85,18 @@ if [ -d "/Applications/SwipeAeroSpace.app" ]; then
     fi
 fi
 
-# Hide menu bar (enable autohide)
-echo "  Hiding macOS menu bar..."
-defaults write NSGlobalDomain _HIHideMenuBar -bool true
-killall SystemUIServer 2>/dev/null || true
-killall Dock 2>/dev/null || true
-echo "  ✓ Menu bar hidden (autohide enabled, may require logout/login for full effect)"
+# Hide Dock (enable autohide)
+echo "  Hiding macOS Dock..."
+defaults write com.apple.dock autohide -bool true
+killall Dock
+echo "  ✓ Dock hidden (autohide enabled)"
+
+# Menu bar setting - manual configuration needed in macOS Sequoia 15+
+echo "  ℹ️  Menu Bar: Please set manually in System Settings"
+echo "     Opening System Settings > Desktop & Dock..."
+echo "     Set 'Automatically hide and show the menu bar' to: Always"
+open "x-apple.systempreferences:com.apple.preference.dock"
+sleep 1
 
 echo ""
 echo "✅ UI components started and configured. Use 'makaron-ui-stop' to disable."

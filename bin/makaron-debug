@@ -272,13 +272,31 @@ echo "    Value: $EXPOSE_GROUP_APPS"
 echo "    Expected: 1 (fixes AeroSpace window visibility)"
 echo ""
 
-# Menu Bar Settings
-echo "📋 MENU BAR SETTINGS"
+# Dock & Menu Bar Settings
+echo "📋 DOCK & MENU BAR SETTINGS"
 echo "────────────────────────────────────────────────────────────────"
+DOCK_AUTOHIDE_STATUS=$(defaults read com.apple.dock autohide 2>/dev/null || echo "not set")
+echo "  Dock Autohide:"
+if [ "$DOCK_AUTOHIDE_STATUS" = "1" ]; then
+    echo "    Status: ✓ Enabled (Dock is hidden)"
+    echo "    Value: $DOCK_AUTOHIDE_STATUS"
+else
+    echo "    Status: ○ Disabled (Dock is visible)"
+    echo "    Value: $DOCK_AUTOHIDE_STATUS"
+fi
+echo ""
+
 MENUBAR_AUTOHIDE=$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null || echo "not set")
 echo "  Menu Bar Autohide:"
-echo "    Value: $MENUBAR_AUTOHIDE"
-echo "    Expected: 1"
+if [ "$MENUBAR_AUTOHIDE" = "1" ]; then
+    echo "    Status: ✓ Enabled (menu bar is hidden)"
+    echo "    Value: $MENUBAR_AUTOHIDE"
+    echo "    Note: In macOS Sequoia 15+, use System Settings to change"
+else
+    echo "    Status: ○ Disabled (menu bar is visible)"
+    echo "    Value: $MENUBAR_AUTOHIDE"
+    echo "    Note: In macOS Sequoia 15+, use System Settings to change"
+fi
 echo ""
 
 # Accessibility Settings
