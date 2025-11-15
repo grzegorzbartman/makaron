@@ -1,0 +1,59 @@
+#!/bin/bash
+# Stop AeroSpace, SketchyBar, Borders, and SwipeAeroSpace
+
+echo "🛑 Stopping Makaron UI components..."
+echo ""
+
+# Disable AeroSpace (doesn't quit, just disables window management)
+if command -v aerospace &> /dev/null; then
+    if pgrep -f "AeroSpace" > /dev/null; then
+        echo "  Disabling AeroSpace..."
+        aerospace enable off
+        echo "  ✓ AeroSpace disabled"
+    else
+        echo "  ⚠️  AeroSpace not running"
+    fi
+else
+    echo "  ⚠️  AeroSpace not installed"
+fi
+
+# Stop SketchyBar service
+if command -v sketchybar &> /dev/null; then
+    if brew services list | grep -q "sketchybar.*started"; then
+        echo "  Stopping SketchyBar..."
+        brew services stop sketchybar 2>/dev/null
+        echo "  ✓ SketchyBar stopped"
+    else
+        echo "  ⚠️  SketchyBar not running"
+    fi
+else
+    echo "  ⚠️  SketchyBar not installed"
+fi
+
+# Stop Borders service
+if command -v borders &> /dev/null; then
+    if brew services list | grep -q "borders.*started"; then
+        echo "  Stopping Borders..."
+        brew services stop borders 2>/dev/null
+        echo "  ✓ Borders stopped"
+    else
+        echo "  ⚠️  Borders not running"
+    fi
+else
+    echo "  ⚠️  Borders not installed"
+fi
+
+# Quit SwipeAeroSpace
+if [ -d "/Applications/SwipeAeroSpace.app" ]; then
+    if pgrep -f "SwipeAeroSpace" > /dev/null; then
+        echo "  Quitting SwipeAeroSpace..."
+        killall SwipeAeroSpace 2>/dev/null
+        echo "  ✓ SwipeAeroSpace quit"
+    else
+        echo "  ⚠️  SwipeAeroSpace not running"
+    fi
+fi
+
+echo ""
+echo "✅ UI components stopped. Use 'makaron-ui-start' to re-enable."
+
