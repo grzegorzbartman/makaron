@@ -1,0 +1,321 @@
+#!/bin/bash
+
+# Universal diagnostic script for Makaron system
+# Checks configuration, status, and settings across all components
+
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║          Makaron System Diagnostic Tool                     ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Set MAKARON_PATH
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+
+# ============================================================================
+# SECTION: System Information
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📊 SYSTEM INFORMATION"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  macOS Version: $(sw_vers -productVersion)"
+echo "  MAKARON_PATH: $MAKARON_PATH"
+if [ ! -d "$MAKARON_PATH" ]; then
+    echo "  ❌ ERROR: MAKARON_PATH directory does not exist!"
+else
+    echo "  ✓ MAKARON_PATH exists"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: macOS Settings
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🍎 MACOS SETTINGS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Menu Bar Autohide
+MENUBAR_AUTOHIDE=$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null || echo "0")
+echo "  Menu Bar Autohide:"
+if [ "$MENUBAR_AUTOHIDE" = "1" ]; then
+    echo "    Status: ✓ Enabled (menu bar is hidden)"
+    echo "    Value: $MENUBAR_AUTOHIDE"
+else
+    echo "    Status: ○ Disabled (menu bar is visible)"
+    echo "    Value: $MENUBAR_AUTOHIDE"
+fi
+echo ""
+
+# Dock Autohide
+DOCK_AUTOHIDE=$(defaults read com.apple.dock autohide 2>/dev/null || echo "0")
+echo "  Dock Autohide:"
+if [ "$DOCK_AUTOHIDE" = "1" ]; then
+    echo "    Status: ✓ Enabled"
+    echo "    Value: $DOCK_AUTOHIDE"
+else
+    echo "    Status: ○ Disabled"
+    echo "    Value: $DOCK_AUTOHIDE"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: AeroSpace
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 AEROSPACE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if command -v aerospace &> /dev/null; then
+    echo "  ✓ AeroSpace installed"
+
+    # Check if running
+    if pgrep -f "AeroSpace" > /dev/null; then
+        echo "  ✓ AeroSpace is running"
+
+        # Check enable status
+        AEROSPACE_ENABLED=$(aerospace list-workspaces --monitor all 2>/dev/null && echo "enabled" || echo "disabled")
+        if [ "$AEROSPACE_ENABLED" = "enabled" ]; then
+            echo "  ✓ AeroSpace window management: ENABLED"
+        else
+            echo "  ○ AeroSpace window management: DISABLED"
+        fi
+
+        # List windows
+        echo ""
+        echo "  Current Windows:"
+        aerospace list-windows --all 2>/dev/null | while read -r line; do
+            echo "    • $line"
+        done || echo "    (Could not retrieve window list)"
+
+        # List workspaces
+        echo ""
+        echo "  Current Workspaces:"
+        aerospace list-workspaces --monitor all 2>/dev/null | while read -r workspace; do
+            FOCUSED=$(aerospace list-workspaces --monitor focused 2>/dev/null | grep "^${workspace}$" && echo "← focused" || echo "")
+            echo "    • $workspace $FOCUSED"
+        done || echo "    (Could not retrieve workspace list)"
+    else
+        echo "  ⚠️  AeroSpace is NOT running"
+    fi
+
+    # Check config
+    if [ -L "$HOME/.aerospace.toml" ]; then
+        TARGET=$(readlink "$HOME/.aerospace.toml")
+        echo ""
+        echo "  Config symlink: ✓"
+        echo "    Target: $TARGET"
+        if [ "$TARGET" = "$MAKARON_PATH/configs/aerospace/.aerospace.toml" ]; then
+            echo "    ✓ Points to correct location"
+        else
+            echo "    ⚠️  Points to different location"
+        fi
+    else
+        echo ""
+        echo "  Config symlink: ❌ Not found or not a symlink"
+    fi
+else
+    echo "  ❌ AeroSpace is NOT installed"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: SketchyBar
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📊 SKETCHYBAR"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if command -v sketchybar &> /dev/null; then
+    echo "  ✓ SketchyBar installed"
+
+    # Check if running
+    if pgrep -f "sketchybar" > /dev/null; then
+        echo "  ✓ SketchyBar is running"
+    else
+        echo "  ⚠️  SketchyBar is NOT running"
+    fi
+
+    # Check brew service
+    if brew services list | grep -q "sketchybar.*started"; then
+        echo "  ✓ Brew service: started"
+    else
+        echo "  ○ Brew service: stopped"
+    fi
+
+    # Check config
+    if [ -L "$HOME/.config/sketchybar" ]; then
+        TARGET=$(readlink "$HOME/.config/sketchybar")
+        echo "  Config symlink: ✓"
+        echo "    Target: $TARGET"
+        if [ "$TARGET" = "$MAKARON_PATH/configs/sketchybar" ]; then
+            echo "    ✓ Points to correct location"
+        else
+            echo "    ⚠️  Points to different location"
+        fi
+    else
+        echo "  Config symlink: ❌ Not found or not a symlink"
+    fi
+else
+    echo "  ❌ SketchyBar is NOT installed"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: Borders
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔲 BORDERS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if command -v borders &> /dev/null; then
+    echo "  ✓ Borders installed"
+
+    # Check if running
+    if pgrep -f "borders" > /dev/null; then
+        echo "  ✓ Borders is running"
+    else
+        echo "  ⚠️  Borders is NOT running"
+    fi
+
+    # Check brew service
+    if brew services list | grep -q "borders.*started"; then
+        echo "  ✓ Brew service: started"
+    else
+        echo "  ○ Brew service: stopped"
+    fi
+else
+    echo "  ❌ Borders is NOT installed"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: SwipeAeroSpace
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "👆 SWIPEAEROSPACE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+if [ -d "/Applications/SwipeAeroSpace.app" ]; then
+    echo "  ✓ SwipeAeroSpace installed"
+
+    # Check if running
+    if pgrep -f "SwipeAeroSpace" > /dev/null; then
+        echo "  ✓ SwipeAeroSpace is running"
+    else
+        echo "  ⚠️  SwipeAeroSpace is NOT running"
+    fi
+else
+    echo "  ❌ SwipeAeroSpace is NOT installed"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: Ghostty Terminal
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "👻 GHOSTTY TERMINAL"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+GHOSTTY_CONFIG="$MAKARON_PATH/configs/ghostty/config"
+
+if [ -f "$GHOSTTY_CONFIG" ]; then
+    echo "  ✓ Config file exists"
+    echo "    Path: $GHOSTTY_CONFIG"
+
+    if [ -w "$GHOSTTY_CONFIG" ]; then
+        echo "    ✓ File is writable"
+    else
+        echo "    ❌ File is NOT writable!"
+    fi
+
+    # Check theme line
+    if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
+        THEME_LINE=$(grep "^theme = " "$GHOSTTY_CONFIG")
+        echo "    Current theme: $THEME_LINE"
+    else
+        echo "    ⚠️  No theme line found in config"
+    fi
+else
+    echo "  ❌ Config file does not exist!"
+fi
+
+# Check symlink
+SYMLINK_PATH="$HOME/.config/ghostty"
+if [ -L "$SYMLINK_PATH" ]; then
+    TARGET=$(readlink "$SYMLINK_PATH")
+    echo "  Config symlink: ✓"
+    echo "    Target: $TARGET"
+    if [ "$TARGET" = "$MAKARON_PATH/configs/ghostty" ]; then
+        echo "    ✓ Points to correct location"
+    else
+        echo "    ⚠️  Points to different location"
+    fi
+else
+    echo "  Config symlink: ❌ Not found or not a symlink"
+fi
+
+# Check GHOSTTY_THEME env var
+if [ -n "$GHOSTTY_THEME" ]; then
+    echo "  GHOSTTY_THEME env: $GHOSTTY_THEME"
+else
+    echo "  GHOSTTY_THEME env: (not set)"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: Current Theme
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🎨 CURRENT THEME"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+THEME_DIR="$MAKARON_PATH/current-theme"
+if [ -L "$THEME_DIR" ]; then
+    TARGET=$(readlink "$THEME_DIR")
+    THEME_NAME=$(basename "$TARGET")
+    echo "  ✓ Current theme: $THEME_NAME"
+    echo "    Path: $TARGET"
+
+    # Check mode
+    if [ -f "$THEME_DIR/mode" ]; then
+        MODE=$(cat "$THEME_DIR/mode")
+        echo "    Mode: $MODE"
+    fi
+
+    # Check if theme files exist
+    echo ""
+    echo "  Theme files:"
+    [ -f "$THEME_DIR/borders.colors" ] && echo "    ✓ borders.colors" || echo "    ⚠️  borders.colors missing"
+    [ -f "$THEME_DIR/sketchybar.colors" ] && echo "    ✓ sketchybar.colors" || echo "    ⚠️  sketchybar.colors missing"
+else
+    echo "  ⚠️  No theme symlink found"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: Summary
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📋 SUMMARY"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Count issues
+ERRORS=0
+WARNINGS=0
+
+# Check critical components
+[ ! -d "$MAKARON_PATH" ] && ((ERRORS++))
+! command -v aerospace &> /dev/null && ((WARNINGS++))
+! command -v sketchybar &> /dev/null && ((WARNINGS++))
+! command -v borders &> /dev/null && ((WARNINGS++))
+
+if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
+    echo "  ✅ All systems operational"
+elif [ $ERRORS -eq 0 ]; then
+    echo "  ⚠️  $WARNINGS warning(s) found"
+else
+    echo "  ❌ $ERRORS error(s) and $WARNINGS warning(s) found"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""

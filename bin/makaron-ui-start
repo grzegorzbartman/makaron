@@ -85,6 +85,12 @@ if [ -d "/Applications/SwipeAeroSpace.app" ]; then
     fi
 fi
 
+# Hide menu bar (enable autohide)
+echo "  Hiding macOS menu bar..."
+defaults write NSGlobalDomain _HIHideMenuBar -bool true
+killall SystemUIServer 2>/dev/null || true
+echo "  ✓ Menu bar hidden (autohide enabled)"
+
 echo ""
 echo "✅ UI components started and configured. Use 'makaron-ui-stop' to disable."
 
