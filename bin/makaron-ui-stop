@@ -61,6 +61,12 @@ defaults write com.apple.dock autohide -bool false
 killall Dock
 echo "  ✓ Dock visible"
 
+# Enable Three Finger Drag (disable Mission Control gesture)
+echo "  Enabling Three Finger Drag..."
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
+echo "  ✓ Three Finger Drag enabled"
+
 # Enable Transparency (disable Reduce Transparency)
 echo "  Enabling macOS transparency..."
 if defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null; then

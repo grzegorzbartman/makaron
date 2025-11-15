@@ -117,8 +117,15 @@ echo ""
 
 THREE_FINGER_DRAG=$(defaults read com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag 2>/dev/null || echo "not set")
 echo "  Three Finger Drag:"
-echo "    Value: $THREE_FINGER_DRAG"
-echo "    Expected: 1"
+if [ "$THREE_FINGER_DRAG" = "1" ]; then
+    echo "    Status: ✓ Enabled (drag windows with 3 fingers)"
+    echo "    Value: $THREE_FINGER_DRAG"
+    echo "    Note: Conflicts with 3-finger Mission Control gesture"
+else
+    echo "    Status: ○ Disabled (3-finger Mission Control enabled)"
+    echo "    Value: $THREE_FINGER_DRAG"
+    echo "    Note: Use 3 fingers swipe up for Mission Control"
+fi
 echo ""
 
 # Text & Input Settings
