@@ -7,6 +7,3 @@ source "$MAKARON_PATH/install/tools/all.sh"
 source "$MAKARON_PATH/install/development/all.sh"
 source "$MAKARON_PATH/install/macos_settings.sh"
 source "$MAKARON_PATH/install/migrations.sh"
-
-# Reload all configurations
-bash "$MAKARON_PATH/bin/makaron-reload-aerospace-sketchybar"

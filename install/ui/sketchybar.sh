@@ -27,6 +27,3 @@ else
         fi
     fi
 fi
-
-# Start SketchyBar service
-brew services start sketchybar
