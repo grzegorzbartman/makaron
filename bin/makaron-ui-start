@@ -89,7 +89,8 @@ fi
 echo "  Hiding macOS menu bar..."
 defaults write NSGlobalDomain _HIHideMenuBar -bool true
 killall SystemUIServer 2>/dev/null || true
-echo "  ✓ Menu bar hidden (autohide enabled)"
+killall Dock 2>/dev/null || true
+echo "  ✓ Menu bar hidden (autohide enabled, may require logout/login for full effect)"
 
 echo ""
 echo "✅ UI components started and configured. Use 'makaron-ui-stop' to disable."

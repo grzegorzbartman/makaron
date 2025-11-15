@@ -58,7 +58,8 @@ fi
 echo "  Showing macOS menu bar..."
 defaults write NSGlobalDomain _HIHideMenuBar -bool false
 killall SystemUIServer 2>/dev/null || true
-echo "  ✓ Menu bar visible"
+killall Dock 2>/dev/null || true
+echo "  ✓ Menu bar visible (may require logout/login for full effect)"
 
 echo ""
 echo "✅ UI components stopped. Use 'makaron-ui-start' to re-enable."
