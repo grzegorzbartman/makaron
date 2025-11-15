@@ -91,6 +91,15 @@ defaults write com.apple.dock autohide -bool true
 killall Dock
 echo "  ✓ Dock hidden (autohide enabled)"
 
+# Disable Transparency (enable Reduce Transparency for better performance)
+echo "  Disabling macOS transparency..."
+if defaults write com.apple.universalaccess reduceTransparency -bool true 2>/dev/null; then
+    echo "  ✓ Transparency disabled (better performance with SketchyBar)"
+else
+    echo "  ℹ️  Transparency: Please enable manually in System Settings"
+    echo "     System Settings → Accessibility → Display → Reduce transparency (turn ON)"
+fi
+
 # Menu bar setting - manual configuration needed in macOS Sequoia 15+
 echo "  ℹ️  Menu Bar: Please set manually in System Settings"
 echo "     Opening System Settings > Desktop & Dock..."

@@ -61,6 +61,15 @@ defaults write com.apple.dock autohide -bool false
 killall Dock
 echo "  ✓ Dock visible"
 
+# Enable Transparency (disable Reduce Transparency)
+echo "  Enabling macOS transparency..."
+if defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null; then
+    echo "  ✓ Transparency enabled"
+else
+    echo "  ℹ️  Transparency: Please disable manually in System Settings"
+    echo "     System Settings → Accessibility → Display → Reduce transparency (turn OFF)"
+fi
+
 # Menu bar setting - manual configuration needed in macOS Sequoia 15+
 echo "  ℹ️  Menu Bar: Please set manually in System Settings"
 echo "     Opening System Settings > Desktop & Dock..."

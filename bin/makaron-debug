@@ -304,8 +304,13 @@ echo "♿ ACCESSIBILITY SETTINGS"
 echo "────────────────────────────────────────────────────────────────"
 REDUCE_TRANSPARENCY=$(defaults read com.apple.universalaccess reduceTransparency 2>/dev/null || echo "not set")
 echo "  Reduce Transparency:"
-echo "    Value: $REDUCE_TRANSPARENCY"
-echo "    Expected: 1"
+if [ "$REDUCE_TRANSPARENCY" = "1" ]; then
+    echo "    Status: ✓ Enabled (transparency disabled - better performance)"
+    echo "    Value: $REDUCE_TRANSPARENCY"
+else
+    echo "    Status: ○ Disabled (transparency enabled - visual effects)"
+    echo "    Value: $REDUCE_TRANSPARENCY"
+fi
 echo ""
 
 # iCloud Settings
