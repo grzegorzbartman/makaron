@@ -32,28 +32,292 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🍎 MACOS SETTINGS"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
 
-# Menu Bar Autohide
-MENUBAR_AUTOHIDE=$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null || echo "0")
-echo "  Menu Bar Autohide:"
-if [ "$MENUBAR_AUTOHIDE" = "1" ]; then
-    echo "    Status: ✓ Enabled (menu bar is hidden)"
-    echo "    Value: $MENUBAR_AUTOHIDE"
+# Keyboard Settings
+echo "⌨️  KEYBOARD SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+INITIAL_KEY_REPEAT=$(defaults read -g InitialKeyRepeat 2>/dev/null || echo "not set")
+echo "  Initial Key Repeat (delay before repeat starts):"
+echo "    Value: $INITIAL_KEY_REPEAT (25 = slower, 15 = normal)"
+echo "    Expected: 25"
+echo ""
+
+KEY_REPEAT=$(defaults read -g KeyRepeat 2>/dev/null || echo "not set")
+echo "  Key Repeat (repeat rate):"
+echo "    Value: $KEY_REPEAT (3 = slower, 2 = normal)"
+echo "    Expected: 3"
+echo ""
+
+# Finder Settings
+echo "🔍 FINDER SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+SHOW_ALL_FILES=$(defaults read com.apple.finder AppleShowAllFiles 2>/dev/null || echo "not set")
+echo "  Show All Files (including hidden files):"
+echo "    Value: $SHOW_ALL_FILES"
+echo "    Expected: YES"
+echo ""
+
+SHOW_ALL_EXTENSIONS=$(defaults read NSGlobalDomain AppleShowAllExtensions 2>/dev/null || echo "not set")
+echo "  Show All File Extensions:"
+echo "    Value: $SHOW_ALL_EXTENSIONS"
+echo "    Expected: 1"
+echo ""
+
+VIEW_STYLE=$(defaults read com.apple.finder FXPreferredViewStyle 2>/dev/null || echo "not set")
+echo "  Default View Style:"
+echo "    Value: $VIEW_STYLE (Nlsv = list view)"
+echo "    Expected: Nlsv"
+echo ""
+
+SHOW_PATHBAR=$(defaults read com.apple.finder ShowPathbar 2>/dev/null || echo "not set")
+echo "  Show Path Bar:"
+echo "    Value: $SHOW_PATHBAR"
+echo "    Expected: 1"
+echo ""
+
+SHOW_STATUSBAR=$(defaults read com.apple.finder ShowStatusBar 2>/dev/null || echo "not set")
+echo "  Show Status Bar:"
+echo "    Value: $SHOW_STATUSBAR"
+echo "    Expected: 1"
+echo ""
+
+FOLDERS_FIRST=$(defaults read com.apple.finder _FXSortFoldersFirst 2>/dev/null || echo "not set")
+echo "  Sort Folders First:"
+echo "    Value: $FOLDERS_FIRST"
+echo "    Expected: 1"
+echo ""
+
+NEW_WINDOW_TARGET=$(defaults read com.apple.finder NewWindowTarget 2>/dev/null || echo "not set")
+echo "  New Window Opens To:"
+echo "    Value: $NEW_WINDOW_TARGET (PfHm = Home folder)"
+echo "    Expected: PfHm"
+echo ""
+
+SEARCH_SCOPE=$(defaults read com.apple.finder FXDefaultSearchScope 2>/dev/null || echo "not set")
+echo "  Default Search Scope:"
+echo "    Value: $SEARCH_SCOPE (SCcf = current folder)"
+echo "    Expected: SCcf"
+echo ""
+
+# System & Trackpad Settings
+echo "🖱️  SYSTEM & TRACKPAD SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+QUARANTINE=$(defaults read com.apple.LaunchServices LSQuarantine 2>/dev/null || echo "not set")
+echo "  Disable Quarantine Warning (open apps from unidentified developers):"
+echo "    Value: $QUARANTINE"
+echo "    Expected: 0"
+echo ""
+
+TRACKPAD_CLICK=$(defaults read com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking 2>/dev/null || echo "not set")
+echo "  Trackpad Tap to Click:"
+echo "    Value: $TRACKPAD_CLICK"
+echo "    Expected: 1"
+echo ""
+
+THREE_FINGER_DRAG=$(defaults read com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag 2>/dev/null || echo "not set")
+echo "  Three Finger Drag:"
+echo "    Value: $THREE_FINGER_DRAG"
+echo "    Expected: 1"
+echo ""
+
+# Text & Input Settings
+echo "📝 TEXT & INPUT SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+AUTO_SPELLING=$(defaults read NSGlobalDomain NSAutomaticSpellingCorrectionEnabled 2>/dev/null || echo "not set")
+echo "  Automatic Spelling Correction:"
+echo "    Value: $AUTO_SPELLING"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+AUTO_CAPITALIZE=$(defaults read NSGlobalDomain NSAutomaticCapitalizationEnabled 2>/dev/null || echo "not set")
+echo "  Automatic Capitalization:"
+echo "    Value: $AUTO_CAPITALIZE"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+AUTO_DASH=$(defaults read NSGlobalDomain NSAutomaticDashSubstitutionEnabled 2>/dev/null || echo "not set")
+echo "  Automatic Dash Substitution:"
+echo "    Value: $AUTO_DASH"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+AUTO_QUOTE=$(defaults read NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled 2>/dev/null || echo "not set")
+echo "  Automatic Quote Substitution:"
+echo "    Value: $AUTO_QUOTE"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+PRESS_AND_HOLD=$(defaults read NSGlobalDomain ApplePressAndHoldEnabled 2>/dev/null || echo "not set")
+echo "  Press and Hold for Special Characters:"
+echo "    Value: $PRESS_AND_HOLD"
+echo "    Expected: 0 (disabled, allows key repeat)"
+echo ""
+
+# Dialog Settings
+echo "💾 DIALOG SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+SAVE_EXPANDED=$(defaults read NSGlobalDomain NSNavPanelExpandedStateForSaveMode 2>/dev/null || echo "not set")
+echo "  Expanded Save Dialogs:"
+echo "    Value: $SAVE_EXPANDED"
+echo "    Expected: 1"
+echo ""
+
+PRINT_EXPANDED=$(defaults read NSGlobalDomain PMPrintingExpandedStateForPrint 2>/dev/null || echo "not set")
+echo "  Expanded Print Dialogs:"
+echo "    Value: $PRINT_EXPANDED"
+echo "    Expected: 1"
+echo ""
+
+# Performance Settings
+echo "⚡ PERFORMANCE SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+WINDOW_RESIZE=$(defaults read NSGlobalDomain NSWindowResizeTime 2>/dev/null || echo "not set")
+echo "  Window Resize Animation Speed:"
+echo "    Value: $WINDOW_RESIZE"
+echo "    Expected: 0.001 (very fast)"
+echo ""
+
+TOOLBAR_ROLLOVER=$(defaults read NSGlobalDomain NSToolbarTitleViewRolloverDelay 2>/dev/null || echo "not set")
+echo "  Toolbar Title Rollover Delay:"
+echo "    Value: $TOOLBAR_ROLLOVER"
+echo "    Expected: 0 (instant)"
+echo ""
+
+# Screenshot Settings
+echo "📸 SCREENSHOT SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+SCREENSHOT_TYPE=$(defaults read com.apple.screencapture type 2>/dev/null || echo "not set")
+echo "  Screenshot Format:"
+echo "    Value: $SCREENSHOT_TYPE"
+echo "    Expected: png"
+echo ""
+
+SCREENSHOT_LOCATION=$(defaults read com.apple.screencapture location 2>/dev/null || echo "not set")
+echo "  Screenshot Location:"
+echo "    Value: $SCREENSHOT_LOCATION"
+echo "    Expected: $HOME/Desktop/Screenshots"
+echo ""
+
+SCREENSHOT_SHADOW=$(defaults read com.apple.screencapture disable-shadow 2>/dev/null || echo "not set")
+echo "  Disable Screenshot Shadow:"
+echo "    Value: $SCREENSHOT_SHADOW"
+echo "    Expected: 1"
+echo ""
+
+# .DS_Store Settings
+echo "📁 .DS_STORE SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+DS_NETWORK=$(defaults read com.apple.desktopservices DSDontWriteNetworkStores 2>/dev/null || echo "not set")
+echo "  Don't Write .DS_Store on Network Volumes:"
+echo "    Value: $DS_NETWORK"
+echo "    Expected: 1"
+echo ""
+
+DS_USB=$(defaults read com.apple.desktopservices DSDontWriteUSBStores 2>/dev/null || echo "not set")
+echo "  Don't Write .DS_Store on USB Volumes:"
+echo "    Value: $DS_USB"
+echo "    Expected: 1"
+echo ""
+
+# Library Folder
+echo "📚 LIBRARY FOLDER"
+echo "────────────────────────────────────────────────────────────────"
+if [ -d "$HOME/Library" ]; then
+    LIBRARY_HIDDEN=$(ls -ldO "$HOME/Library" | grep -q "hidden" && echo "hidden" || echo "visible")
+    echo "  Library Folder Visibility:"
+    echo "    Value: $LIBRARY_HIDDEN"
+    echo "    Expected: visible"
 else
-    echo "    Status: ○ Disabled (menu bar is visible)"
-    echo "    Value: $MENUBAR_AUTOHIDE"
+    echo "  Library folder not found"
 fi
 echo ""
 
-# Dock Autohide
-DOCK_AUTOHIDE=$(defaults read com.apple.dock autohide 2>/dev/null || echo "0")
+# Dock Settings
+echo "🎯 DOCK SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+DOCK_AUTOHIDE=$(defaults read com.apple.dock autohide 2>/dev/null || echo "not set")
 echo "  Dock Autohide:"
-if [ "$DOCK_AUTOHIDE" = "1" ]; then
-    echo "    Status: ✓ Enabled"
-    echo "    Value: $DOCK_AUTOHIDE"
+echo "    Value: $DOCK_AUTOHIDE"
+echo "    Expected: 1"
+echo ""
+
+DOCK_AUTOHIDE_DELAY=$(defaults read com.apple.Dock autohide-delay 2>/dev/null || echo "not set")
+echo "  Dock Autohide Delay:"
+echo "    Value: $DOCK_AUTOHIDE_DELAY"
+echo "    Expected: 0 (instant)"
+echo ""
+
+DOCK_AUTOHIDE_TIME=$(defaults read com.apple.dock autohide-time-modifier 2>/dev/null || echo "not set")
+echo "  Dock Autohide Animation Time:"
+echo "    Value: $DOCK_AUTOHIDE_TIME"
+echo "    Expected: 0 (instant)"
+echo ""
+
+EXPOSE_ANIMATION=$(defaults read com.apple.dock expose-animation-duration 2>/dev/null || echo "not set")
+echo "  Mission Control Animation Duration:"
+echo "    Value: $EXPOSE_ANIMATION"
+echo "    Expected: 0.1"
+echo ""
+
+MRU_SPACES=$(defaults read com.apple.dock mru-spaces 2>/dev/null || echo "not set")
+echo "  Automatically Rearrange Spaces:"
+echo "    Value: $MRU_SPACES"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+EXPOSE_GROUP_APPS=$(defaults read com.apple.dock expose-group-apps 2>/dev/null || echo "not set")
+echo "  Mission Control Group Windows by App:"
+echo "    Value: $EXPOSE_GROUP_APPS"
+echo "    Expected: 1 (fixes AeroSpace window visibility)"
+echo ""
+
+# Menu Bar Settings
+echo "📋 MENU BAR SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+MENUBAR_AUTOHIDE=$(defaults read NSGlobalDomain _HIHideMenuBar 2>/dev/null || echo "not set")
+echo "  Menu Bar Autohide:"
+echo "    Value: $MENUBAR_AUTOHIDE"
+echo "    Expected: 1"
+echo ""
+
+# Accessibility Settings
+echo "♿ ACCESSIBILITY SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+REDUCE_TRANSPARENCY=$(defaults read com.apple.universalaccess reduceTransparency 2>/dev/null || echo "not set")
+echo "  Reduce Transparency:"
+echo "    Value: $REDUCE_TRANSPARENCY"
+echo "    Expected: 1"
+echo ""
+
+# iCloud Settings
+echo "☁️  ICLOUD SETTINGS"
+echo "────────────────────────────────────────────────────────────────"
+ICLOUD_SAVE=$(defaults read NSGlobalDomain NSDocumentSaveNewDocumentsToCloud 2>/dev/null || echo "not set")
+echo "  Save New Documents to iCloud by Default:"
+echo "    Value: $ICLOUD_SAVE"
+echo "    Expected: 0 (save to local disk)"
+echo ""
+
+# Apple Intelligence
+echo "🤖 APPLE INTELLIGENCE"
+echo "────────────────────────────────────────────────────────────────"
+APPLE_INTELLIGENCE=$(defaults read com.apple.CloudSubscriptionFeatures.optIn "545129924" 2>/dev/null || echo "not set")
+echo "  Apple Intelligence:"
+echo "    Value: $APPLE_INTELLIGENCE"
+echo "    Expected: 0 (disabled)"
+echo ""
+
+# Wallpaper
+echo "🖼️  WALLPAPER"
+echo "────────────────────────────────────────────────────────────────"
+WALLPAPER_PATH="$MAKARON_PATH/assets/1-scenery-pink-lakeside-sunset-lake-landscape-scenic-panorama-7680x3215-144.png"
+if [ -f "$WALLPAPER_PATH" ]; then
+    echo "  Default Wallpaper File:"
+    echo "    ✓ Exists at $WALLPAPER_PATH"
 else
-    echo "    Status: ○ Disabled"
-    echo "    Value: $DOCK_AUTOHIDE"
+    echo "  Default Wallpaper File:"
+    echo "    ❌ Not found at $WALLPAPER_PATH"
 fi
 echo ""
 
