@@ -135,6 +135,8 @@ automatically-unhide-macos-hidden-apps = false
     alt-8 = 'workspace 8'
     alt-9 = 'workspace 9'
     alt-0 = 'workspace 10'
+    alt-q = 'workspace Q'
+    alt-w = 'workspace W'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-1 = 'move-node-to-workspace 1'
@@ -147,6 +149,8 @@ automatically-unhide-macos-hidden-apps = false
     alt-shift-8 = 'move-node-to-workspace 8'
     alt-shift-9 = 'move-node-to-workspace 9'
     alt-shift-0 = 'move-node-to-workspace 10'
+    alt-shift-q = 'move-node-to-workspace Q'
+    alt-shift-w = 'move-node-to-workspace W'
 
     # Go to next workspace
     alt-right = 'workspace next'
