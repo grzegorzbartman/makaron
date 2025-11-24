@@ -154,6 +154,8 @@ Makaron includes twelve beautiful themes that change the colors of your UI and w
 10. **Osaka Jade** - Dark theme with jade green accents
 11. **Ristretto** - Warm dark theme with coffee tones
 12. **Rose Pine** - Light theme with rose and pine colors
+13. **Ethereal** - Dreamy, soft dark theme
+14. **Hackerman** - Cyberpunk/Matrix inspired theme
 
 Switch themes instantly with:
 
@@ -170,6 +172,8 @@ makaron-theme-nord                 # Cool arctic
 makaron-theme-osaka-jade           # Dark jade green
 makaron-theme-ristretto            # Dark coffee warm
 makaron-theme-rose-pine            # Light rose/pine
+makaron-theme-ethereal             # Dreamy dark
+makaron-theme-hackerman            # Cyberpunk/Matrix
 ```
 
 Each theme includes:

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Hackerman color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff0B0C16
+export BAR_BACKGROUND_COLOR=0xff0B0C16
+
+# Default item colors
+export ICON_COLOR=0xffddf7ff
+export LABEL_COLOR=0xffddf7ff
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff6a6e95
+export SPACE_LABEL_COLOR=0xff6a6e95
+export SPACE_BACKGROUND_COLOR=0xff1f202a
+export SPACE_BORDER_COLOR=0xff6a6e95
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffddf7ff
+export SPACE_FOCUSED_LABEL_COLOR=0xffddf7ff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0B0C16
+export SPACE_FOCUSED_BORDER_COLOR=0xff50f872
