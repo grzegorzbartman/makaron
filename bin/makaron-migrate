@@ -4,6 +4,11 @@
 # Based on omarchy migration system
 # Runs pending migrations in chronological order
 
+# Ensure MAKARON_PATH is set
+if [ -z "$MAKARON_PATH" ]; then
+    export MAKARON_PATH="$HOME/.local/share/makaron"
+fi
+
 # Where we store an empty file for each migration that has already been performed.
 STATE_DIR="$HOME/.local/state/makaron/migrations"
 mkdir -p "$STATE_DIR"

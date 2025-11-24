@@ -2,7 +2,7 @@
 
 set -e
 
-MAKARON_PATH="$HOME/.local/share/makaron"
+export MAKARON_PATH="$HOME/.local/share/makaron"
 
 # Install gum if not available
 install_gum_if_needed() {
