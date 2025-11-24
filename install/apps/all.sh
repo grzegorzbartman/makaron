@@ -1,8 +1,6 @@
 #!/bin/bash
 
 # Source all app installation scripts
-source "$MAKARON_PATH/install/apps/chatgpt.sh"
-source "$MAKARON_PATH/install/apps/codex.sh"
 source "$MAKARON_PATH/install/apps/discord.sh"
 source "$MAKARON_PATH/install/apps/flameshot.sh"
 source "$MAKARON_PATH/install/apps/gimp.sh"

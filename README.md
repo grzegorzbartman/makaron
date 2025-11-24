@@ -42,13 +42,15 @@ This will:
 - **SketchyBar** - Custom status bar
 - **Borders** - Visual window borders
 - **Nerd Fonts** - Developer-friendly fonts with icon support
+### AI Tools
+- **Claude** - AI assistant desktop app
+- **Claude Code** - AI coding assistant
+- **Gemini CLI** - AI assistant command-line tool
+- **Cursor** - AI-powered code editor
 - **ChatGPT** - AI assistant desktop app
 - **Codex** - AI code assistant
-- **Dozer** - Hide menu bar icons
-- **Sublime Text** - Text editor
 
 ### Development Tools
-- **Cursor** - AI-powered code editor
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
 - **PhpStorm** - Professional PHP IDE
@@ -292,6 +294,7 @@ All installation scripts are modular and organized in the `install/` directory:
 
 ```
 install/
+├── ai/           # AI tools (Claude Code, ChatGPT, Cursor)
 ├── desktop/      # Window manager, status bar, system UI
 ├── terminal/     # Terminal emulators and CLI utilities
 ├── editors/      # IDEs and text editors
@@ -309,6 +312,7 @@ You can customize your installation by modifying which scripts run in `install/a
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `install/` - Modular installation scripts
   - `brew.sh` - Homebrew package manager installation
+  - `ai/` - AI tools (Claude Code, ChatGPT, Cursor)
   - `desktop/` - Desktop environment (AeroSpace, SketchyBar, fonts)
   - `terminal/` - Terminal tools (Ghostty, tmux, CLI utils)
   - `editors/` - Text editors and IDEs
