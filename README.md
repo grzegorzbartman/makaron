@@ -292,9 +292,11 @@ All installation scripts are modular and organized in the `install/` directory:
 
 ```
 install/
-├── ui/           # Window manager, status bar, fonts
-├── development/  # IDEs, Docker, DDEV
-├── tools/        # Terminal, utilities
+├── desktop/      # Window manager, status bar, system UI
+├── terminal/     # Terminal emulators and CLI utilities
+├── editors/      # IDEs and text editors
+├── development/  # Languages, frameworks, dev tools
+├── apps/         # GUI applications
 └── macos_settings.sh
 ```
 
@@ -307,8 +309,11 @@ You can customize your installation by modifying which scripts run in `install/a
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `install/` - Modular installation scripts
   - `brew.sh` - Homebrew package manager installation
-  - `ui/` - UI components (AeroSpace, SketchyBar, borders, fonts)
-  - `tools/` - Development tools (Ghostty terminal)
+  - `desktop/` - Desktop environment (AeroSpace, SketchyBar, fonts)
+  - `terminal/` - Terminal tools (Ghostty, tmux, CLI utils)
+  - `editors/` - Text editors and IDEs
+  - `development/` - Development tools (Languages, Docker)
+  - `apps/` - GUI applications
   - `macos_settings.sh` - macOS system settings
   - `migrations.sh` - Migration system initialization
 - `migrations/` - Database-style migrations for configuration updates

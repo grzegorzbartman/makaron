@@ -8,8 +8,8 @@ MAKARON_PATH="$HOME/.local/share/makaron"
 install_gum_if_needed() {
     if ! command -v gum &> /dev/null; then
         echo "Installing gum..."
-        if [ -f "$MAKARON_PATH/install/tools/gum.sh" ]; then
-            bash "$MAKARON_PATH/install/tools/gum.sh" || true
+        if [ -f "$MAKARON_PATH/install/terminal/gum.sh" ]; then
+            bash "$MAKARON_PATH/install/terminal/gum.sh" || true
         else
             if command -v brew &> /dev/null; then
                 brew install gum || true
