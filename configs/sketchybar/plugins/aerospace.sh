@@ -23,6 +23,7 @@ case "$1" in
 "Messages") echo "󰍦" ;;
 "Slack") echo "" ;;
 "Discord") echo "󰙯" ;;
+"ChatGPT") echo "󰭹" ;;
 "Telegram") echo "" ;;
 "WhatsApp") echo "" ;;
 "Spotify"|"Music") echo "" ;;
