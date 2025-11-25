@@ -70,6 +70,24 @@ automatically-unhide-macos-hidden-apps = false
     outer.top = [{ monitor."Built-in" = 15 }, 45]
     outer.right =      10
 
+# Workspace assignment for dual monitor setup
+# This prevents random workspace creation when connecting/disconnecting monitors
+# Monitor 1: workspace 1-5 (always available, even with single monitor)
+# Monitor 2: workspace 6-10,Q,W (auto-move to monitor 1 when disconnected)
+[workspace-to-monitor-force-assignment]
+    1 = 1
+    2 = 1
+    3 = 1
+    4 = 1
+    5 = 1
+    6 = 2
+    7 = 2
+    8 = 2
+    9 = 2
+    10 = 2
+    Q = 2
+    W = 2
+
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 # 'main' binding mode must be always presented
@@ -208,6 +226,17 @@ tell application "PhpStorm"
     activate
 end tell'
 '''
+
+    # Multi-monitor management
+    # Quick focus switching between monitors
+    ctrl-tab = 'focus-monitor next'
+    ctrl-shift-tab = 'focus-monitor prev'
+    
+    # Move windows between monitors
+    ctrl-alt-shift-left = 'move-node-to-monitor left'
+    ctrl-alt-shift-right = 'move-node-to-monitor right'
+    ctrl-alt-shift-1 = 'move-node-to-monitor 1'
+    ctrl-alt-shift-2 = 'move-node-to-monitor 2'
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
