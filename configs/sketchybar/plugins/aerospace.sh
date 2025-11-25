@@ -3,6 +3,7 @@
 # This script highlights the focused AeroSpace workspace and shows app icons
 
 WORKSPACE=$1
+MONITOR=$2
 
 # Map app names to icons (using Nerd Font icons)
 get_app_icon() {
@@ -61,13 +62,23 @@ if [ -f "$THEME_DIR/sketchybar.colors" ]; then
   source "$THEME_DIR/sketchybar.colors"
 fi
 
-# Get focused workspace from environment variable (set by aerospace exec-on-workspace-change)
-# If not set (e.g., from front_app_switched event), query aerospace
-if [[ -z "$FOCUSED_WORKSPACE" ]]; then
-  FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused 2>/dev/null)
+# Multi-monitor support: Check if this workspace is visible on its assigned monitor
+# In multi-monitor setup, we need to check per-monitor visibility, not global focus
+if [[ -n "$MONITOR" ]]; then
+  # Get the visible workspace for this specific monitor
+  VISIBLE_ON_MONITOR=$(aerospace list-workspaces --monitor "$MONITOR" --visible 2>/dev/null)
+  IS_FOCUSED="$VISIBLE_ON_MONITOR"
+else
+  # Fallback for single monitor or legacy behavior
+  # Get focused workspace from environment variable (set by aerospace exec-on-workspace-change)
+  # If not set (e.g., from front_app_switched event), query aerospace
+  if [[ -z "$FOCUSED_WORKSPACE" ]]; then
+    FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused 2>/dev/null)
+  fi
+  IS_FOCUSED="$FOCUSED_WORKSPACE"
 fi
 
-if [[ "$FOCUSED_WORKSPACE" == "$WORKSPACE" ]]; then
+if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
 # Focused workspace - theme colors
 sketchybar --set "$NAME" \
   background.drawing=on \
