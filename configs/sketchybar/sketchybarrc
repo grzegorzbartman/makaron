@@ -60,14 +60,15 @@ sketchybar --default "${default[@]}"
 
 sketchybar --add event aerospace_workspace_change
 
-# Multi-monitor support: Create workspace items per monitor
-# This ensures each monitor's bar only shows its own workspaces
-for monitor in $(aerospace list-monitors | awk '{print $1}'); do
-  for sid in $(aerospace list-workspaces --monitor "$monitor"); do
+# Detect number of monitors
+MONITOR_COUNT=$(aerospace list-monitors | wc -l | tr -d ' ')
+
+if [ "$MONITOR_COUNT" -eq 1 ]; then
+  # Single monitor: Show all workspaces without display assignment
+  for sid in $(aerospace list-workspaces --all); do
     sketchybar --add item space.$sid left \
       --subscribe space.$sid aerospace_workspace_change front_app_switched \
       --set space.$sid \
-      display="$monitor" \
       icon="$sid" \
       icon.padding_left=8 \
       icon.padding_right=8 \
@@ -82,10 +83,44 @@ for monitor in $(aerospace list-monitors | awk '{print $1}'); do
       background.drawing=on \
       background.border_color=$SPACE_BORDER_COLOR \
       background.border_width=0 \
-      script="$PLUGIN_DIR/aerospace.sh $sid $monitor" \
+      script="$PLUGIN_DIR/aerospace.sh $sid" \
       click_script="aerospace workspace $sid"
   done
-done
+else
+  # Multi-monitor: Create workspace items per monitor
+  # This ensures each monitor's bar only shows its own workspaces
+  for monitor in $(aerospace list-monitors | awk '{print $1}'); do
+    for sid in $(aerospace list-workspaces --monitor "$monitor"); do
+      sketchybar --add item space.$sid left \
+        --subscribe space.$sid aerospace_workspace_change front_app_switched \
+        --set space.$sid \
+        display="$monitor" \
+        icon="$sid" \
+        icon.padding_left=8 \
+        icon.padding_right=8 \
+        icon.color=$SPACE_ICON_COLOR \
+        label.padding_left=6 \
+        label.padding_right=6 \
+        label.font="Hack Nerd Font:Bold:11.0" \
+        label.color=$SPACE_LABEL_COLOR \
+        background.color=$SPACE_BACKGROUND_COLOR \
+        background.corner_radius=8 \
+        background.height=28 \
+        background.drawing=on \
+        background.border_color=$SPACE_BORDER_COLOR \
+        background.border_width=0 \
+        script="$PLUGIN_DIR/aerospace.sh $sid $monitor" \
+        click_script="aerospace workspace $sid"
+    done
+  done
+fi
+
+##### Monitor Change Detection #####
+# Automatically reload SketchyBar when monitors are connected/disconnected
+sketchybar --add item display_change_detector left \
+           --set display_change_detector drawing=off \
+           script="$PLUGIN_DIR/display_change.sh" \
+           --subscribe display_change_detector display_change
 
 ##### Adding Left Items #####
 # We add some regular items to the left side of the bar, where
