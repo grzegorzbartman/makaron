@@ -64,7 +64,10 @@ get_ghostty_theme_mapping() {
         rose-pine)
             echo "Rosé Pine|Rosé Pine Dawn"
             ;;
-        matte-black|droptica-dark|hackerman)
+        matte-black)
+            echo "Nord|Nord Light"
+            ;;
+        droptica-dark|hackerman)
             echo "TokyoNight Storm|TokyoNight Day"
             ;;
         osaka-jade|verdant-dark|verdant-light)
