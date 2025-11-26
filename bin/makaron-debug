@@ -542,7 +542,7 @@ if [ -f "$HOME/.config/ghostty/config" ]; then
     if grep -q "^theme = " "$HOME/.config/ghostty/config"; then
         THEME_VALUE=$(grep "^theme = " "$HOME/.config/ghostty/config" | head -1)
         echo "  Theme line: $THEME_VALUE"
-        
+
         # Check for "One Dark" references
         if echo "$THEME_VALUE" | grep -qi "One Dark"; then
             echo "  ❌ ERROR: Config contains 'One Dark' theme (does not exist in Ghostty!)"
