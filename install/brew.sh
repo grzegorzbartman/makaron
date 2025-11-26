@@ -8,6 +8,28 @@ fi
 
 LOCAL_BREW_PATH="$HOME/.local/homebrew"
 
+setup_brew_autoupdate() {
+    if ! command -v brew &>/dev/null; then
+        echo "Brew not found, skipping autoupdate setup"
+        return 0
+    fi
+
+    # Add tap if not present
+    if ! brew tap | grep -q "domt4/autoupdate"; then
+        brew tap domt4/autoupdate
+    fi
+
+    # Check if already running
+    if brew autoupdate status 2>/dev/null | grep -q "installed and running"; then
+        echo "Brew autoupdate already configured"
+        return 0
+    fi
+
+    # Start autoupdate with upgrade and cleanup (24h interval)
+    brew autoupdate start --upgrade --cleanup
+    echo "Brew autoupdate configured (24h interval with upgrade & cleanup)"
+}
+
 install_local_brew() {
     mkdir -p "$LOCAL_BREW_PATH"
     git clone https://github.com/Homebrew/brew "$LOCAL_BREW_PATH"
@@ -28,18 +50,15 @@ install_local_brew() {
 # Check if local brew already installed
 if [[ -x "$LOCAL_BREW_PATH/bin/brew" ]]; then
     echo "Local Homebrew already installed"
-    exit 0
-fi
-
-# Check if global brew exists and is writable by current user
-if command -v brew &>/dev/null; then
+elif command -v brew &>/dev/null; then
+    # Check if global brew exists and is writable by current user
     BREW_PREFIX="$(brew --prefix 2>/dev/null)"
     if [[ -w "$BREW_PREFIX/Cellar" ]]; then
         echo "Homebrew already installed and writable"
-        exit 0
+    else
+        echo "Global Homebrew exists but not writable - installing locally to $LOCAL_BREW_PATH"
+        install_local_brew
     fi
-    echo "Global Homebrew exists but not writable - installing locally to $LOCAL_BREW_PATH"
-    install_local_brew
 elif [[ -d "/opt/homebrew" ]] || [[ -d "/usr/local/Homebrew" ]]; then
     echo "Global Homebrew detected but not accessible - installing locally to $LOCAL_BREW_PATH"
     install_local_brew
@@ -53,3 +72,6 @@ else
         eval "$(/usr/local/bin/brew shellenv)"
     fi
 fi
+
+# Setup autoupdate for all installations
+setup_brew_autoupdate
