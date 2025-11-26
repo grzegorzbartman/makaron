@@ -183,6 +183,13 @@ fi
 
 ## Troubleshooting
 
+### Diagnostics Tool
+Use `makaron-debug` to check system status:
+- Shows all component statuses (AeroSpace, SketchyBar, Borders, Ghostty)
+- Verifies symlinks and configs
+- Checks migration status
+- Useful when debugging issues or verifying installation
+
 ### Migration Not Running
 ```bash
 ls ~/.local/state/makaron/migrations/  # Check if marked completed
