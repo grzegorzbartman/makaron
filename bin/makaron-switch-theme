@@ -35,7 +35,7 @@ echo "Switching to theme: $THEME_NAME"
 
 get_ghostty_theme_mapping() {
     local theme="$1"
-    
+
     case "$theme" in
         tokyo-night)
             echo "TokyoNight Storm|TokyoNight Day"
@@ -98,7 +98,7 @@ get_ghostty_theme() {
     local themes=$(get_ghostty_theme_mapping "$theme")
     local dark_theme="${themes%|*}"
     local light_theme="${themes#*|}"
-    
+
     if [ "$mode" = "dark" ]; then
         echo "$dark_theme"
     else
