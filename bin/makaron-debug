@@ -532,6 +532,64 @@ if [ -n "$GHOSTTY_THEME" ]; then
 else
     echo "  GHOSTTY_THEME env: (not set)"
 fi
+
+# Check actual config file content
+echo ""
+echo "  Ghostty Config File Content:"
+echo "  ────────────────────────────────────────────────────────────────"
+if [ -f "$HOME/.config/ghostty/config" ]; then
+    echo "  Location: $HOME/.config/ghostty/config"
+    if grep -q "^theme = " "$HOME/.config/ghostty/config"; then
+        THEME_VALUE=$(grep "^theme = " "$HOME/.config/ghostty/config" | head -1)
+        echo "  Theme line: $THEME_VALUE"
+        
+        # Check for "One Dark" references
+        if echo "$THEME_VALUE" | grep -qi "One Dark"; then
+            echo "  ❌ ERROR: Config contains 'One Dark' theme (does not exist in Ghostty!)"
+        else
+            echo "  ✓ No 'One Dark' references found"
+        fi
+    else
+        echo "  ⚠️  No theme line found"
+    fi
+else
+    echo "  ❌ Config file not found at $HOME/.config/ghostty/config"
+fi
+
+# Check shell config files for GHOSTTY_THEME
+echo ""
+echo "  Shell Config Files:"
+echo "  ────────────────────────────────────────────────────────────────"
+for config_file in "$HOME/.zshrc" "$HOME/.bashrc"; do
+    if [ -f "$config_file" ]; then
+        echo "  $(basename $config_file):"
+        if grep -q "GHOSTTY_THEME" "$config_file"; then
+            GHOSTTY_LINE=$(grep "GHOSTTY_THEME" "$config_file" | tail -1)
+            echo "    Found: $GHOSTTY_LINE"
+            if echo "$GHOSTTY_LINE" | grep -qi "One Dark"; then
+                echo "    ❌ ERROR: Contains 'One Dark' theme reference!"
+            else
+                echo "    ✓ No 'One Dark' references"
+            fi
+        else
+            echo "    No GHOSTTY_THEME variable found"
+        fi
+    fi
+done
+
+# Check migration status
+echo ""
+echo "  Migration Status (1764134080 - Fix One Dark):"
+echo "  ────────────────────────────────────────────────────────────────"
+MIGRATION_STATE_DIR="$HOME/.local/state/makaron/migrations"
+if [ -f "$MIGRATION_STATE_DIR/1764134080.sh" ]; then
+    echo "  ✓ Migration completed"
+    echo "    Completed at: $(stat -f "%Sm" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null || stat -c "%y" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null)"
+elif [ -f "$MIGRATION_STATE_DIR/skipped/1764134080.sh" ]; then
+    echo "  ⚠️  Migration was skipped"
+else
+    echo "  ⚠️  Migration NOT run yet (run: makaron-migrate)"
+fi
 echo ""
 
 # ============================================================================
