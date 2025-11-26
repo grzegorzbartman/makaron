@@ -26,103 +26,61 @@ fi
 
 echo "Switching to theme: $THEME_NAME"
 
+# ============================================================
+# THEME MAPPING: Makaron themes -> Ghostty themes
+# ============================================================
+# This maps makaron theme names to their corresponding Ghostty theme names
+# Format: makaron-theme-name -> "Dark Theme Name|Light Theme Name"
+# ============================================================
+
+declare -A GHOSTTY_THEME_MAP=(
+    ["tokyo-night"]="TokyoNight Storm|TokyoNight Day"
+    ["catppuccin"]="Catppuccin Mocha|Catppuccin Latte"
+    ["catppuccin-mocha-dark"]="Catppuccin Mocha|Catppuccin Latte"
+    ["catppuccin-latte"]="Catppuccin Latte|Catppuccin Latte"
+    ["gruvbox"]="Gruvbox Dark|Gruvbox Light"
+    ["nord"]="Nord|Nord Light"
+    ["everforest"]="Everforest Dark Hard|Everforest Light Med"
+    ["kanagawa"]="Kanagawa Dragon|Kanagawa Dragon"
+    ["flexoki-light"]="Flexoki Light|Flexoki Light"
+    ["rose-pine"]="Rosé Pine|Rosé Pine Dawn"
+    ["matte-black"]="TokyoNight Storm|TokyoNight Day"
+    ["droptica-dark"]="TokyoNight Storm|TokyoNight Day"
+    ["osaka-jade"]="Everforest Dark Hard|Everforest Light Med"
+    ["ristretto"]="Gruvbox Dark|Gruvbox Light"
+    ["hackerman"]="TokyoNight Storm|TokyoNight Day"
+    ["ethereal"]="Catppuccin Mocha|Catppuccin Latte"
+    ["underwater-dark"]="Nord|Nord Light"
+    ["underwater-light"]="Nord Light|Nord Light"
+    ["verdant-dark"]="Everforest Dark Hard|Everforest Light Med"
+    ["verdant-light"]="Everforest Light Med|Everforest Light Med"
+)
+
 # Function to get Ghostty theme name (full name with variant)
 # Returns the complete theme name as it appears in Ghostty
 get_ghostty_theme() {
     local theme="$1"
     local mode="$2"
 
-    case "$theme" in
-        tokyo-night)
-            if [ "$mode" = "dark" ]; then
-                echo "TokyoNight Storm"
-            else
-                echo "TokyoNight Day"
-            fi
-            ;;
-        catppuccin|catppuccin-mocha-dark)
-            if [ "$mode" = "dark" ]; then
-                echo "Catppuccin Mocha"
-            else
-                echo "Catppuccin Latte"
-            fi
-            ;;
-        catppuccin-latte)
-            echo "Catppuccin Latte"
-            ;;
-        gruvbox)
-            if [ "$mode" = "dark" ]; then
-                echo "Gruvbox Dark"
-            else
-                echo "Gruvbox Light"
-            fi
-            ;;
-        nord)
-            if [ "$mode" = "dark" ]; then
-                echo "Nord"
-            else
-                echo "Nord Light"
-            fi
-            ;;
-        everforest)
-            if [ "$mode" = "dark" ]; then
-                echo "Everforest Dark Hard"
-            else
-                echo "Everforest Light Med"
-            fi
-            ;;
-        kanagawa)
-            echo "Kanagawa Dragon"
-            ;;
-        flexoki-light)
-            echo "Flexoki Light"
-            ;;
-        matte-black)
-            # Use One Dark as closest match for matte black minimalist theme
-            echo "One Dark"
-            ;;
-        osaka-jade)
-            # Use a dark green theme, closest available
-            if [ "$mode" = "dark" ]; then
-                echo "Everforest Dark Hard"
-            else
-                echo "Everforest Light Med"
-            fi
-            ;;
-        ristretto)
-            # Use warm dark theme, closest to coffee tones
-            if [ "$mode" = "dark" ]; then
-                echo "Gruvbox Dark"
-            else
-                echo "Gruvbox Light"
-            fi
-            ;;
-        rose-pine)
-            # Rose Pine theme
-            if [ "$mode" = "dark" ]; then
-                echo "Rosé Pine"
-            else
-                echo "Rosé Pine Dawn"
-            fi
-            ;;
-        droptica-dark)
-            # Use dark theme
-            if [ "$mode" = "dark" ]; then
-                echo "One Dark"
-            else
-                echo "One Light"
-            fi
-            ;;
-        *)
-            # For unknown themes, try to construct a reasonable name
-            local base_name=$(echo "$theme" | sed 's/-\([a-z]\)/\U\1/g' | sed 's/^\([a-z]\)/\U\1/')
-            if [ "$mode" = "dark" ]; then
-                echo "$base_name Dark"
-            else
-                echo "$base_name Light"
-            fi
-            ;;
-    esac
+    # Check if theme exists in mapping
+    if [[ -n "${GHOSTTY_THEME_MAP[$theme]}" ]]; then
+        local themes="${GHOSTTY_THEME_MAP[$theme]}"
+        local dark_theme="${themes%|*}"
+        local light_theme="${themes#*|}"
+
+        if [ "$mode" = "dark" ]; then
+            echo "$dark_theme"
+        else
+            echo "$light_theme"
+        fi
+    else
+        # Fallback for unknown themes
+        if [ "$mode" = "dark" ]; then
+            echo "TokyoNight Storm"
+        else
+            echo "TokyoNight Day"
+        fi
+    fi
 }
 
 # Update current-theme symlink
