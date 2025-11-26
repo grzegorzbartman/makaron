@@ -30,31 +30,64 @@ echo "Switching to theme: $THEME_NAME"
 # THEME MAPPING: Makaron themes -> Ghostty themes
 # ============================================================
 # This maps makaron theme names to their corresponding Ghostty theme names
-# Format: makaron-theme-name -> "Dark Theme Name|Light Theme Name"
+# Format: returns "Dark Theme Name|Light Theme Name" for each theme
 # ============================================================
 
-declare -A GHOSTTY_THEME_MAP=(
-    ["tokyo-night"]="TokyoNight Storm|TokyoNight Day"
-    ["catppuccin"]="Catppuccin Mocha|Catppuccin Latte"
-    ["catppuccin-mocha-dark"]="Catppuccin Mocha|Catppuccin Latte"
-    ["catppuccin-latte"]="Catppuccin Latte|Catppuccin Latte"
-    ["gruvbox"]="Gruvbox Dark|Gruvbox Light"
-    ["nord"]="Nord|Nord Light"
-    ["everforest"]="Everforest Dark Hard|Everforest Light Med"
-    ["kanagawa"]="Kanagawa Dragon|Kanagawa Dragon"
-    ["flexoki-light"]="Flexoki Light|Flexoki Light"
-    ["rose-pine"]="Rosé Pine|Rosé Pine Dawn"
-    ["matte-black"]="TokyoNight Storm|TokyoNight Day"
-    ["droptica-dark"]="TokyoNight Storm|TokyoNight Day"
-    ["osaka-jade"]="Everforest Dark Hard|Everforest Light Med"
-    ["ristretto"]="Gruvbox Dark|Gruvbox Light"
-    ["hackerman"]="TokyoNight Storm|TokyoNight Day"
-    ["ethereal"]="Catppuccin Mocha|Catppuccin Latte"
-    ["underwater-dark"]="Nord|Nord Light"
-    ["underwater-light"]="Nord Light|Nord Light"
-    ["verdant-dark"]="Everforest Dark Hard|Everforest Light Med"
-    ["verdant-light"]="Everforest Light Med|Everforest Light Med"
-)
+get_ghostty_theme_mapping() {
+    local theme="$1"
+    
+    case "$theme" in
+        tokyo-night)
+            echo "TokyoNight Storm|TokyoNight Day"
+            ;;
+        catppuccin|catppuccin-mocha-dark)
+            echo "Catppuccin Mocha|Catppuccin Latte"
+            ;;
+        catppuccin-latte)
+            echo "Catppuccin Latte|Catppuccin Latte"
+            ;;
+        gruvbox)
+            echo "Gruvbox Dark|Gruvbox Light"
+            ;;
+        nord)
+            echo "Nord|Nord Light"
+            ;;
+        everforest)
+            echo "Everforest Dark Hard|Everforest Light Med"
+            ;;
+        kanagawa)
+            echo "Kanagawa Dragon|Kanagawa Dragon"
+            ;;
+        flexoki-light)
+            echo "Flexoki Light|Flexoki Light"
+            ;;
+        rose-pine)
+            echo "Rosé Pine|Rosé Pine Dawn"
+            ;;
+        matte-black|droptica-dark|hackerman)
+            echo "TokyoNight Storm|TokyoNight Day"
+            ;;
+        osaka-jade|verdant-dark|verdant-light)
+            echo "Everforest Dark Hard|Everforest Light Med"
+            ;;
+        ristretto)
+            echo "Gruvbox Dark|Gruvbox Light"
+            ;;
+        ethereal)
+            echo "Catppuccin Mocha|Catppuccin Latte"
+            ;;
+        underwater-dark)
+            echo "Nord|Nord Light"
+            ;;
+        underwater-light)
+            echo "Nord Light|Nord Light"
+            ;;
+        *)
+            # Fallback for unknown themes
+            echo "TokyoNight Storm|TokyoNight Day"
+            ;;
+    esac
+}
 
 # Function to get Ghostty theme name (full name with variant)
 # Returns the complete theme name as it appears in Ghostty
@@ -62,24 +95,14 @@ get_ghostty_theme() {
     local theme="$1"
     local mode="$2"
 
-    # Check if theme exists in mapping
-    if [[ -n "${GHOSTTY_THEME_MAP[$theme]}" ]]; then
-        local themes="${GHOSTTY_THEME_MAP[$theme]}"
-        local dark_theme="${themes%|*}"
-        local light_theme="${themes#*|}"
-
-        if [ "$mode" = "dark" ]; then
-            echo "$dark_theme"
-        else
-            echo "$light_theme"
-        fi
+    local themes=$(get_ghostty_theme_mapping "$theme")
+    local dark_theme="${themes%|*}"
+    local light_theme="${themes#*|}"
+    
+    if [ "$mode" = "dark" ]; then
+        echo "$dark_theme"
     else
-        # Fallback for unknown themes
-        if [ "$mode" = "dark" ]; then
-            echo "TokyoNight Storm"
-        else
-            echo "TokyoNight Day"
-        fi
+        echo "$light_theme"
     fi
 }
 
