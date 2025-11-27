@@ -24,6 +24,7 @@ case "$1" in
 "Slack") echo "" ;;
 "Discord") echo "󰙯" ;;
 "ChatGPT") echo "󰭹" ;;
+"Claude") echo "󰚩" ;;
 "Telegram") echo "" ;;
 "WhatsApp") echo "" ;;
 "Spotify"|"Music") echo "" ;;
@@ -52,7 +53,7 @@ case "$1" in
 "App Store") echo "" ;;
 "TV") echo "" ;;
 "Activity Monitor") echo "" ;;
-*) echo "" ;; # Default icon for unknown apps
+*) echo "󰀏" ;; # Default icon for unknown apps
 esac
 }
 
