@@ -4,6 +4,43 @@
 
 WORKSPACE=$1
 MONITOR=$2
+PLUGIN_DIR="$(dirname "$0")"
+
+# Sync workspaces: remove non-existent, add new ones (runs once per event via lock)
+LOCK_FILE="/tmp/sketchybar_workspace_sync.lock"
+if mkdir "$LOCK_FILE" 2>/dev/null; then
+  trap "rmdir '$LOCK_FILE' 2>/dev/null" EXIT
+  
+  CURRENT_WS=$(aerospace list-workspaces --all 2>/dev/null)
+  EXISTING=$(sketchybar --query bar 2>/dev/null | grep -o '"space\.[^"]*"' | tr -d '"' | sed 's/space\.//')
+  
+  # Remove items for workspaces that no longer exist
+  for item in $EXISTING; do
+    echo "$CURRENT_WS" | grep -qx "$item" || sketchybar --remove "space.$item" 2>/dev/null
+  done
+  
+  # Add items for new workspaces (load colors first)
+  MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+  if [ -f "$MAKARON_PATH/current-theme/sketchybar.colors" ]; then
+    source "$MAKARON_PATH/current-theme/sketchybar.colors"
+  fi
+  
+  for ws in $CURRENT_WS; do
+    if ! echo "$EXISTING" | grep -qx "$ws"; then
+      sketchybar --add item space.$ws left \
+        --subscribe space.$ws aerospace_workspace_change front_app_switched \
+        --set space.$ws icon="$ws" icon.padding_left=8 icon.padding_right=8 \
+        icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" label.padding_left=6 label.padding_right=6 \
+        label.font="Hack Nerd Font:Bold:11.0" label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}" \
+        background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" background.corner_radius=8 \
+        background.height=28 background.drawing=on background.border_color="${SPACE_BORDER_COLOR:-0xff3b4261}" \
+        script="$PLUGIN_DIR/aerospace.sh $ws" click_script="aerospace workspace $ws"
+    fi
+  done
+  
+  rmdir "$LOCK_FILE" 2>/dev/null
+  trap - EXIT
+fi
 
 # Map app names to icons (using Nerd Font icons)
 get_app_icon() {
