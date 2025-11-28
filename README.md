@@ -76,6 +76,7 @@ This will:
 ### System Configuration
 - **macOS Settings** - Optimized system preferences for development workflow
 - **Migration System** - Safe, incremental configuration updates
+- **User Config** - Personal settings in `~/.config/makaron/makaron.conf`
 
 ## Manual Installation
 
@@ -325,6 +326,7 @@ You can customize your installation by modifying which scripts run in `install/a
   - `macos_settings.sh` - macOS system settings
   - `migrations.sh` - Migration system initialization
 - `migrations/` - Database-style migrations for configuration updates
+- `templates/makaron.conf.default` - Default user configuration template
 - `bin/` - Executable scripts
   - `makaron-migrate` - Run pending migrations
   - `makaron-migration-status` - Show migration status
@@ -365,6 +367,15 @@ Run pending migrations manually:
 
 ```bash
 makaron-migrate
+```
+
+## User Configuration
+
+Personal settings are stored in `~/.config/makaron/makaron.conf`. This file is created on install and preserved during updates.
+
+Available settings:
+```bash
+BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
 ```
 
 ---
