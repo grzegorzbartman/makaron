@@ -35,10 +35,12 @@ if mkdir "$LOCK_FILE" 2>/dev/null; then
         background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" background.corner_radius=8 \
         background.height=28 background.drawing=on background.border_color="${SPACE_BORDER_COLOR:-0xff3b4261}" \
         script="$PLUGIN_DIR/aerospace.sh $ws" click_script="aerospace workspace $ws"
+      # Move new item to correct position immediately
+      sketchybar --move space.$ws before chevron
     fi
   done
   
-  # Reorder workspace items to correct position (move each before chevron, in reverse order)
+  # Reorder all workspace items to ensure correct order
   for ws in $(echo "$CURRENT_WS" | tac); do
     sketchybar --move space.$ws before chevron 2>/dev/null
   done
