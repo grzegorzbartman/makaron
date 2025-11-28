@@ -125,6 +125,12 @@ if [ -d "$MAKARON_PATH/.git" ]; then
     git reset --hard origin/main
     echo "Configuration updated successfully!"
 
+    # Update user config with new variables
+    if [ -f "$MAKARON_PATH/install/makaron-conf.sh" ]; then
+        echo "Updating user configuration..."
+        source "$MAKARON_PATH/install/makaron-conf.sh"
+    fi
+
     # Run migrations
     if [ -f "$MAKARON_PATH/bin/makaron-migrate" ]; then
         echo "Running migrations..."
