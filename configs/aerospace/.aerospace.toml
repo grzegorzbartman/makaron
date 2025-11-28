@@ -1,18 +1,11 @@
 # Place a copy of this config to ~/.aerospace.toml
 # After that, you can edit ~/.aerospace.toml to your liking
 
-# Config version (required for persistent-workspaces)
-config-version = 2
-
 # You can use it to add commands that run after AeroSpace startup.
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 
 # Start AeroSpace at login
 start-at-login = true
-
-# Workspaces that always exist (even when empty)
-# These will always show in SketchyBar, others appear only when they have windows
-persistent-workspaces = ["1", "2", "3", "4", "Q", "W"]
 
 # Commands to run after AeroSpace startup
 # Border colors are loaded from theme file via makaron-reload-aerospace-sketchybar
