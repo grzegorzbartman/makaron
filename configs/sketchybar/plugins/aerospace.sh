@@ -38,13 +38,9 @@ if mkdir "$LOCK_FILE" 2>/dev/null; then
     fi
   done
   
-  # Reorder workspace items to correct position
-  PREV=""
-  for ws in $CURRENT_WS; do
-    if [ -n "$PREV" ]; then
-      sketchybar --reorder space.$ws after space.$PREV 2>/dev/null
-    fi
-    PREV="$ws"
+  # Reorder workspace items to correct position (move each before chevron, in reverse order)
+  for ws in $(echo "$CURRENT_WS" | tac); do
+    sketchybar --move space.$ws before chevron 2>/dev/null
   done
   
   rmdir "$LOCK_FILE" 2>/dev/null
