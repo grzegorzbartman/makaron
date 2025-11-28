@@ -55,6 +55,30 @@ $HOME/
 ```bash
 MAKARON_PATH="$HOME/.local/share/makaron"
 MAKARON_MIGRATIONS_STATE_PATH="$HOME/.local/state/makaron/migrations"
+MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
+```
+
+---
+
+## User Configuration
+
+### Overview
+User-specific settings stored outside the repo in `~/.config/makaron/makaron.conf`.
+
+### How It Works
+- Template: `templates/makaron.conf.default`
+- User file: `~/.config/makaron/makaron.conf`
+- On install: template is copied to user location
+- On update: missing variables are appended (existing values preserved)
+
+### Adding New Config Variables
+1. Add variable to `templates/makaron.conf.default`
+2. Use in scripts: `source "$HOME/.config/makaron/makaron.conf"`
+3. Always provide fallback: `VARIABLE="${VARIABLE:-default_value}"`
+
+### Current Variables
+```bash
+BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
 ```
 
 ---
