@@ -7,5 +7,9 @@ install_formula "gemini-cli" "Gemini CLI" "gemini"
 install_cask "codex" "Codex"
 install_cask "cursor" "Cursor"
 
-# Claude Code (has additional binary check)
-source "$MAKARON_PATH/install/ai/claude-code.sh"
+# Claude Code - check binary first (npm install creates 'claude' command)
+if command -v claude &>/dev/null; then
+    echo "Claude Code already installed"
+else
+    install_cask "claude-code" "Claude Code"
+fi
