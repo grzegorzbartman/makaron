@@ -44,8 +44,25 @@ makaron/
 │   ├── sketchybar/plugins/
 │   └── ghostty/
 ├── install/                # Installation scripts
-│   ├── ai/, apps/, desktop/, development/, editors/, terminal/
-│   └── migrations.sh
+│   ├── all.sh              # Sources all category scripts
+│   ├── main.sh             # Main installer (called by install.sh)
+│   ├── helpers.sh          # Helper functions (install_cask, install_formula)
+│   ├── brew.sh             # Homebrew + CLT setup
+│   ├── ai/all.sh           # AI tools
+│   ├── apps/all.sh         # General apps
+│   ├── desktop/            # Desktop environment
+│   │   ├── all.sh
+│   │   ├── aerospace.sh, borders.sh, sketchybar.sh  # (with config)
+│   │   └── fonts.sh
+│   ├── development/        # Dev tools
+│   │   ├── all.sh
+│   │   └── pipx.sh, rbenv.sh  # (with additional setup)
+│   ├── editors/            # Code editors
+│   │   ├── all.sh
+│   │   └── neovim_lazyvim.sh  # (with LazyVim setup)
+│   └── terminal/           # Terminal tools
+│       ├── all.sh
+│       └── ghostty.sh      # (with config setup)
 ├── migrations/             # Timestamped migration scripts
 ├── themes/                 # Theme definitions
 │   └── <name>/
@@ -53,7 +70,7 @@ makaron/
 │       ├── borders.colors
 │       ├── mode
 │       └── backgrounds/
-└── install.sh
+└── install.sh              # Bootstrap (clone + call main.sh)
 ```
 
 ### User System Layout
