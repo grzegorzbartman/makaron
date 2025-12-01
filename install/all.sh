@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Source all installation scripts
+source "$MAKARON_PATH/install/helpers.sh"
 source "$MAKARON_PATH/install/makaron-conf.sh"
 source "$MAKARON_PATH/install/brew.sh"
 source "$MAKARON_PATH/install/desktop/all.sh"
