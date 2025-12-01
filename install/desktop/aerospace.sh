@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # Install AeroSpace
-if ! command -v aerospace &> /dev/null; then
-    brew install --cask nikitabobko/tap/aerospace
-fi
+install_cask "nikitabobko/tap/aerospace" "AeroSpace"
 
 # Setup AeroSpace config
 if [ ! -L "$HOME/.aerospace.toml" ] && [ ! -f "$HOME/.aerospace.toml" ]; then

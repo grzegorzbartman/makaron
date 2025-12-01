@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Source all desktop environment installation scripts
+# Desktop tools
+install_cask "alt-tab" "AltTab"
+install_cask "command-x" "Command X"
+install_cask "dozer" "Dozer"
+install_cask "stats" "Stats"
+
+# Components with additional config
 source "$MAKARON_PATH/install/desktop/aerospace.sh"
-source "$MAKARON_PATH/install/desktop/alt-tab.sh"
 source "$MAKARON_PATH/install/desktop/borders.sh"
-source "$MAKARON_PATH/install/desktop/command-x.sh"
-source "$MAKARON_PATH/install/desktop/dozer.sh"
 source "$MAKARON_PATH/install/desktop/fonts.sh"
 source "$MAKARON_PATH/install/desktop/sketchybar.sh"
-source "$MAKARON_PATH/install/desktop/stats.sh"
 
 # Initialize default theme (tokyo-night)
 echo "Setting up default theme (Tokyo Night)..."

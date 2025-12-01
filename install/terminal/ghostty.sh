@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # Install Ghostty
-if ! command -v ghostty &> /dev/null; then
-    brew install --cask ghostty
-fi
+install_cask "ghostty" "Ghostty"
 
 # Setup Ghostty config
 mkdir -p "$HOME/.config"

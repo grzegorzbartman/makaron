@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# Source all AI tool installation scripts
-source "$MAKARON_PATH/install/ai/chatgpt.sh"
-source "$MAKARON_PATH/install/ai/claude.sh"
+# AI tools
+install_cask "chatgpt" "ChatGPT"
+install_cask "claude" "Claude"
+install_formula "gemini-cli" "Gemini CLI" "gemini"
+install_cask "codex" "Codex"
+install_cask "cursor" "Cursor"
+
+# Claude Code (has additional binary check)
 source "$MAKARON_PATH/install/ai/claude-code.sh"
-source "$MAKARON_PATH/install/ai/gemini-cli.sh"
-source "$MAKARON_PATH/install/ai/codex.sh"
-source "$MAKARON_PATH/install/ai/cursor.sh"

@@ -15,6 +15,22 @@
 - Install scripts handle their own symlinks - detect and fix wrong targets automatically.
 - Scripts must be idempotent.
 
+### Helper Functions (`install/helpers.sh`)
+Use these helpers in install scripts - they handle idempotency and errors gracefully:
+
+```bash
+# For GUI apps (casks) - skips if already in /Applications
+install_cask "cask-name" "App Name"
+
+# For CLI tools - continues on failure
+install_formula "formula" "Display Name" "command-to-check"
+
+# For critical CLI tools - exits on failure with CLT fix instructions
+install_formula_critical "formula" "Display Name" "command-to-check"
+```
+
+**Important:** Never use `exit` in sourced scripts - use `return` instead, or the entire installation will stop.
+
 ---
 
 ## Directory Structure

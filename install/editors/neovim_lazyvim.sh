@@ -1,30 +1,14 @@
 #!/bin/bash
 
 # Install Neovim
-if ! command -v nvim &> /dev/null; then
-    brew install neovim
-fi
+install_formula "neovim" "Neovim" "nvim"
 
 # Install LazyVim dependencies
-if ! command -v tree-sitter &> /dev/null; then
-    brew install tree-sitter-cli
-fi
-
-if ! command -v curl &> /dev/null; then
-    brew install curl
-fi
-
-if ! command -v fzf &> /dev/null; then
-    brew install fzf
-fi
-
-if ! command -v rg &> /dev/null; then
-    brew install ripgrep
-fi
-
-if ! command -v fd &> /dev/null; then
-    brew install fd
-fi
+install_formula "tree-sitter-cli" "tree-sitter" "tree-sitter"
+install_formula "curl" "curl" "curl"
+install_formula "fzf" "fzf" "fzf"
+install_formula "ripgrep" "ripgrep" "rg"
+install_formula "fd" "fd" "fd"
 
 # Install LazyVim
 if [ ! -d "$HOME/.config/nvim" ] || [ ! -f "$HOME/.config/nvim/lua/config/lazy.lua" ]; then
