@@ -3,6 +3,12 @@
 # Exit immediately if a command exits with a non-zero status
 set -eEo pipefail
 
+# Fix for curl | bash - close stdin to prevent buffering issues
+# This prevents the script from being printed as text if something fails
+if [ ! -t 0 ]; then
+    exec < /dev/null
+fi
+
 # Define Makaron locations
 export MAKARON_PATH="$HOME/.local/share/makaron"
 export MAKARON_INSTALL="$MAKARON_PATH/install"
@@ -32,9 +38,9 @@ mkdir -p "$(dirname "$MAKARON_INSTALL_LOG_FILE")"
 # Change to the cloned directory
 cd "$MAKARON_PATH"
 
-# Run all installations
+# Run all installations (use source to avoid subshell stdin issues with curl|bash)
 echo "Starting installation process..."
-bash "$MAKARON_PATH/install/all.sh"
+source "$MAKARON_PATH/install/all.sh"
 
 # Add bin directory to PATH
 echo "Setting up PATH..."
