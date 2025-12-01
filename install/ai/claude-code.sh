@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Install Claude Code
-if ! brew list --cask claude-code &>/dev/null; then
-    echo "Installing Claude Code..."
-    brew install --cask claude-code
+source "$MAKARON_PATH/install/helpers.sh"
+
+# Check if claude binary already exists (from previous install or manual)
+if command -v claude &>/dev/null; then
+    echo "Claude Code already installed"
 else
-    echo "Claude Code is already installed."
+    install_cask "claude-code" "Claude Code"
 fi

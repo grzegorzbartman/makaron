@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Install borders
-if ! command -v borders &> /dev/null; then
-    brew tap FelixKratz/formulae
-    brew install borders
-fi
+source "$MAKARON_PATH/install/helpers.sh"
+
+# Install borders (CRITICAL component)
+brew tap FelixKratz/formulae 2>/dev/null || true
+install_formula_critical "borders" "Borders"

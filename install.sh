@@ -83,15 +83,76 @@ fi
 
 echo "Added $MAKARON_PATH/bin to PATH in shell config files"
 
-echo "Installation completed successfully!"
+# Installation summary
 echo ""
-echo "Available commands:"
-echo "  makaron-ui-start                    - Start UI components (AeroSpace, SketchyBar, Borders)"
-echo "  makaron-ui-stop                     - Stop UI components"
-echo "  makaron-update                      - Update the configuration"
-echo "  makaron-reload-aerospace-sketchybar - Reload all configurations"
-echo "  makaron-debug                       - Show system diagnostic information"
+echo "═══════════════════════════════════════════════════════════════════"
+echo "                    INSTALLATION SUMMARY"
+echo "═══════════════════════════════════════════════════════════════════"
 echo ""
-echo "To enable the UI components, run: makaron-ui-start"
+
+INSTALL_FAILED=0
+
+check_installed() {
+    local cmd="$1"
+    local name="$2"
+    if command -v "$cmd" &>/dev/null; then
+        echo "  ✓ $name"
+        return 0
+    else
+        echo "  ✗ $name (not installed)"
+        INSTALL_FAILED=1
+        return 1
+    fi
+}
+
+check_app() {
+    local app="$1"
+    if [ -d "/Applications/$app.app" ]; then
+        echo "  ✓ $app"
+        return 0
+    else
+        echo "  ✗ $app (not installed)"
+        return 1
+    fi
+}
+
+echo "Core UI Components:"
+check_installed "aerospace" "AeroSpace"
+check_installed "sketchybar" "SketchyBar"
+check_installed "borders" "Borders"
+
+echo ""
+echo "Terminal & Tools:"
+check_app "Ghostty"
+check_installed "nvim" "Neovim"
+check_installed "tmux" "tmux"
+
+echo ""
+
+if [ "$INSTALL_FAILED" -eq 1 ]; then
+    echo "⚠️  Some critical components failed to install."
+    echo ""
+    echo "This is often caused by outdated Command Line Tools after a macOS update."
+    echo ""
+    echo "To fix, run:"
+    echo "  sudo rm -rf /Library/Developer/CommandLineTools"
+    echo "  sudo xcode-select --install"
+    echo ""
+    echo "Then run: makaron-reinstall"
+    echo ""
+else
+    echo "✓ All critical components installed successfully!"
+    echo ""
+    echo "Available commands:"
+    echo "  makaron-ui-start                    - Start UI components (AeroSpace, SketchyBar, Borders)"
+    echo "  makaron-ui-stop                     - Stop UI components"
+    echo "  makaron-update                      - Update the configuration"
+    echo "  makaron-reload-aerospace-sketchybar - Reload all configurations"
+    echo "  makaron-debug                       - Show system diagnostic information"
+    echo ""
+    echo "To enable the UI components, run: makaron-ui-start"
+fi
+
+echo "═══════════════════════════════════════════════════════════════════"
 echo ""
 echo "Note: You may need to restart your terminal or run 'source ~/.zshrc' to use the new commands."

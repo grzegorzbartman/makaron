@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Install PHPStorm
-if ! brew list --cask phpstorm &> /dev/null; then
-    echo "Installing PHPStorm..."
-    brew install --cask phpstorm
-fi
+source "$MAKARON_PATH/install/helpers.sh"
 
+install_cask "phpstorm" "PhpStorm"

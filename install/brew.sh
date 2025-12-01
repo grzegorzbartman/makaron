@@ -1,10 +1,41 @@
 #!/bin/bash
 
-# Install Xcode Command Line Tools
-if ! xcode-select --print-path &>/dev/null; then
-    xcode-select --install
-    exit 1
-fi
+# Check Xcode Command Line Tools
+check_command_line_tools() {
+    # Check if CLT is installed
+    if ! xcode-select --print-path &>/dev/null; then
+        echo "Xcode Command Line Tools not installed."
+        echo "Installing now..."
+        xcode-select --install
+        echo ""
+        echo "Please wait for the installation to complete, then run this script again."
+        exit 1
+    fi
+
+    # Verify CLT works by attempting a simple compile
+    # This catches outdated CLT after macOS updates
+    local test_file=$(mktemp)
+    echo "int main(){return 0;}" > "$test_file.c"
+    if ! cc -x c "$test_file.c" -o "$test_file.out" 2>/dev/null; then
+        rm -f "$test_file" "$test_file.c" "$test_file.out" 2>/dev/null
+        echo ""
+        echo "═══════════════════════════════════════════════════════════════════"
+        echo "ERROR: Command Line Tools are installed but not working properly."
+        echo "This usually happens after a macOS update."
+        echo ""
+        echo "Please run these commands to fix:"
+        echo "  sudo rm -rf /Library/Developer/CommandLineTools"
+        echo "  sudo xcode-select --install"
+        echo ""
+        echo "Then run this installation script again."
+        echo "═══════════════════════════════════════════════════════════════════"
+        exit 1
+    fi
+    rm -f "$test_file" "$test_file.c" "$test_file.out" 2>/dev/null
+    echo "✓ Command Line Tools verified"
+}
+
+check_command_line_tools
 
 LOCAL_BREW_PATH="$HOME/.local/homebrew"
 

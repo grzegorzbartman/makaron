@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Install Visual Studio Code
-if ! brew list --cask visual-studio-code &> /dev/null; then
-    echo "Installing Visual Studio Code..."
-    brew install --cask visual-studio-code
-fi
+source "$MAKARON_PATH/install/helpers.sh"
 
+install_cask "visual-studio-code" "Visual Studio Code"
