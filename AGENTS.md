@@ -130,6 +130,7 @@ Database-style migrations for safe, incremental config updates.
 - Bug fixes for existing installations
 - Moving/renaming config files
 - Breaking changes needing gradual rollout
+- Adding new software to install scripts (existing users won't get it via update)
 
 ### When NOT to Create
 - New features not affecting existing installs
@@ -169,6 +170,12 @@ echo "Migration completed successfully"
 
 ### Key Patterns
 ```bash
+# Use helpers for installing software (preferred)
+if [ -f "$MAKARON_PATH/install/helpers.sh" ]; then
+    source "$MAKARON_PATH/install/helpers.sh"
+    install_formula "package" "Display Name" "command"
+fi
+
 # Source install script with check
 if [ -f "$MAKARON_PATH/install/path/script.sh" ]; then
     source "$MAKARON_PATH/install/path/script.sh"

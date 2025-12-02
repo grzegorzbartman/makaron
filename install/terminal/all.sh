@@ -7,6 +7,7 @@ install_formula "fzf" "fzf" "fzf"
 install_formula "gum" "gum" "gum"
 install_formula "htop" "htop" "htop"
 install_formula "jq" "jq" "jq"
+install_formula "ncdu" "ncdu" "ncdu"
 install_formula "tmux" "tmux" "tmux"
 install_formula "tree" "tree" "tree"
 
