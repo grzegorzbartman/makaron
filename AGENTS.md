@@ -31,6 +31,8 @@ install_formula_critical "formula" "Display Name" "command-to-check"
 
 **Important:** Never use `exit` in sourced scripts - use `return` instead, or the entire installation will stop.
 
+**Homebrew paths:** Always use `$(brew --prefix)` instead of hardcoded paths like `/opt/homebrew` - supports Apple Silicon, Intel, and local installs.
+
 ---
 
 ## Directory Structure

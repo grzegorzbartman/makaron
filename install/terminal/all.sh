@@ -13,3 +13,6 @@ install_formula "tree" "tree" "tree"
 
 # Ghostty (has additional config setup)
 source "$MAKARON_PATH/install/terminal/ghostty.sh"
+
+# Powerlevel10k (zsh theme with config setup)
+source "$MAKARON_PATH/install/terminal/p10k.sh"
