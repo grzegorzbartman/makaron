@@ -8,16 +8,11 @@ if ! pgrep -f "AeroSpace" > /dev/null; then
     sleep 2  # Give it time to start
 fi
 
-# Check if SketchyBar is running, start if not
-if ! pgrep -f "sketchybar" > /dev/null; then
-    echo "SketchyBar not running, starting..."
-    brew services start sketchybar
-    sleep 2  # Give it time to start
-fi
-
 # Now reload the configurations
 aerospace reload-config
-sketchybar --reload
+
+# Restart SketchyBar
+brew services restart sketchybar
 
 # Load theme colors for borders
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
