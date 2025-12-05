@@ -1,0 +1,45 @@
+# Extensions for PHP/Drupal development profile
+# Install with: cursor --install-extension <id> or code --install-extension <id>
+
+# Themes
+anan.jetbrains-darcula-theme
+ardonplay.vscode-jetbrains-icon-theme
+
+# PHP
+bmewburn.vscode-intelephense-client
+neilbrayfield.php-docblocker
+valeryanm.vscode-phpsab
+xdebug.php-debug
+sanderronde.phpstan-vscode
+emallin.phpunit
+
+# Drupal
+andrewdavidblum.drupal-smart-snippets
+biati.ddev-manager
+mblode.twig-language-2
+
+# Web
+dbaeumer.vscode-eslint
+
+# Composer
+ikappas.composer
+
+# Python (for scripts)
+ms-python.python
+ms-python.debugpy
+
+# Dev Containers / Remote
+ms-vscode-remote.remote-containers
+ms-vscode.remote-explorer
+
+# Git
+eamodio.gitlens
+
+# Code Quality
+usernamehw.errorlens
+
+# Utilities
+mechatroner.rainbow-csv
+redhat.vscode-yaml
+tomoki1207.pdf
+zaaack.markdown-editor

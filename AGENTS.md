@@ -210,6 +210,45 @@ exec makaron-switch-theme <name>
 
 ---
 
+## Editor Profiles
+
+### Overview
+Pre-configured profiles for VSCode and Cursor with settings, extensions, and keybindings.
+
+### Structure
+```
+profiles/
+└── <profile-name>/
+    ├── settings.json      # Editor settings
+    ├── extensions.txt     # Extension IDs (one per line, # for comments)
+    └── keybindings.json   # Custom keybindings (optional)
+```
+
+### Paths
+```bash
+# VSCode
+~/Library/Application Support/Code/User/settings.json
+~/Library/Application Support/Code/User/keybindings.json
+
+# Cursor
+~/Library/Application Support/Cursor/User/settings.json
+~/Library/Application Support/Cursor/User/keybindings.json
+```
+
+### Usage
+```bash
+makaron-apply-editor-profile <profile-name> [--cursor-only|--vscode-only]
+```
+
+### Creating New Profile
+1. Create `profiles/<name>/` directory
+2. Add `settings.json` with editor settings
+3. Add `extensions.txt` with extension IDs
+4. Optionally add `keybindings.json`
+5. Update `README.md`
+
+---
+
 ## AeroSpace + SketchyBar Integration
 
 ### Critical Config

@@ -1,0 +1,103 @@
+#!/bin/bash
+# Apply editor profile to VSCode and/or Cursor
+
+set -e
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+PROFILES_PATH="$MAKARON_PATH/profiles"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+usage() {
+    echo "Usage: makaron-apply-editor-profile <profile-name> [--cursor-only|--vscode-only]"
+    echo ""
+    echo "Available profiles:"
+    if [ -d "$PROFILES_PATH" ]; then
+        for dir in "$PROFILES_PATH"/*/; do
+            [ -d "$dir" ] && echo "  - $(basename "$dir")"
+        done
+    fi
+    exit 1
+}
+
+[ -z "$1" ] && usage
+
+PROFILE_NAME="$1"
+PROFILE_PATH="$PROFILES_PATH/$PROFILE_NAME"
+TARGET="both"
+
+[ "$2" = "--cursor-only" ] && TARGET="cursor"
+[ "$2" = "--vscode-only" ] && TARGET="vscode"
+
+if [ ! -d "$PROFILE_PATH" ]; then
+    echo -e "${RED}Profile '$PROFILE_NAME' not found at $PROFILE_PATH${NC}"
+    usage
+fi
+
+apply_to_editor() {
+    local editor_name="$1"
+    local app_support_dir="$2"
+    local cli_cmd="$3"
+    local user_dir="$app_support_dir/User"
+
+    if [ ! -d "$app_support_dir" ]; then
+        echo -e "${YELLOW}$editor_name not installed, skipping${NC}"
+        return 0
+    fi
+
+    echo -e "${BLUE}Applying profile to $editor_name...${NC}"
+
+    # Backup and apply settings.json
+    if [ -f "$PROFILE_PATH/settings.json" ]; then
+        if [ -f "$user_dir/settings.json" ]; then
+            cp "$user_dir/settings.json" "$user_dir/settings.json.bak.$(date +%Y%m%d%H%M%S)"
+            echo "  Backed up existing settings.json"
+        fi
+        cp "$PROFILE_PATH/settings.json" "$user_dir/settings.json"
+        echo -e "  ${GREEN}✓${NC} Applied settings.json"
+    fi
+
+    # Backup and apply keybindings.json
+    if [ -f "$PROFILE_PATH/keybindings.json" ]; then
+        if [ -f "$user_dir/keybindings.json" ]; then
+            cp "$user_dir/keybindings.json" "$user_dir/keybindings.json.bak.$(date +%Y%m%d%H%M%S)"
+            echo "  Backed up existing keybindings.json"
+        fi
+        cp "$PROFILE_PATH/keybindings.json" "$user_dir/keybindings.json"
+        echo -e "  ${GREEN}✓${NC} Applied keybindings.json"
+    fi
+
+    # Install extensions
+    if [ -f "$PROFILE_PATH/extensions.txt" ] && command -v "$cli_cmd" &>/dev/null; then
+        echo "  Installing extensions..."
+        while IFS= read -r line || [ -n "$line" ]; do
+            line=$(echo "$line" | sed 's/#.*//' | xargs)
+            [ -z "$line" ] && continue
+            echo -n "    $line... "
+            if $cli_cmd --install-extension "$line" --force &>/dev/null; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${YELLOW}skipped${NC}"
+            fi
+        done < "$PROFILE_PATH/extensions.txt"
+    elif [ -f "$PROFILE_PATH/extensions.txt" ]; then
+        echo -e "  ${YELLOW}$cli_cmd CLI not found, skipping extensions${NC}"
+    fi
+
+    echo -e "${GREEN}$editor_name profile applied!${NC}"
+}
+
+if [ "$TARGET" = "both" ] || [ "$TARGET" = "cursor" ]; then
+    apply_to_editor "Cursor" "$HOME/Library/Application Support/Cursor" "cursor"
+fi
+
+if [ "$TARGET" = "both" ] || [ "$TARGET" = "vscode" ]; then
+    apply_to_editor "VSCode" "$HOME/Library/Application Support/Code" "code"
+fi
+
+echo ""
+echo -e "${GREEN}Done!${NC} Restart your editor to apply all changes."

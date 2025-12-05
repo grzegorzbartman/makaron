@@ -126,6 +126,7 @@ After installation, you'll have access to these commands:
 - **`makaron-theme-osaka-jade`** - Switch to Osaka Jade theme
 - **`makaron-theme-ristretto`** - Switch to Ristretto theme
 - **`makaron-theme-rose-pine`** - Switch to Rose Pine theme
+- **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
 - **`./install/macos_settings.sh`** - Apply macOS settings (optional)
 
 ### Themes
@@ -181,6 +182,24 @@ Each theme includes:
 - Custom color scheme for SketchyBar
 - Matching window border colors
 - Coordinated desktop wallpaper
+
+### Editor Profiles
+
+Makaron includes pre-configured profiles for VSCode and Cursor:
+
+```bash
+# Apply to both Cursor and VSCode
+makaron-apply-editor-profile development-php-drupal
+
+# Apply to Cursor only
+makaron-apply-editor-profile development-php-drupal --cursor-only
+
+# Apply to VSCode only
+makaron-apply-editor-profile development-php-drupal --vscode-only
+```
+
+**Available profiles:**
+- **`development-php-drupal`** - PHP/Drupal development with auto dark/light theme, PHP Intelephense, Xdebug, DDEV Manager, Twig support, Drupal file associations
 
 ### Manual Commands
 
@@ -315,6 +334,8 @@ You can customize your installation by modifying which scripts run in `install/a
 - `configs/aerospace/.aerospace.toml` - AeroSpace config
 - `configs/ghostty/config` - Ghostty terminal config
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
+- `profiles/` - Editor profiles for VSCode/Cursor
+  - `development-php-drupal/` - PHP/Drupal development profile
 - `install/` - Modular installation scripts
   - `brew.sh` - Homebrew package manager installation
   - `ai/` - AI tools (Claude Code, ChatGPT, Cursor)
