@@ -9,6 +9,7 @@ install_formula "lazygit" "lazygit" "lazygit"
 install_formula "node" "Node.js" "node"
 install_formula "yarn" "Yarn" "yarn"
 install_formula "platformsh-cli" "Platform.sh CLI" "platform"
+install_cask "bruno" "Bruno"
 install_cask "docker-desktop" "Docker"
 install_cask "sequel-ace" "Sequel Ace"
 

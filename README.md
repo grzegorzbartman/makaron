@@ -51,6 +51,7 @@ This will:
 - **Codex** - AI code assistant
 
 ### Development Tools
+- **Bruno** - Open-source API client (Postman alternative)
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
 - **PhpStorm** - Professional PHP IDE

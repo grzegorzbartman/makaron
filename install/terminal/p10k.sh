@@ -67,4 +67,3 @@ fi'
 }
 
 add_p10k_to_zshrc
-

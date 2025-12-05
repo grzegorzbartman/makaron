@@ -17,9 +17,14 @@ else
     exit 0
 fi
 
-# Install powerlevel10k
+# Install powerlevel10k (theme package without CLI command)
 BREW_PREFIX="$(brew --prefix)"
-install_formula "powerlevel10k" "Powerlevel10k" "ls $BREW_PREFIX/share/powerlevel10k"
+if brew list powerlevel10k &>/dev/null; then
+    echo "Powerlevel10k already installed"
+else
+    echo "Installing Powerlevel10k..."
+    brew install powerlevel10k || echo "Warning: Failed to install Powerlevel10k (continuing...)"
+fi
 
 # Setup p10k config symlink
 P10K_CONFIG="$HOME/.p10k.zsh"
