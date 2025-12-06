@@ -319,7 +319,7 @@ pgrep -x "sketchybar" || brew services restart sketchybar
 **Quick Apps:**
 - `Ctrl+Alt+B` - Safari
 - `Ctrl+Alt+C` - Cursor
-- `Ctrl+Alt+T` - iTerm
+- `Ctrl+Alt+T` - Ghostty
 - `Ctrl+Alt+P` - PhpStorm
 - `Ctrl+Alt+Z` - Todoist
 - `Ctrl+Alt+N` - Notes (new note)

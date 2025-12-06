@@ -192,12 +192,7 @@ tell application "Safari"
     activate
 end tell'
 '''
-    ctrl-alt-t = '''exec-and-forget osascript -e '
-tell application "iTerm"
-    create window with default profile
-    activate
-end tell'
-'''
+    ctrl-alt-t = 'exec-and-forget open -na Ghostty'
     ctrl-alt-c = '''exec-and-forget osascript -e '
 tell application "Cursor"
     activate
