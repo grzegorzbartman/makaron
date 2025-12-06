@@ -115,24 +115,16 @@ After installation, you'll have access to these commands:
 - **`makaron-migrate`** - Run pending migrations
 - **`makaron-migration-status`** - Show migration status
 - **`makaron-dev-add-migration`** - Create new migration (development)
-- **`makaron-theme-tokyo-night`** - Switch to Tokyo Night theme
-- **`makaron-theme-catppuccin`** - Switch to Catppuccin theme
-- **`makaron-theme-catppuccin-latte`** - Switch to Catppuccin Latte theme
-- **`makaron-theme-everforest`** - Switch to Everforest theme
-- **`makaron-theme-flexoki-light`** - Switch to Flexoki Light theme
-- **`makaron-theme-gruvbox`** - Switch to Gruvbox theme
-- **`makaron-theme-kanagawa`** - Switch to Kanagawa theme
-- **`makaron-theme-matte-black`** - Switch to Matte Black theme
-- **`makaron-theme-nord`** - Switch to Nord theme
-- **`makaron-theme-osaka-jade`** - Switch to Osaka Jade theme
-- **`makaron-theme-ristretto`** - Switch to Ristretto theme
-- **`makaron-theme-rose-pine`** - Switch to Rose Pine theme
+- **`makaron-debug`** - Diagnose system status
+- **`makaron-ui-start`** - Start UI components (AeroSpace, SketchyBar, Borders)
+- **`makaron-ui-stop`** - Stop UI components
+- **`makaron-macos-config-reload`** - Apply macOS settings
 - **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
-- **`./install/macos_settings.sh`** - Apply macOS settings (optional)
+- **`makaron-theme-*`** - Switch themes (see Themes section below)
 
 ### Themes
 
-Makaron includes twelve beautiful themes that change the colors of your UI and wallpaper (based on [Omarchy](https://github.com/basecamp/omarchy)):
+Makaron includes twenty beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com)):
 
 <p align="center">
   <img src="docs/makaron-02.png" alt="Catppuccin Latte" width="49%" />
@@ -146,37 +138,49 @@ Makaron includes twelve beautiful themes that change the colors of your UI and w
 </p>
 
 1. **Tokyo Night** (default) - Dark theme with purple/blue accents
-2. **Catppuccin Mocha** - Dark theme with pastel colors
+2. **Catppuccin** - Dark theme with pastel colors
 3. **Catppuccin Latte** - Light theme for daytime use
-4. **Everforest** - Dark theme with green forest colors
-5. **Flexoki Light** - Light theme with modern colors
-6. **Gruvbox** - Dark theme with warm retro colors
-7. **Kanagawa** - Dark theme inspired by Japanese art
-8. **Matte Black** - Minimalist dark theme
-9. **Nord** - Cool arctic-inspired color palette
-10. **Osaka Jade** - Dark theme with jade green accents
-11. **Ristretto** - Warm dark theme with coffee tones
-12. **Rose Pine** - Light theme with rose and pine colors
-13. **Ethereal** - Dreamy, soft dark theme
-14. **Hackerman** - Cyberpunk/Matrix inspired theme
+4. **Catppuccin Mocha Dark** - Dark theme with mocha colors
+5. **Droptica Dark** - Dark theme with Droptica branding
+6. **Ethereal** - Dreamy, soft dark theme
+7. **Everforest** - Dark theme with green forest colors
+8. **Flexoki Light** - Light theme with modern colors
+9. **Gruvbox** - Dark theme with warm retro colors
+10. **Hackerman** - Cyberpunk/Matrix inspired theme
+11. **Kanagawa** - Dark theme inspired by Japanese art
+12. **Matte Black** - Minimalist dark theme
+13. **Nord** - Cool arctic-inspired color palette
+14. **Osaka Jade** - Dark theme with jade green accents
+15. **Ristretto** - Warm dark theme with coffee tones
+16. **Rose Pine** - Dark theme with rose and pine colors
+17. **Underwater Dark** - Deep ocean dark theme
+18. **Underwater Light** - Ocean-inspired light theme
+19. **Verdant Dark** - Lush green dark theme
+20. **Verdant Light** - Fresh green light theme
 
 Switch themes instantly with:
 
 ```bash
-makaron-theme-tokyo-night         # Dark purple/blue
-makaron-theme-catppuccin           # Dark pastel
-makaron-theme-catppuccin-latte     # Light pastel
-makaron-theme-everforest           # Dark forest green
-makaron-theme-flexoki-light        # Light modern
-makaron-theme-gruvbox              # Dark retro warm
-makaron-theme-kanagawa             # Dark Japanese art
-makaron-theme-matte-black          # Minimalist dark
-makaron-theme-nord                 # Cool arctic
-makaron-theme-osaka-jade           # Dark jade green
-makaron-theme-ristretto            # Dark coffee warm
-makaron-theme-rose-pine            # Light rose/pine
-makaron-theme-ethereal             # Dreamy dark
-makaron-theme-hackerman            # Cyberpunk/Matrix
+makaron-theme-tokyo-night           # Dark purple/blue
+makaron-theme-catppuccin            # Dark pastel
+makaron-theme-catppuccin-latte      # Light pastel
+makaron-theme-catppuccin-mocha-dark # Dark mocha
+makaron-theme-droptica-dark         # Dark Droptica
+makaron-theme-ethereal              # Dreamy dark
+makaron-theme-everforest            # Dark forest green
+makaron-theme-flexoki-light         # Light modern
+makaron-theme-gruvbox               # Dark retro warm
+makaron-theme-hackerman             # Cyberpunk/Matrix
+makaron-theme-kanagawa              # Dark Japanese art
+makaron-theme-matte-black           # Minimalist dark
+makaron-theme-nord                  # Cool arctic
+makaron-theme-osaka-jade            # Dark jade green
+makaron-theme-ristretto             # Dark coffee warm
+makaron-theme-rose-pine             # Dark rose/pine
+makaron-theme-underwater-dark       # Deep ocean dark
+makaron-theme-underwater-light      # Ocean light
+makaron-theme-verdant-dark          # Lush green dark
+makaron-theme-verdant-light         # Fresh green light
 ```
 
 Each theme includes:
@@ -205,7 +209,7 @@ makaron-apply-editor-profile development-php-drupal --vscode-only
 ### Manual Commands
 
 - **Reload config**: `makaron-reload-aerospace-sketchybar`
-- **macOS settings**: `./install/macos_settings.sh` (optional)
+- **macOS settings**: `makaron-macos-config-reload`
 
 ### Troubleshooting
 
@@ -280,8 +284,8 @@ pgrep -x "sketchybar" || brew services restart sketchybar
 ## Keyboard Shortcuts
 
 **Window Management:**
-- `Ctrl+Alt+H/J/K/L` - Focus window (left/down/up/right)
-- `Alt+Shift+H/J/K/L` - Move window (left/down/up/right)
+- `Ctrl+Alt+Left/Down/Up/Right` - Focus window (left/down/up/right)
+- `Alt+Shift+Left/Down/Up/Right` - Move window (left/down/up/right)
 - `Alt+Minus/Equal` - Resize window (decrease/increase)
 - `Alt+Slash` - Toggle horizontal/vertical tiles layout
 - `Alt+Comma` - Toggle horizontal/vertical accordion layout
@@ -290,9 +294,17 @@ pgrep -x "sketchybar" || brew services restart sketchybar
 
 **Workspaces:**
 - `Alt+1-9/0` - Switch to workspace 1-10
+- `Alt+Q/W` - Switch to workspace Q/W
 - `Alt+Shift+1-9/0` - Move window to workspace 1-10
+- `Alt+Shift+Q/W` - Move window to workspace Q/W
 - `Alt+Left/Right` - Switch to previous/next workspace
 - `Cmd+Alt+Left/Right` - Move window to previous/next workspace
+
+**Multi-Monitor:**
+- `Ctrl+Tab` - Focus next monitor
+- `Ctrl+Shift+Tab` - Focus previous monitor
+- `Ctrl+Alt+Shift+Left/Right` - Move window to left/right monitor
+- `Ctrl+Alt+Shift+1/2` - Move window to monitor 1/2
 
 **Service Mode:**
 - `Alt+Shift+Semicolon` - Enter service mode
@@ -399,6 +411,24 @@ Available settings:
 ```bash
 BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
 ```
+
+---
+
+## Contributing
+
+Contributions are welcome! If you'd like to contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please read [AGENTS.md](AGENTS.md) for development guidelines and code style.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
