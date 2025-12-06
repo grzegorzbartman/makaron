@@ -127,10 +127,10 @@ automatically-unhide-macos-hidden-apps = false
     alt-f = 'layout floating tiling'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-    ctrl-alt-h = 'focus left'
-    ctrl-alt-j = 'focus down'
-    ctrl-alt-k = 'focus up'
-    ctrl-alt-l = 'focus right'
+    ctrl-alt-left = 'focus left'
+    ctrl-alt-down = 'focus down'
+    ctrl-alt-up = 'focus up'
+    ctrl-alt-right = 'focus right'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move
     alt-shift-left = 'move left'
@@ -231,7 +231,7 @@ end tell'
     # Quick focus switching between monitors
     ctrl-tab = 'focus-monitor next'
     ctrl-shift-tab = 'focus-monitor prev'
-    
+
     # Move windows between monitors
     ctrl-alt-shift-left = 'move-node-to-monitor left'
     ctrl-alt-shift-right = 'move-node-to-monitor right'
