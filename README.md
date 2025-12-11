@@ -124,7 +124,7 @@ After installation, you'll have access to these commands:
 
 ### Themes
 
-Makaron includes twenty beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com)):
+Makaron includes twenty-two beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), and COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic)):
 
 <p align="center">
   <img src="docs/makaron-02.png" alt="Catppuccin Latte" width="49%" />
@@ -157,6 +157,8 @@ Makaron includes twenty beautiful themes that change the colors of your UI and w
 18. **Underwater Light** - Ocean-inspired light theme
 19. **Verdant Dark** - Lush green dark theme
 20. **Verdant Light** - Fresh green light theme
+21. **COSMIC Dark** - Pop!_OS COSMIC-inspired dark theme with teal accents
+22. **COSMIC Light** - Pop!_OS COSMIC-inspired light theme with teal accents
 
 Switch themes instantly with:
 
@@ -181,6 +183,8 @@ makaron-theme-underwater-dark       # Deep ocean dark
 makaron-theme-underwater-light      # Ocean light
 makaron-theme-verdant-dark          # Lush green dark
 makaron-theme-verdant-light         # Fresh green light
+makaron-theme-cosmic-dark           # COSMIC teal dark
+makaron-theme-cosmic-light          # COSMIC teal light
 ```
 
 Each theme includes:

@@ -1,0 +1,22 @@
+#!/bin/bash
+# COSMIC Light color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xffF6F9FC
+export BAR_BACKGROUND_COLOR=0xffF6F9FC
+
+# Default item colors
+export ICON_COLOR=0xff191F27
+export LABEL_COLOR=0xff191F27
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff616975
+export SPACE_LABEL_COLOR=0xff616975
+export SPACE_BACKGROUND_COLOR=0xffD0D7DE
+export SPACE_BORDER_COLOR=0xffD0D7DE
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xff191F27
+export SPACE_FOCUSED_LABEL_COLOR=0xff191F27
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xffEFF3F7
+export SPACE_FOCUSED_BORDER_COLOR=0xff5AD4C4

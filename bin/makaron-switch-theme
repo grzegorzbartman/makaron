@@ -85,6 +85,12 @@ get_ghostty_theme_mapping() {
         underwater-light)
             echo "Nord Light|Nord Light"
             ;;
+        cosmic-dark)
+            echo "Nord|Nord Light"
+            ;;
+        cosmic-light)
+            echo "Nord Light|Nord Light"
+            ;;
         *)
             # Fallback for unknown themes
             echo "TokyoNight Storm|TokyoNight Day"

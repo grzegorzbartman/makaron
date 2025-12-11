@@ -208,7 +208,15 @@ killall ServiceName 2>/dev/null || true
 exec makaron-switch-theme <name>
 ```
 
-3. Update `README.md` with theme name and command.
+3. Add Ghostty theme mapping in `bin/makaron-switch-theme` function `get_ghostty_theme_mapping()`:
+```bash
+        <theme-name>)
+            echo "Ghostty Dark Theme|Ghostty Light Theme"
+            ;;
+```
+   Available Ghostty themes: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest, Kanagawa, Rosé Pine, Flexoki Light.
+
+4. Update `README.md` with theme name and command.
 
 ---
 
