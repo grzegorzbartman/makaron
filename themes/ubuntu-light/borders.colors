@@ -1,0 +1,6 @@
+#!/bin/bash
+# Ubuntu Light color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xffE95420
+export INACTIVE_BORDER_COLOR=0xffAEA79F
+export BORDER_WIDTH=5.0

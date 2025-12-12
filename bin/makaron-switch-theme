@@ -91,6 +91,12 @@ get_ghostty_theme_mapping() {
         cosmic-light)
             echo "Nord Light|Nord Light"
             ;;
+        ubuntu-dark)
+            echo "Catppuccin Mocha|Catppuccin Latte"
+            ;;
+        ubuntu-light)
+            echo "Catppuccin Latte|Catppuccin Latte"
+            ;;
         *)
             # Fallback for unknown themes
             echo "TokyoNight Storm|TokyoNight Day"

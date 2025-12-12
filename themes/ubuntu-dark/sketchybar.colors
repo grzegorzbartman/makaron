@@ -1,0 +1,22 @@
+#!/bin/bash
+# Ubuntu Dark color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff2C001E
+export BAR_BACKGROUND_COLOR=0xff2C001E
+
+# Default item colors
+export ICON_COLOR=0xffFFFFFF
+export LABEL_COLOR=0xffFFFFFF
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffAEA79F
+export SPACE_LABEL_COLOR=0xffAEA79F
+export SPACE_BACKGROUND_COLOR=0xff77216F
+export SPACE_BORDER_COLOR=0x0077216F
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffFFFFFF
+export SPACE_FOCUSED_LABEL_COLOR=0xffFFFFFF
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff2C001E
+export SPACE_FOCUSED_BORDER_COLOR=0xffE95420
