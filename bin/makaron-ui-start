@@ -76,8 +76,13 @@ fi
 # Hide Dock (enable autohide)
 echo "  Hiding macOS Dock..."
 defaults write com.apple.dock autohide -bool true
-killall Dock
 echo "  ✓ Dock hidden (autohide enabled)"
+
+# Enable Mission Control grouping by application (AeroSpace fix)
+echo "  Enabling window grouping by application..."
+defaults write com.apple.dock expose-group-apps -bool true
+killall Dock
+echo "  ✓ Window grouping enabled (required for AeroSpace)"
 
 # Disable Three Finger Drag (enable Mission Control gesture)
 echo "  Disabling Three Finger Drag (enabling Mission Control gesture)..."

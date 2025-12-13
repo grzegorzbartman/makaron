@@ -54,8 +54,13 @@ fi
 # Show Dock (disable autohide)
 echo "  Showing macOS Dock..."
 defaults write com.apple.dock autohide -bool false
-killall Dock
 echo "  ✓ Dock visible"
+
+# Disable Mission Control grouping by application (restore default)
+echo "  Restoring default window grouping..."
+defaults write com.apple.dock expose-group-apps -bool false
+killall Dock
+echo "  ✓ Window grouping restored to default"
 
 # Enable Three Finger Drag (disable Mission Control gesture)
 echo "  Enabling Three Finger Drag..."
