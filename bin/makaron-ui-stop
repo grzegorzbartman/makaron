@@ -32,10 +32,17 @@ fi
 
 # Stop Borders (process and service)
 if command -v borders &> /dev/null; then
-    if pgrep -f "borders" > /dev/null; then
+    if pgrep -x "borders" > /dev/null; then
         echo "  Stopping Borders..."
-        killall borders 2>/dev/null
+        killall borders 2>/dev/null || true
         brew services stop borders 2>/dev/null || true
+        # Wait for process to actually terminate
+        sleep 0.5
+        if pgrep -x "borders" > /dev/null; then
+            echo "  ⚠️  Borders still running, forcing..."
+            killall -9 borders 2>/dev/null || true
+            sleep 0.5
+        fi
         echo "  ✓ Borders stopped"
     else
         echo "  ⚠️  Borders not running"
