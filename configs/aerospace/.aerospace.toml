@@ -299,3 +299,12 @@ run = ["move-node-to-workspace Q"]
 [[on-window-detected]]
 if.app-id = "com.todoist.mac.Todoist"
 run = ["move-node-to-workspace Q"]
+
+# Floating windows by default: AI assistants
+[[on-window-detected]]
+if.app-id = "com.openai.chat"
+run = "layout floating"
+
+[[on-window-detected]]
+if.app-id = "com.anthropic.claudefordesktop"
+run = "layout floating"
