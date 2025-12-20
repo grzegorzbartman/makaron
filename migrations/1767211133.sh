@@ -10,6 +10,7 @@ echo "Running migration: Restore default file extension visibility"
 
 defaults write NSGlobalDomain AppleShowAllExtensions -bool false
 killall Finder 2>/dev/null || true
+killall Spotlight 2>/dev/null || true
 
 echo "Migration completed successfully"
 
