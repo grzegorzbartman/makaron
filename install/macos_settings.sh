@@ -17,7 +17,7 @@ configure_keyboard() {
 configure_finder() {
     echo "Configuring enhanced Finder settings..."
     defaults write com.apple.finder AppleShowAllFiles YES
-    defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+    defaults write NSGlobalDomain AppleShowAllExtensions -bool false
     defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
     defaults write com.apple.finder ShowPathbar -bool true
     defaults write com.apple.finder ShowStatusBar -bool true
