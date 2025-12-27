@@ -1,0 +1,215 @@
+#!/bin/bash
+# Shared helper functions for Makaron UI scripts
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+
+# --- AeroSpace ---
+start_aerospace() {
+    if command -v aerospace &> /dev/null; then
+        if ! pgrep -f "AeroSpace" > /dev/null; then
+            echo "  Starting AeroSpace..."
+            open -a AeroSpace
+            sleep 2
+        fi
+        echo "  Enabling AeroSpace..."
+        aerospace enable on
+        aerospace reload-config
+        echo "  ✓ AeroSpace enabled and config reloaded"
+    else
+        echo "  ⚠️  AeroSpace not installed"
+    fi
+}
+
+stop_aerospace() {
+    if command -v aerospace &> /dev/null; then
+        if pgrep -f "AeroSpace" > /dev/null; then
+            echo "  Disabling AeroSpace..."
+            aerospace enable off
+            echo "  ✓ AeroSpace disabled"
+        else
+            echo "  ⚠️  AeroSpace not running"
+        fi
+    else
+        echo "  ⚠️  AeroSpace not installed"
+    fi
+}
+
+# --- SketchyBar ---
+start_sketchybar() {
+    if command -v sketchybar &> /dev/null; then
+        if ! pgrep -f "sketchybar" > /dev/null; then
+            echo "  Starting SketchyBar..."
+            brew services start sketchybar
+            sleep 2
+        fi
+        echo "  Reloading SketchyBar config..."
+        sketchybar --reload
+        echo "  ✓ SketchyBar started and config reloaded"
+    else
+        echo "  ⚠️  SketchyBar not installed"
+    fi
+}
+
+stop_sketchybar() {
+    if command -v sketchybar &> /dev/null; then
+        if brew services list | grep -q "sketchybar.*started"; then
+            echo "  Stopping SketchyBar..."
+            brew services stop sketchybar 2>/dev/null
+            echo "  ✓ SketchyBar stopped"
+        else
+            echo "  ⚠️  SketchyBar not running"
+        fi
+    else
+        echo "  ⚠️  SketchyBar not installed"
+    fi
+}
+
+# --- Borders ---
+start_borders() {
+    if command -v borders &> /dev/null; then
+        local THEME_DIR="$MAKARON_PATH/current-theme"
+        if [ -f "$THEME_DIR/borders.colors" ]; then
+            source "$THEME_DIR/borders.colors"
+        else
+            export ACTIVE_BORDER_COLOR=0xff7aa2f7
+            export INACTIVE_BORDER_COLOR=0xff292e42
+            export BORDER_WIDTH=2.0
+        fi
+        echo "  Starting Borders with theme colors..."
+        brew services stop borders 2>/dev/null || true
+        sleep 0.5
+        borders active_color=$ACTIVE_BORDER_COLOR inactive_color=$INACTIVE_BORDER_COLOR width=$BORDER_WIDTH &
+        echo "  ✓ Borders started with theme colors"
+    else
+        echo "  ⚠️  Borders not installed"
+    fi
+}
+
+stop_borders() {
+    if command -v borders &> /dev/null; then
+        if pgrep -x "borders" > /dev/null; then
+            echo "  Stopping Borders..."
+            killall borders 2>/dev/null || true
+            brew services stop borders 2>/dev/null || true
+            sleep 0.5
+            if pgrep -x "borders" > /dev/null; then
+                echo "  ⚠️  Borders still running, forcing..."
+                killall -9 borders 2>/dev/null || true
+                sleep 0.5
+            fi
+            echo "  ✓ Borders stopped"
+        else
+            echo "  ⚠️  Borders not running"
+        fi
+    else
+        echo "  ⚠️  Borders not installed"
+    fi
+}
+
+# --- Calendar Plugin ---
+compile_calendar_plugin() {
+    local CALENDAR_SOURCE_DIR="$MAKARON_PATH/configs/sketchybar/plugins/calendar"
+    if [ -f "$CALENDAR_SOURCE_DIR/calendar_events.swift" ] && [ ! -f "$CALENDAR_SOURCE_DIR/calendar_events" ]; then
+        echo "  Compiling calendar plugin..."
+        cd "$CALENDAR_SOURCE_DIR"
+        if swiftc -o calendar_events calendar_events.swift 2>/dev/null; then
+            chmod +x calendar_events
+            echo "  ✓ Calendar plugin compiled"
+        else
+            echo "  ⚠️  Failed to compile calendar plugin"
+        fi
+        cd - > /dev/null
+    fi
+}
+
+# --- macOS Settings ---
+apply_macos_full_settings() {
+    echo "  Hiding macOS Dock..."
+    defaults write com.apple.dock autohide -bool true
+    echo "  ✓ Dock hidden (autohide enabled)"
+
+    echo "  Enabling window grouping by application..."
+    defaults write com.apple.dock expose-group-apps -bool true
+    killall Dock
+    echo "  ✓ Window grouping enabled (required for AeroSpace)"
+
+    echo "  Disabling Three Finger Drag (enabling Mission Control gesture)..."
+    defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
+    defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
+    echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
+
+    echo "  Hiding menu bar (auto-hide always)..."
+    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
+    defaults write -g _HIHideMenuBar -bool true
+    defaults write -g AppleMenuBarVisibleInFullscreen -bool false
+    killall ControlCenter 2>/dev/null || true
+    killall SystemUIServer 2>/dev/null || true
+    echo "  ✓ Menu bar set to auto-hide (Always)"
+
+    echo ""
+    echo "  ℹ️  Please enable 'Reduce transparency' manually:"
+    echo "     System Settings → Accessibility → Display → Reduce transparency (ON)"
+    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    sleep 1
+}
+
+apply_macos_minimal_settings() {
+    echo "  Showing macOS Dock..."
+    defaults write com.apple.dock autohide -bool false
+    echo "  ✓ Dock visible (always shown)"
+
+    echo "  Enabling window grouping by application..."
+    defaults write com.apple.dock expose-group-apps -bool true
+    killall Dock
+    echo "  ✓ Window grouping enabled (required for AeroSpace)"
+
+    echo "  Disabling Three Finger Drag (enabling Mission Control gesture)..."
+    defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
+    defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
+    echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
+
+    echo "  Showing menu bar (auto-hide off)..."
+    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
+    defaults write -g _HIHideMenuBar -bool false
+    defaults write -g AppleMenuBarVisibleInFullscreen -bool true
+    killall ControlCenter 2>/dev/null || true
+    killall SystemUIServer 2>/dev/null || true
+    echo "  ✓ Menu bar visible (Never auto-hide)"
+
+    echo ""
+    echo "  ℹ️  Please disable 'Reduce transparency' manually:"
+    echo "     System Settings → Accessibility → Display → Reduce transparency (OFF)"
+    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    sleep 1
+}
+
+restore_macos_defaults() {
+    echo "  Showing macOS Dock..."
+    defaults write com.apple.dock autohide -bool false
+    echo "  ✓ Dock visible"
+
+    echo "  Restoring default window grouping..."
+    defaults write com.apple.dock expose-group-apps -bool false
+    killall Dock
+    echo "  ✓ Window grouping restored to default"
+
+    echo "  Enabling Three Finger Drag..."
+    defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
+    defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
+    echo "  ✓ Three Finger Drag enabled"
+
+    echo "  Showing menu bar (auto-hide off)..."
+    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
+    defaults write -g _HIHideMenuBar -bool false
+    defaults write -g AppleMenuBarVisibleInFullscreen -bool true
+    killall ControlCenter 2>/dev/null || true
+    killall SystemUIServer 2>/dev/null || true
+    echo "  ✓ Menu bar visible (Never auto-hide)"
+
+    echo ""
+    echo "  ℹ️  Please disable 'Reduce transparency' manually:"
+    echo "     System Settings → Accessibility → Display → Reduce transparency (OFF)"
+    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    sleep 1
+}
+

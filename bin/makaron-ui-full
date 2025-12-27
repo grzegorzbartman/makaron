@@ -1,0 +1,21 @@
+#!/bin/bash
+# Start full Makaron UI: AeroSpace + SketchyBar + Borders
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+echo "🚀 Starting Makaron UI (full mode)..."
+echo ""
+
+stop_borders
+stop_sketchybar
+
+start_aerospace
+start_sketchybar
+compile_calendar_plugin
+start_borders
+apply_macos_full_settings
+
+echo ""
+echo "✅ Full UI started. Use 'makaron-ui-stop' to disable or 'makaron-ui-minimal' for minimal mode."
+

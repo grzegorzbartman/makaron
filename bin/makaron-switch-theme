@@ -97,6 +97,12 @@ get_ghostty_theme_mapping() {
         ubuntu-light)
             echo "Catppuccin Latte|Catppuccin Latte"
             ;;
+        macos-default-dark)
+            echo "TokyoNight Storm|TokyoNight Day"
+            ;;
+        macos-default-light)
+            echo "TokyoNight Day|TokyoNight Day"
+            ;;
         *)
             # Fallback for unknown themes
             echo "TokyoNight Storm|TokyoNight Day"
@@ -218,8 +224,8 @@ fi
 
 # Set wallpaper if backgrounds directory exists
 if [ -d "$THEME_DIR/backgrounds" ]; then
-    # Use the first image file found in backgrounds/
-    WALLPAPER=$(find "$THEME_DIR/backgrounds" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \) | sort | head -n 1)
+    # Use the first image file found in backgrounds/ (including .heic for dynamic wallpapers)
+    WALLPAPER=$(find "$THEME_DIR/backgrounds" -type f \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.heic" \) | sort | head -n 1)
     if [ -n "$WALLPAPER" ]; then
         echo "Setting wallpaper..."
         osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$WALLPAPER\""

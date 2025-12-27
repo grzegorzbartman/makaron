@@ -1,89 +1,16 @@
 #!/bin/bash
 # Stop AeroSpace, SketchyBar, and Borders
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
 echo "🛑 Stopping Makaron UI components..."
 echo ""
 
-# Disable AeroSpace (doesn't quit, just disables window management)
-if command -v aerospace &> /dev/null; then
-    if pgrep -f "AeroSpace" > /dev/null; then
-        echo "  Disabling AeroSpace..."
-        aerospace enable off
-        echo "  ✓ AeroSpace disabled"
-    else
-        echo "  ⚠️  AeroSpace not running"
-    fi
-else
-    echo "  ⚠️  AeroSpace not installed"
-fi
-
-# Stop SketchyBar service
-if command -v sketchybar &> /dev/null; then
-    if brew services list | grep -q "sketchybar.*started"; then
-        echo "  Stopping SketchyBar..."
-        brew services stop sketchybar 2>/dev/null
-        echo "  ✓ SketchyBar stopped"
-    else
-        echo "  ⚠️  SketchyBar not running"
-    fi
-else
-    echo "  ⚠️  SketchyBar not installed"
-fi
-
-# Stop Borders (process and service)
-if command -v borders &> /dev/null; then
-    if pgrep -x "borders" > /dev/null; then
-        echo "  Stopping Borders..."
-        killall borders 2>/dev/null || true
-        brew services stop borders 2>/dev/null || true
-        # Wait for process to actually terminate
-        sleep 0.5
-        if pgrep -x "borders" > /dev/null; then
-            echo "  ⚠️  Borders still running, forcing..."
-            killall -9 borders 2>/dev/null || true
-            sleep 0.5
-        fi
-        echo "  ✓ Borders stopped"
-    else
-        echo "  ⚠️  Borders not running"
-    fi
-else
-    echo "  ⚠️  Borders not installed"
-fi
-
-# Show Dock (disable autohide)
-echo "  Showing macOS Dock..."
-defaults write com.apple.dock autohide -bool false
-echo "  ✓ Dock visible"
-
-# Disable Mission Control grouping by application (restore default)
-echo "  Restoring default window grouping..."
-defaults write com.apple.dock expose-group-apps -bool false
-killall Dock
-echo "  ✓ Window grouping restored to default"
-
-# Enable Three Finger Drag (disable Mission Control gesture)
-echo "  Enabling Three Finger Drag..."
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true 2>/dev/null
-echo "  ✓ Three Finger Drag enabled"
-
-# Enable Transparency (disable Reduce Transparency)
-echo "  Enabling macOS transparency..."
-if defaults write com.apple.universalaccess reduceTransparency -bool false 2>/dev/null; then
-    echo "  ✓ Transparency enabled"
-else
-    echo "  ℹ️  Transparency: Please disable manually in System Settings"
-    echo "     System Settings → Accessibility → Display → Reduce transparency (turn OFF)"
-fi
-
-# Menu bar setting - manual configuration needed in macOS Sequoia 15+
-echo "  ℹ️  Menu Bar: Please set manually in System Settings"
-echo "     Opening System Settings > Desktop & Dock..."
-echo "     Set 'Automatically hide and show the menu bar' to: Never"
-open "x-apple.systempreferences:com.apple.preference.dock"
-sleep 1
+stop_aerospace
+stop_sketchybar
+stop_borders
+restore_macos_defaults
 
 echo ""
-echo "✅ UI components stopped. Use 'makaron-ui-start' to re-enable."
-
+echo "✅ UI components stopped. Use 'makaron-ui-full' or 'makaron-ui-minimal' to re-enable."

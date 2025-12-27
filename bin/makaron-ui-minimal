@@ -1,0 +1,47 @@
+#!/bin/bash
+# Start minimal Makaron UI: only AeroSpace (no SketchyBar, no Borders)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+echo "🚀 Starting Makaron UI (minimal mode)..."
+echo ""
+
+stop_sketchybar
+stop_borders
+
+start_aerospace
+apply_macos_minimal_settings
+
+# Detect system appearance and set wallpaper (without reloading SketchyBar/Borders)
+echo "  Detecting system appearance..."
+DARK_MODE=$(osascript -e 'tell application "System Events" to tell appearance preferences to get dark mode' 2>/dev/null)
+
+if [ "$DARK_MODE" = "true" ]; then
+    THEME_NAME="macos-default-dark"
+    echo "  System is in Dark Mode, applying $THEME_NAME wallpaper..."
+else
+    THEME_NAME="macos-default-light"
+    echo "  System is in Light Mode, applying $THEME_NAME wallpaper..."
+fi
+
+# Update current-theme symlink
+THEME_DIR="$MAKARON_PATH/themes/$THEME_NAME"
+CURRENT_THEME_LINK="$MAKARON_PATH/current-theme"
+if [ -d "$THEME_DIR" ]; then
+    rm -f "$CURRENT_THEME_LINK"
+    ln -s "$THEME_DIR" "$CURRENT_THEME_LINK"
+fi
+
+# Set wallpaper to macOS system default (Sonoma Horizon - dynamic wallpaper)
+SYSTEM_WALLPAPER="/System/Library/Desktop Pictures/.wallpapers/Sonoma Horizon/Sonoma Horizon.heic"
+if [ -f "$SYSTEM_WALLPAPER" ]; then
+    osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$SYSTEM_WALLPAPER\"" 2>/dev/null
+    echo "  ✓ Wallpaper set to Sonoma Horizon (system default)"
+else
+    echo "  ⚠️  System wallpaper not found, skipping"
+fi
+
+echo ""
+echo "✅ Minimal UI started (AeroSpace only). Use 'makaron-ui-full' for full mode or 'makaron-ui-stop' to disable."
