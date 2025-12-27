@@ -11,6 +11,7 @@ stop_aerospace
 stop_sketchybar
 stop_borders
 restore_macos_defaults
+save_ui_mode "stop"
 
 echo ""
 echo "✅ UI components stopped. Use 'makaron-ui-full' or 'makaron-ui-minimal' to re-enable."

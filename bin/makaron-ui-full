@@ -15,6 +15,7 @@ start_sketchybar
 compile_calendar_plugin
 start_borders
 apply_macos_full_settings
+save_ui_mode "full"
 
 echo ""
 echo "✅ Full UI started. Use 'makaron-ui-stop' to disable or 'makaron-ui-minimal' for minimal mode."

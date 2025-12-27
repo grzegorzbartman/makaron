@@ -13,6 +13,7 @@ stop_borders
 
 start_aerospace
 apply_macos_minimal_settings
+save_ui_mode "minimal"
 
 # Detect system appearance and set wallpaper (without reloading SketchyBar/Borders)
 echo "  Detecting system appearance..."

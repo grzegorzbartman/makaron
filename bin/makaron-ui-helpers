@@ -2,6 +2,47 @@
 # Shared helper functions for Makaron UI scripts
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
+
+# --- UI Mode State ---
+save_ui_mode() {
+    local mode="$1"
+    mkdir -p "$(dirname "$UI_MODE_FILE")"
+    echo "$mode" > "$UI_MODE_FILE"
+}
+
+get_ui_mode() {
+    if [ -f "$UI_MODE_FILE" ]; then
+        cat "$UI_MODE_FILE"
+    else
+        echo "full"  # default
+    fi
+}
+
+reload_current_ui() {
+    local mode=$(get_ui_mode)
+    case "$mode" in
+        full)
+            echo "Reloading full UI..."
+            if command -v aerospace &> /dev/null; then
+                aerospace reload-config
+            fi
+            if command -v sketchybar &> /dev/null && pgrep -f "sketchybar" > /dev/null; then
+                sketchybar --reload
+            fi
+            start_borders
+            ;;
+        minimal)
+            echo "Reloading minimal UI..."
+            if command -v aerospace &> /dev/null; then
+                aerospace reload-config
+            fi
+            ;;
+        stop)
+            echo "UI is stopped, skipping reload."
+            ;;
+    esac
+}
 
 # --- AeroSpace ---
 start_aerospace() {
