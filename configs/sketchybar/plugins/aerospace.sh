@@ -90,12 +90,11 @@ sketchybar --set "$NAME" \
   icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}" \
   label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"
 else
-# Inactive workspace - theme colors
+# Inactive workspace - theme colors (no border)
 sketchybar --set "$NAME" \
   background.drawing=on \
   background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" \
-  background.border_color="${SPACE_BORDER_COLOR:-0xff3b4261}" \
-  background.border_width=1 \
+  background.border_width=0 \
   icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
   label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
 fi
