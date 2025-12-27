@@ -34,13 +34,13 @@ if [ -d "$THEME_DIR" ]; then
     ln -s "$THEME_DIR" "$CURRENT_THEME_LINK"
 fi
 
-# Set wallpaper to macOS system default (Sonoma Horizon - dynamic wallpaper)
-SYSTEM_WALLPAPER="/System/Library/Desktop Pictures/.wallpapers/Sonoma Horizon/Sonoma Horizon.heic"
-if [ -f "$SYSTEM_WALLPAPER" ]; then
-    osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$SYSTEM_WALLPAPER\"" 2>/dev/null
-    echo "  ✓ Wallpaper set to Sonoma Horizon (system default)"
+# Set wallpaper from theme
+THEME_WALLPAPER="$THEME_DIR/backgrounds/wallpaper.jpg"
+if [ -f "$THEME_WALLPAPER" ]; then
+    osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$THEME_WALLPAPER\"" 2>/dev/null
+    echo "  ✓ Wallpaper set to Tahoe ($THEME_NAME)"
 else
-    echo "  ⚠️  System wallpaper not found, skipping"
+    echo "  ⚠️  Theme wallpaper not found, skipping"
 fi
 
 echo ""
