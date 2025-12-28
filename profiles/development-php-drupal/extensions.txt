@@ -6,6 +6,8 @@ anan.jetbrains-darcula-theme
 ardonplay.vscode-jetbrains-icon-theme
 
 # PHP
+# NOTE: Do NOT install DEVSENSE.phptools-vscode - uses 7GB+ RAM
+# Use Intelephense instead (lightweight, ~100-500MB)
 bmewburn.vscode-intelephense-client
 neilbrayfield.php-docblocker
 valeryanm.vscode-phpsab

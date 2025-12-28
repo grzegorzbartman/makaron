@@ -26,7 +26,6 @@
   },
   "files.trimTrailingWhitespace": true,
   "files.restoreUndoStack": false,
-  "files.insertFinalNewline": true,
   "html.format.enable": true,
   "html.format.wrapLineLength": 80,
   "telemetry.telemetryLevel": "off",
@@ -43,6 +42,8 @@
     "sysvsem", "sysvshm", "tidy", "tokenizer", "xml", "xmlreader", "xmlrpc",
     "xmlwriter", "xsl", "Zend OPcache", "zip", "zlib"
   ],
+  "php.suggest.basic": false,
+  "intelephense.files.maxSize": 1000000,
   "intelephense.environment.includePaths": [
     "vendor/",
     "web/core/",
