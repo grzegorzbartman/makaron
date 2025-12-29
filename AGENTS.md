@@ -33,6 +33,18 @@ install_formula_critical "formula" "Display Name" "command-to-check"
 
 **Homebrew paths:** Always use `$(brew --prefix)` instead of hardcoded paths like `/opt/homebrew` - supports Apple Silicon, Intel, and local installs.
 
+### Swift Binaries (`src/`)
+Some components require compiled Swift binaries for performance or API access:
+
+```bash
+# Compile all Swift sources
+swiftc -O -o bin/makaron-memory-stats src/memory_stats.swift
+```
+
+- Source files: `src/*.swift`
+- Compiled binaries: `bin/` (gitignored)
+- Compilation runs automatically during `install/desktop/sketchybar.sh`
+
 ---
 
 ## Directory Structure
@@ -66,6 +78,7 @@ makaron/
 │       ├── all.sh
 │       └── ghostty.sh      # (with config setup)
 ├── migrations/             # Timestamped migration scripts
+├── src/                    # Swift source files (compiled to bin/)
 ├── themes/                 # Theme definitions
 │   └── <name>/
 │       ├── sketchybar.colors
