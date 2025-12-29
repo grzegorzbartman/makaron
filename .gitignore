@@ -11,3 +11,6 @@
 .env.production
 tmp
 .playwright-mcp/
+
+# Compiled binaries (built from src/)
+bin/makaron-memory-stats
