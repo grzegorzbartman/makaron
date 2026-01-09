@@ -13,3 +13,5 @@ if command -v claude &>/dev/null; then
 else
     install_cask "claude-code" "Claude Code"
 fi
+
+install_formula "anomalyco/tap/opencode" "OpenCode" "opencode"

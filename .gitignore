@@ -14,3 +14,6 @@ tmp
 
 # Compiled binaries (built from src/)
 bin/makaron-memory-stats
+
+# OpenCode planning directory
+.opencode/

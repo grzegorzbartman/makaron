@@ -49,6 +49,7 @@ This will:
 - **Cursor** - AI-powered code editor
 - **ChatGPT** - AI assistant desktop app
 - **Codex** - AI code assistant
+- **OpenCode** - AI coding assistant CLI
 
 ### Development Tools
 - **Bruno** - Open-source API client (Postman alternative)
