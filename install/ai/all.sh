@@ -15,3 +15,4 @@ else
 fi
 
 install_formula "anomalyco/tap/opencode" "OpenCode" "opencode"
+install_cask "opencode-desktop" "OpenCode"
