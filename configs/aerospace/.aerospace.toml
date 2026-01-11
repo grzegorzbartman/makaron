@@ -302,5 +302,9 @@ run = ["move-node-to-workspace Q"]
 
 [[on-window-detected]]
 if.app-id = "com.todoist.mac.Todoist"
+run = ["move-node-to-workspace 1"]
+
+[[on-window-detected]]
+if.app-id = "com.apple.iCal"
 run = ["move-node-to-workspace Q"]
 
