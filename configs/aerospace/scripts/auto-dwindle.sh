@@ -6,7 +6,7 @@
 # - 3 windows: master 50% + stack (2 windows vertically)
 # - 4+ windows: equal quadrants (each window 25%)
 
-sleep 0.1
+sleep 0.05
 COUNT=$(aerospace list-windows --workspace focused --count 2>/dev/null)
 [ -z "$COUNT" ] && exit 0
 

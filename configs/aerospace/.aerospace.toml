@@ -255,7 +255,7 @@ end tell'
 
 # Auto dwindle layout (Hyprland-style) for all workspaces
 [[on-window-detected]]
-run = ['exec-and-forget $HOME/.local/share/makaron/bin/makaron-auto-dwindle']
+run = ['exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/auto-dwindle.sh']
 
 # App-specific workspace assignments
 
