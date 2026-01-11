@@ -221,6 +221,7 @@ tell application "PhpStorm"
     activate
 end tell'
 '''
+    ctrl-alt-s = 'exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/startup-apps.sh'
 
     # Multi-monitor management
     # Quick focus switching between monitors
