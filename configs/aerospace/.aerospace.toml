@@ -253,6 +253,10 @@ end tell'
     up = 'volume up'
     shift-down = ['volume set 0', 'mode main']
 
+# Auto dwindle layout (Hyprland-style) for all workspaces
+[[on-window-detected]]
+run = ['exec-and-forget $HOME/.local/share/makaron/bin/makaron-auto-dwindle']
+
 # App-specific workspace assignments
 
 # Workspace 2: Code Editor
