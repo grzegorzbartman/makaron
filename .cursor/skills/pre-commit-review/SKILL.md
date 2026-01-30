@@ -1,3 +1,9 @@
+---
+name: pre-commit-review
+description: Pre commit review
+disable-model-invocation: true
+---
+
 # Pre commit review
 
 
