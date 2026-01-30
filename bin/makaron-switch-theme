@@ -73,6 +73,9 @@ get_ghostty_theme_mapping() {
         osaka-jade|verdant-dark|verdant-light)
             echo "Everforest Dark Hard|Everforest Light Med"
             ;;
+        miasma)
+            echo "Gruvbox Dark|Gruvbox Light"
+            ;;
         ristretto)
             echo "Gruvbox Dark|Gruvbox Light"
             ;;

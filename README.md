@@ -125,7 +125,7 @@ After installation, you'll have access to these commands:
 
 ### Themes
 
-Makaron includes twenty-four beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic), and Ubuntu themes with official Ubuntu 25.10 wallpapers):
+Makaron includes twenty-five beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic), and Ubuntu themes with official Ubuntu 25.10 wallpapers):
 
 <p align="center">
   <img src="docs/makaron-02.png" alt="Catppuccin Latte" width="49%" />
@@ -162,6 +162,7 @@ Makaron includes twenty-four beautiful themes that change the colors of your UI 
 22. **COSMIC Light** - Pop!_OS COSMIC-inspired light theme with teal accents
 23. **Ubuntu Dark** - Official Ubuntu dark theme with aubergine colors
 24. **Ubuntu Light** - Official Ubuntu light theme
+25. **Miasma** - Dark organic theme with olive green accents
 
 Switch themes instantly with:
 
@@ -190,6 +191,7 @@ makaron-theme-cosmic-dark           # COSMIC teal dark
 makaron-theme-cosmic-light          # COSMIC teal light
 makaron-theme-ubuntu-dark           # Ubuntu aubergine dark
 makaron-theme-ubuntu-light          # Ubuntu light
+makaron-theme-miasma                # Dark organic olive
 ```
 
 Each theme includes:

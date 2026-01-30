@@ -1,0 +1,7 @@
+#!/bin/bash
+# Miasma color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff78824b
+export INACTIVE_BORDER_COLOR=0xff333333
+export BORDER_WIDTH=5.0
+
