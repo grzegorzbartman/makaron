@@ -3,7 +3,6 @@
 # Desktop tools
 install_cask "alt-tab" "AltTab"
 install_cask "command-x" "Command X"
-install_cask "dozer" "Dozer"
 install_cask "stats" "Stats"
 
 # Components with additional config

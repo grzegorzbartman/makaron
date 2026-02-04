@@ -2,7 +2,7 @@
 
 # Migration: Install new development tools, system tools, and UI applications
 # Adds installation scripts for node/yarn, pipx, rbenv, neovim, tmux, btop,
-# platformsh-cli, dozer, codex, sublime-text, chatgpt for existing users
+# platformsh-cli, codex, sublime-text, chatgpt for existing users
 
 set -e
 
@@ -70,13 +70,6 @@ else
 fi
 
 # Install UI applications
-if [ -f "$MAKARON_PATH/install/ui/dozer.sh" ]; then
-    echo "Installing Dozer..."
-    source "$MAKARON_PATH/install/ui/dozer.sh"
-else
-    echo "Dozer installation script not found, skipping"
-fi
-
 if [ -f "$MAKARON_PATH/install/ui/codex.sh" ]; then
     echo "Installing Codex..."
     source "$MAKARON_PATH/install/ui/codex.sh"
