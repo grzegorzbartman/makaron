@@ -311,3 +311,12 @@ run = ["move-node-to-workspace 1"]
 if.app-id = "com.apple.iCal"
 run = ["move-node-to-workspace Q"]
 
+# Floating by default
+[[on-window-detected]]
+if.app-id = "com.apple.finder"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.apple.Preview"
+run = ["layout floating"]
+
