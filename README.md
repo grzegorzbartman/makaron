@@ -72,7 +72,7 @@ This will:
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor
 - **Neovim** - Modern Vim-based text editor
-- **Platform.sh CLI** - Platform.sh command-line tool
+- **Upsun CLI** - Upsun (Platform.sh) command-line tool
 - **tmux** - Terminal multiplexer
 
 ### System Configuration
