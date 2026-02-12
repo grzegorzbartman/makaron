@@ -164,6 +164,36 @@ compile_calendar_plugin() {
 }
 
 # --- macOS Settings ---
+
+# Toggle menu bar autohide by setting opposite value first, then target.
+# macOS requires this "toggle" to actually apply the change.
+_set_menubar_autohide() {
+    local hide="$1"  # true = always hide, false = never hide
+    if [ "$hide" = "true" ]; then
+        # First set opposite (show), restart, then set target (hide)
+        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
+        defaults write -g _HIHideMenuBar -bool false
+        killall ControlCenter 2>/dev/null || true
+        killall SystemUIServer 2>/dev/null || true
+        sleep 1
+        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
+        defaults write -g _HIHideMenuBar -bool true
+        defaults write -g AppleMenuBarVisibleInFullscreen -bool false
+    else
+        # First set opposite (hide), restart, then set target (show)
+        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
+        defaults write -g _HIHideMenuBar -bool true
+        killall ControlCenter 2>/dev/null || true
+        killall SystemUIServer 2>/dev/null || true
+        sleep 1
+        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
+        defaults write -g _HIHideMenuBar -bool false
+        defaults write -g AppleMenuBarVisibleInFullscreen -bool true
+    fi
+    killall ControlCenter 2>/dev/null || true
+    killall SystemUIServer 2>/dev/null || true
+}
+
 apply_macos_full_settings() {
     echo "  Hiding macOS Dock..."
     defaults write com.apple.dock autohide -bool true
@@ -180,17 +210,12 @@ apply_macos_full_settings() {
     echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
 
     echo "  Hiding menu bar (auto-hide always)..."
-    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
-    defaults write -g _HIHideMenuBar -bool true
-    defaults write -g AppleMenuBarVisibleInFullscreen -bool false
-    killall ControlCenter 2>/dev/null || true
-    killall SystemUIServer 2>/dev/null || true
+    _set_menubar_autohide true
     echo "  ✓ Menu bar set to auto-hide (Always)"
 
     echo ""
-    echo "  ℹ️  Please enable 'Reduce transparency' manually:"
-    echo "     System Settings → Accessibility → Display → Reduce transparency (ON)"
-    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    echo "  ℹ️  Opening menu bar settings to verify..."
+    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
     sleep 1
 }
 
@@ -210,17 +235,12 @@ apply_macos_minimal_settings() {
     echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
 
     echo "  Showing menu bar (auto-hide off)..."
-    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
-    defaults write -g _HIHideMenuBar -bool false
-    defaults write -g AppleMenuBarVisibleInFullscreen -bool true
-    killall ControlCenter 2>/dev/null || true
-    killall SystemUIServer 2>/dev/null || true
+    _set_menubar_autohide false
     echo "  ✓ Menu bar visible (Never auto-hide)"
 
     echo ""
-    echo "  ℹ️  Please disable 'Reduce transparency' manually:"
-    echo "     System Settings → Accessibility → Display → Reduce transparency (OFF)"
-    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    echo "  ℹ️  Opening menu bar settings to verify..."
+    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
     sleep 1
 }
 
@@ -240,17 +260,12 @@ restore_macos_defaults() {
     echo "  ✓ Three Finger Drag enabled"
 
     echo "  Showing menu bar (auto-hide off)..."
-    defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
-    defaults write -g _HIHideMenuBar -bool false
-    defaults write -g AppleMenuBarVisibleInFullscreen -bool true
-    killall ControlCenter 2>/dev/null || true
-    killall SystemUIServer 2>/dev/null || true
+    _set_menubar_autohide false
     echo "  ✓ Menu bar visible (Never auto-hide)"
 
     echo ""
-    echo "  ℹ️  Please disable 'Reduce transparency' manually:"
-    echo "     System Settings → Accessibility → Display → Reduce transparency (OFF)"
-    open "x-apple.systempreferences:com.apple.Accessibility-Settings.extension?Display"
+    echo "  ℹ️  Opening menu bar settings to verify..."
+    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
     sleep 1
 }
 
