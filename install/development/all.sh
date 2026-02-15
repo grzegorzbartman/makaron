@@ -15,4 +15,3 @@ install_cask "sequel-ace" "Sequel Ace"
 
 # Tools with additional setup
 source "$MAKARON_PATH/install/development/pipx.sh"
-source "$MAKARON_PATH/install/development/rbenv.sh"

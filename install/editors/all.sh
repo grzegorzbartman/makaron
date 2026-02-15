@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Editors - simple installs
-install_cask "phpstorm" "PhpStorm"
 install_cask "sublime-text" "Sublime Text"
 install_cask "visual-studio-code" "Visual Studio Code"
 install_cask "cursor" "Cursor"
