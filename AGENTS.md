@@ -330,3 +330,10 @@ Check `exec-on-workspace-change` in aerospace.toml, then `aerospace reload-confi
 ```bash
 sketchybar --reload
 ```
+
+### makaron-update Fails (Entry not uptodate / Local changes)
+If update fails due to git state, re-run the install script (it fetches latest and fixes skip-worktree):
+```bash
+curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash
+```
+Then use `makaron-update` or `makaron-update -y` for future updates.
