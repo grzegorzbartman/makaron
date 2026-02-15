@@ -3,6 +3,12 @@
 set -e
 
 export MAKARON_PATH="$HOME/.local/share/makaron"
+SKIP_CONFIRM=false
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes) SKIP_CONFIRM=true; break ;;
+    esac
+done
 
 # Install gum if not available
 install_gum_if_needed() {
@@ -75,45 +81,30 @@ echo ""
 echo "Are you sure you want to continue with the update?"
 echo ""
 
-if command -v gum &> /dev/null; then
+if [ "$SKIP_CONFIRM" = true ]; then
+    echo "Proceeding with update (--yes flag)..."
+elif command -v gum &> /dev/null && [ -t 0 ]; then
     if ! gum confirm "Continue with update?"; then
         echo "Update cancelled."
         exit 0
     fi
-else
+elif [ -t 0 ]; then
     read -p "Continue with update? (y/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo "Update cancelled."
         exit 0
     fi
+else
+    echo "No TTY detected. Run with -y or --yes to skip confirmation:"
+    echo "  makaron-update -y"
+    exit 1
 fi
 
 if [ -d "$MAKARON_PATH/.git" ]; then
     cd "$MAKARON_PATH"
 
-    # Check for local changes
-    if ! git diff --quiet || ! git diff --cached --quiet; then
-        echo ""
-        echo "❌ Local changes detected in makaron repository!"
-        echo ""
-        echo "You have uncommitted changes that would be overwritten by the update."
-        echo "Please resolve this manually:"
-        echo ""
-        echo "1. Save your changes:"
-        echo "   cd $MAKARON_PATH"
-        echo "   git stash push -m 'backup before update'"
-        echo ""
-        echo "2. Then run update again:"
-        echo "   makaron-update"
-        echo ""
-        echo "3. Restore your changes if needed:"
-        echo "   cd $MAKARON_PATH"
-        echo "   git stash pop"
-        echo ""
-        exit 1
-    fi
-
+    # ~/.local/share/makaron is deployment - always reset to origin, no local commits
     # Create backup
     echo ""
     echo "📦 Creating backup snapshot..."
@@ -121,8 +112,10 @@ if [ -d "$MAKARON_PATH/.git" ]; then
     echo ""
 
     echo "Fetching latest changes..."
+    git update-index --no-skip-worktree configs/ghostty/config 2>/dev/null || true
     git fetch origin main
     git reset --hard origin/main
+    git update-index --skip-worktree configs/ghostty/config 2>/dev/null || true
     echo "Configuration updated successfully!"
 
     # Update user config with new variables
