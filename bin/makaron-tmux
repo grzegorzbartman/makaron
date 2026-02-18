@@ -1,0 +1,69 @@
+#!/bin/bash
+
+dir="${1:-$(pwd)}"
+dir="$(realpath "$dir")"
+
+session_name="$(basename "$(dirname "$dir")")_$(basename "$dir")"
+session_name="${session_name//[^a-zA-Z0-9_-]/_}"
+
+if tmux has-session -t "$session_name" 2>/dev/null; then
+  tmux attach-session -t "$session_name"
+  exit 0
+fi
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+
+# Load theme colors (0xffRRGGBB -> #RRGGBB)
+hex() { echo "#${1:4:6}"; }
+
+THEME_DIR="$MAKARON_PATH/current-theme"
+if [ -f "$THEME_DIR/borders.colors" ]; then
+  source "$THEME_DIR/borders.colors"
+fi
+if [ -f "$THEME_DIR/sketchybar.colors" ]; then
+  source "$THEME_DIR/sketchybar.colors"
+fi
+
+ACCENT=$(hex "${ACTIVE_BORDER_COLOR:-0xff89b4fa}")
+DIM=$(hex "${INACTIVE_BORDER_COLOR:-0xff313244}")
+BG=$(hex "${BAR_COLOR:-0xff0a0a0a}")
+FG=$(hex "${LABEL_COLOR:-0xffcdd6f4}")
+
+# Create session
+tmux new-session -d -s "$session_name" -c "$dir"
+tmux rename-window -t "$session_name:0" "ide"
+
+EDITOR_PANE=$(tmux display-message -t "$session_name:ide" -p '#{pane_id}')
+CLAUDE_PANE=$(tmux split-window -t "$EDITOR_PANE" -h -P -F '#{pane_id}' -c "$dir")
+GIT_PANE=$(tmux split-window -t "$EDITOR_PANE" -v -P -F '#{pane_id}' -c "$dir")
+TERM_PANE=$(tmux split-window -t "$CLAUDE_PANE" -v -P -F '#{pane_id}' -c "$dir")
+
+tmux send-keys -t "$CLAUDE_PANE" "claude" Enter
+tmux send-keys -t "$GIT_PANE" "lazygit" Enter
+
+# Layout
+tmux select-layout -t "$session_name:ide" main-vertical
+tmux set-option -t "$session_name" main-pane-width "60%"
+
+# Pane borders
+tmux set-option -t "$session_name" pane-border-style "fg=$DIM"
+tmux set-option -t "$session_name" pane-active-border-style "fg=$ACCENT"
+
+# Pane titles
+tmux set-option -t "$session_name" pane-border-status top
+tmux set-option -t "$session_name" pane-border-format " #{?pane_active,#[fg=$ACCENT],#[fg=$DIM]}#{pane_title} "
+tmux select-pane -t "$EDITOR_PANE" -T "editor"
+tmux select-pane -t "$CLAUDE_PANE" -T "claude"
+tmux select-pane -t "$GIT_PANE" -T "lazygit"
+tmux select-pane -t "$TERM_PANE" -T "terminal"
+
+# Status bar
+tmux set-option -t "$session_name" status-style "bg=$BG,fg=$FG"
+tmux set-option -t "$session_name" status-left "#[fg=$ACCENT,bold] $session_name #[default]"
+tmux set-option -t "$session_name" status-right "#[fg=$DIM]%H:%M "
+tmux set-option -t "$session_name" window-status-current-format "#[fg=$ACCENT,bold] #W "
+tmux set-option -t "$session_name" window-status-format "#[fg=$DIM] #W "
+tmux set-option -t "$session_name" status-left-length 40
+
+tmux select-pane -t "$EDITOR_PANE"
+tmux attach-session -t "$session_name"
