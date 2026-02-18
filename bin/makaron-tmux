@@ -60,10 +60,44 @@ tmux select-pane -t "$TERM_PANE" -T "terminal"
 # Status bar
 tmux set-option -t "$session_name" status-style "bg=$BG,fg=$FG"
 tmux set-option -t "$session_name" status-left "#[fg=$ACCENT,bold] $session_name #[default]"
-tmux set-option -t "$session_name" status-right "#[fg=$DIM]%H:%M "
+tmux set-option -t "$session_name" status-right "#[fg=$DIM]?=help  %H:%M "
 tmux set-option -t "$session_name" window-status-current-format "#[fg=$ACCENT,bold] #W "
 tmux set-option -t "$session_name" window-status-format "#[fg=$DIM] #W "
 tmux set-option -t "$session_name" status-left-length 40
+
+# Help popup (prefix + ?)
+tmux bind-key -T prefix ? display-popup -E -w 62 -h 32 \
+  "printf '\033[1m  Makaron tmux cheatsheet\033[0m
+\033[2m  prefix = Ctrl+b\033[0m
+
+  \033[1mPanes\033[0m
+  prefix + %%     split vertical
+  prefix + \"     split horizontal
+  prefix + arrow  move between panes
+  prefix + z      zoom pane (toggle)
+  prefix + x      close pane
+  prefix + q      show pane numbers
+  prefix + {  }   swap pane left/right
+  prefix + space  cycle layouts
+
+  \033[1mWindows\033[0m
+  prefix + c      new window
+  prefix + n / p  next / previous window
+  prefix + ,      rename window
+  prefix + &      close window
+  prefix + w      window list
+
+  \033[1mSession\033[0m
+  prefix + d      detach
+  prefix + s      session list
+  prefix + \$      rename session
+
+  \033[1mCopy mode\033[0m
+  prefix + [      enter copy mode
+  q               exit copy mode
+
+  \033[2mpress q to close\033[0m
+' | less -R"
 
 tmux select-pane -t "$EDITOR_PANE"
 tmux attach-session -t "$session_name"
