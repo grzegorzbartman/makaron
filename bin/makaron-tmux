@@ -57,13 +57,19 @@ tmux select-pane -t "$CLAUDE_PANE" -T "claude"
 tmux select-pane -t "$GIT_PANE" -T "lazygit"
 tmux select-pane -t "$TERM_PANE" -T "terminal"
 
-# Status bar
+# Status bar (2 lines)
+tmux set-option -t "$session_name" status 2
 tmux set-option -t "$session_name" status-style "bg=$BG,fg=$FG"
 tmux set-option -t "$session_name" status-left "#[fg=$ACCENT,bold] $session_name #[default]"
-tmux set-option -t "$session_name" status-right "#[fg=$DIM]?=help  %H:%M "
+tmux set-option -t "$session_name" status-right "#[fg=$DIM]%H:%M "
 tmux set-option -t "$session_name" window-status-current-format "#[fg=$ACCENT,bold] #W "
 tmux set-option -t "$session_name" window-status-format "#[fg=$DIM] #W "
 tmux set-option -t "$session_name" status-left-length 40
+
+# Shortcut bar (bottom line)
+HINT="#[fg=$ACCENT,bold]^b#[fg=$DIM]"
+tmux set-option -t "$session_name" "status-format[1]" \
+  "#[bg=$BG] ${HINT}+arrows#[default,fg=$FG] panes  ${HINT}+z#[default,fg=$FG] zoom  ${HINT}+x#[default,fg=$FG] close  ${HINT}+d#[default,fg=$FG] detach  ${HINT}+c#[default,fg=$FG] window  ${HINT}+?#[default,fg=$FG] help"
 
 # Help popup (prefix + ?)
 tmux bind-key -T prefix ? display-popup -E -w 62 -h 32 \
