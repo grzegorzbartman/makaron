@@ -48,6 +48,7 @@ tmux send-keys -t "$EDITOR_PANE" C-e
 # Layout
 tmux select-layout -t "$session_name:ide" main-vertical
 tmux set-option -t "$session_name" main-pane-width "60%"
+tmux set-option -t "$session_name" mouse on
 
 # Pane borders
 tmux set-option -t "$session_name" pane-border-style "fg=$DIM"
