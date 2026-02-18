@@ -11,6 +11,9 @@ install_formula "ncdu" "ncdu" "ncdu"
 install_formula "tmux" "tmux" "tmux"
 install_formula "tree" "tree" "tree"
 
+brew tap sinelaw/fresh 2>/dev/null || true
+install_formula "fresh-editor" "Fresh Editor" "fresh"
+
 # Ghostty (has additional config setup)
 source "$MAKARON_PATH/install/terminal/ghostty.sh"
 
