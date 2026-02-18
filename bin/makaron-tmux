@@ -38,8 +38,12 @@ CLAUDE_PANE=$(tmux split-window -t "$EDITOR_PANE" -h -P -F '#{pane_id}' -c "$dir
 GIT_PANE=$(tmux split-window -t "$EDITOR_PANE" -v -P -F '#{pane_id}' -c "$dir")
 TERM_PANE=$(tmux split-window -t "$CLAUDE_PANE" -v -P -F '#{pane_id}' -c "$dir")
 
+tmux send-keys -t "$EDITOR_PANE" "fresh" Enter
 tmux send-keys -t "$CLAUDE_PANE" "claude" Enter
 tmux send-keys -t "$GIT_PANE" "lazygit" Enter
+
+sleep 0.3
+tmux send-keys -t "$EDITOR_PANE" C-e
 
 # Layout
 tmux select-layout -t "$session_name:ide" main-vertical
