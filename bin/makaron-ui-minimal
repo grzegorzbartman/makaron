@@ -11,6 +11,7 @@ echo ""
 stop_sketchybar
 stop_borders
 
+switch_aerospace_config "minimal"
 start_aerospace
 apply_macos_minimal_settings
 save_ui_mode "minimal"

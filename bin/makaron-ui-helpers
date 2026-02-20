@@ -34,6 +34,7 @@ reload_current_ui() {
             ;;
         minimal)
             echo "Reloading minimal UI..."
+            switch_aerospace_config "minimal"
             if command -v aerospace &> /dev/null; then
                 aerospace reload-config
             fi
@@ -42,6 +43,44 @@ reload_current_ui() {
             echo "UI is stopped, skipping reload."
             ;;
     esac
+}
+
+# --- AeroSpace Config ---
+switch_aerospace_config() {
+    local mode="$1"  # "full" or "minimal"
+
+    # Resolve the actual file behind the ~/.aerospace.toml symlink
+    local config_link="$HOME/.aerospace.toml"
+    local config_file
+    if [ -L "$config_link" ]; then
+        config_file="$(readlink "$config_link")"
+        [[ "$config_file" != /* ]] && config_file="$(dirname "$config_link")/$config_file"
+    else
+        config_file="$config_link"
+    fi
+
+    if [ ! -f "$config_file" ]; then
+        echo "  ⚠️  AeroSpace config not found: $config_file"
+        return 1
+    fi
+
+    case "$mode" in
+        full)
+            local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
+            ;;
+        minimal)
+            # Built-in: from notch bottom — small margin is enough
+            # External: menu bar ~24px from physical top + 6px margin = 30px
+            local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 30]'
+            ;;
+        *)
+            echo "  ⚠️  Unknown aerospace config mode: $mode"
+            return 1
+            ;;
+    esac
+
+    sed -i '' "s/    outer\.top = .*/$outer_top/" "$config_file"
+    echo "  ✓ AeroSpace outer.top set for: $mode mode"
 }
 
 # --- AeroSpace ---

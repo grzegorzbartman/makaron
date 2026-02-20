@@ -10,6 +10,7 @@ echo ""
 stop_borders
 stop_sketchybar
 
+switch_aerospace_config "full"
 start_aerospace
 start_sketchybar
 compile_calendar_plugin
