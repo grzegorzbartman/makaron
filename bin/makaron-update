@@ -113,6 +113,7 @@ if [ -d "$MAKARON_PATH/.git" ]; then
 
     echo "Fetching latest changes..."
     git update-index --no-skip-worktree configs/ghostty/config 2>/dev/null || true
+    git add configs/ghostty/config 2>/dev/null || true
     git fetch origin main
     git reset --hard origin/main
     git update-index --skip-worktree configs/ghostty/config 2>/dev/null || true
