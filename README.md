@@ -274,6 +274,16 @@ Alternatively, enable it manually:
 
 **Note**: On some macOS versions, you might need to log out and log back in for the menu bar autohide to take effect.
 
+**Problem: `makaron-update` fails with "configs/ghostty/config not uptodate, cannot merge"**
+
+This happens after switching themes — ghostty config gets modified locally and goes out of sync with git index. Run this once to fix:
+
+```bash
+cd ~/.local/share/makaron && git update-index --no-skip-worktree configs/ghostty/config && git add configs/ghostty/config && makaron-update -y
+```
+
+---
+
 **Problem: SketchyBar or AeroSpace not working properly**
 
 Try reloading the configuration:
