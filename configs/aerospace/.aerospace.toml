@@ -64,9 +64,9 @@ automatically-unhide-macos-hidden-apps = false
     inner.vertical =   15
     outer.left =       15
     outer.bottom =     15
-    # Different top gaps for built-in display (with notch) vs external monitor
-    # For built-in display with notch: use 0 to let macOS handle the notch area automatically
-    # For external monitor: 50px for SketchyBar (40px height + 10px margin)
+    # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
+    # Full mode: menu bar hidden, SketchyBar 40px → 45px covers it with 5px margin.
+    # Minimal mode: set via switch_aerospace_config in makaron-ui-helpers (8px for both monitors).
     outer.top = [{ monitor."Built-in" = 15 }, 45]
     outer.right =      10
 

@@ -69,9 +69,7 @@ switch_aerospace_config() {
             local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
             ;;
         minimal)
-            # Built-in: from notch bottom — small margin is enough
-            # External: menu bar ~24px from physical top + 6px margin = 30px
-            local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 30]'
+            local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 8]'
             ;;
         *)
             echo "  ⚠️  Unknown aerospace config mode: $mode"
