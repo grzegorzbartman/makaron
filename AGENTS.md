@@ -234,7 +234,7 @@ exec makaron-switch-theme <name>
    ```
    TokyoNight Storm
    ```
-   Available: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest Dark Hard/Light Med, Kanagawa Dragon, Rosé Pine/Dawn, Flexoki Light.
+   Available: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest Dark Hard/Light Med, Kanagawa Dragon, Rose Pine/Dawn/Moon, Flexoki Light.
 
    **Custom palette** (multiple lines with `=`):
    ```
