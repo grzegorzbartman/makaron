@@ -39,6 +39,7 @@ Some components require compiled Swift binaries for performance or API access:
 ```bash
 # Compile all Swift sources
 swiftc -O -o bin/makaron-memory-stats src/memory_stats.swift
+swiftc -O -o bin/makaron-set-accent-color src/set_accent_color.swift
 ```
 
 - Source files: `src/*.swift`
@@ -85,6 +86,7 @@ makaron/
 │       ├── borders.colors
 │       ├── mode
 │       ├── vscode.theme     # (optional) VSCode/Cursor color theme
+│       ├── accent.color     # (optional) macOS accent color (-1..6)
 │       └── backgrounds/
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
@@ -222,6 +224,7 @@ killall ServiceName 2>/dev/null || true
    - `mode` (dark/light)
    - `ghostty.theme` (see below)
    - `vscode.theme` (optional, see below)
+   - `accent.color` (optional) — single line with macOS accent color value (-1=graphite, 0=red, 1=orange, 2=yellow, 3=green, 4=blue, 5=purple, 6=pink)
    - `backgrounds/` dir with wallpaper
 
 2. Create executable `bin/makaron-theme-<name>`:

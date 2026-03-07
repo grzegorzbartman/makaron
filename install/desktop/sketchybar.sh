@@ -14,6 +14,14 @@ if [ -f "$MAKARON_PATH/src/memory_stats.swift" ]; then
     }
 fi
 
+# Compile accent color binary (sets macOS accent color with instant notification)
+if [ -f "$MAKARON_PATH/src/set_accent_color.swift" ]; then
+    echo "Compiling set_accent_color..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-set-accent-color" "$MAKARON_PATH/src/set_accent_color.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile set_accent_color.swift"
+    }
+fi
+
 # Setup SketchyBar config
 mkdir -p "$HOME/.config"
 
