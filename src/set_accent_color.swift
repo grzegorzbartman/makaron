@@ -7,8 +7,12 @@ guard CommandLine.arguments.count > 1,
     exit(1)
 }
 
-UserDefaults.standard.set(value, forKey: "AppleAccentColor")
-UserDefaults.standard.synchronize()
+CFPreferencesSetAppValue(
+    "AppleAccentColor" as CFString,
+    value as CFNumber,
+    kCFPreferencesAnyApplication
+)
+CFPreferencesAppSynchronize(kCFPreferencesAnyApplication)
 
 DistributedNotificationCenter.default().postNotificationName(
     NSNotification.Name("AppleColorPreferencesChangedNotification"),
