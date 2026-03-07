@@ -219,6 +219,16 @@ osascript -e '
 # Update VSCode/Cursor theme (before macOS appearance change so editors pick up correct preferred theme)
 update_editor_theme "$THEME_DIR" "$MODE"
 
+# Set macOS accent color
+accent_file="$THEME_DIR/accent.color"
+if [ -f "$accent_file" ]; then
+    accent_value=$(head -n 1 "$accent_file" | tr -d '\n')
+    if [ -n "$accent_value" ]; then
+        "$MAKARON_PATH/bin/makaron-set-accent-color" "$accent_value" 2>/dev/null || \
+            defaults write -globalDomain AppleAccentColor -int "$accent_value" 2>/dev/null || true
+    fi
+fi
+
 # Set macOS appearance mode (after Ghostty config reload so it picks up correct theme)
 if [ "$MODE" = "dark" ]; then
     osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true' 2>/dev/null || true
