@@ -72,6 +72,61 @@ find_counterpart_theme() {
     fi
 }
 
+# Update VSCode/Cursor color theme from vscode.theme file
+update_editor_theme() {
+    local theme_dir="$1"
+    local mode="$2"
+    local vscode_file="$theme_dir/vscode.theme"
+    [ ! -f "$vscode_file" ] && return 0
+
+    local vscode_theme
+    vscode_theme=$(head -n 1 "$vscode_file" | tr -d '\n')
+    [ -z "$vscode_theme" ] && return 0
+
+    local settings_paths=(
+        "$HOME/Library/Application Support/Code/User/settings.json"
+        "$HOME/Library/Application Support/Cursor/User/settings.json"
+    )
+
+    # VSCode/Cursor profiles that have their own theme settings (others inherit from main)
+    local profiles_dir
+    for profiles_dir in \
+        "$HOME/Library/Application Support/Code/User/profiles" \
+        "$HOME/Library/Application Support/Cursor/User/profiles"; do
+        if [ -d "$profiles_dir" ]; then
+            for profile_settings in "$profiles_dir"/*/settings.json; do
+                [ -f "$profile_settings" ] && grep -q '"workbench.colorTheme"' "$profile_settings" && settings_paths+=("$profile_settings")
+            done
+        fi
+    done
+
+    local preferred_key
+    if [ "$mode" = "dark" ]; then
+        preferred_key="workbench.preferredDarkColorTheme"
+    else
+        preferred_key="workbench.preferredLightColorTheme"
+    fi
+
+    for settings in "${settings_paths[@]}"; do
+        [ ! -f "$settings" ] && continue
+
+        if grep -q "\"$preferred_key\"" "$settings"; then
+            # Key exists — replace both in single write
+            sed -i '' \
+                -e "s/\"workbench\.colorTheme\": \"[^\"]*\"/\"workbench.colorTheme\": \"$vscode_theme\"/" \
+                -e "s/\"$preferred_key\": \"[^\"]*\"/\"$preferred_key\": \"$vscode_theme\"/" \
+                "$settings"
+        else
+            # Key missing — replace colorTheme and insert preferred key
+            sed -i '' \
+                -e "s/\"workbench\.colorTheme\": \"[^\"]*\"/\"workbench.colorTheme\": \"$vscode_theme\"/" \
+                -e "/\"window\.autoDetectColorScheme\"/a\\
+\\  \"$preferred_key\": \"$vscode_theme\"," \
+                "$settings"
+        fi
+    done
+}
+
 # Update current-theme symlink
 rm -f "$CURRENT_THEME_LINK"
 ln -s "$THEME_DIR" "$CURRENT_THEME_LINK"
@@ -160,6 +215,9 @@ osascript -e '
         end tell
     end tell
 ' 2>/dev/null || true
+
+# Update VSCode/Cursor theme (before macOS appearance change so editors pick up correct preferred theme)
+update_editor_theme "$THEME_DIR" "$MODE"
 
 # Set macOS appearance mode (after Ghostty config reload so it picks up correct theme)
 if [ "$MODE" = "dark" ]; then
