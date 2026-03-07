@@ -84,6 +84,7 @@ makaron/
 │       ├── sketchybar.colors
 │       ├── borders.colors
 │       ├── mode
+│       ├── vscode.theme     # (optional) VSCode/Cursor color theme
 │       └── backgrounds/
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
@@ -220,6 +221,7 @@ killall ServiceName 2>/dev/null || true
    - `sketchybar.colors`
    - `mode` (dark/light)
    - `ghostty.theme` (see below)
+   - `vscode.theme` (optional, see below)
    - `backgrounds/` dir with wallpaper
 
 2. Create executable `bin/makaron-theme-<name>`:
@@ -252,9 +254,16 @@ exec makaron-switch-theme <name>
 
    **Dark/light counterparts**: The script auto-discovers pairs (e.g., `cosmic-dark` ↔ `cosmic-light`).
 
-4. If custom palette: copy the file to `configs/ghostty/themes/<name>` and commit it.
+4. Create `vscode.theme` (optional) — a single line with the exact VSCode color theme name:
+   ```
+   Tokyo Night Storm
+   ```
+   Sets `workbench.colorTheme` in both VSCode and Cursor `settings.json` (including profiles).
+   If the file doesn't exist or `settings.json` is missing, the editor is silently skipped.
 
-5. Update `README.md` with theme name and command.
+5. If custom palette: copy the file to `configs/ghostty/themes/<name>` and commit it.
+
+6. Update `README.md` with theme name and command.
 
 ---
 
