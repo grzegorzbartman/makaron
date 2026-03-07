@@ -26,107 +26,49 @@ fi
 
 echo "Switching to theme: $THEME_NAME"
 
-# ============================================================
-# THEME MAPPING: Makaron themes -> Ghostty themes
-# ============================================================
-# This maps makaron theme names to their corresponding Ghostty theme names
-# Format: returns "Dark Theme Name|Light Theme Name" for each theme
-# ============================================================
+# Resolve Ghostty theme from ghostty.theme file
+# If custom palette (contains '='), install to configs/ghostty/themes/
+# If built-in name (single line), return as-is
+resolve_ghostty_theme() {
+    local theme_dir="$1"
+    local theme_name="$2"
+    local ghostty_file="$theme_dir/ghostty.theme"
 
-get_ghostty_theme_mapping() {
-    local theme="$1"
+    if [ ! -f "$ghostty_file" ]; then
+        echo "TokyoNight Storm"
+        return
+    fi
 
-    case "$theme" in
-        tokyo-night)
-            echo "TokyoNight Storm|TokyoNight Day"
-            ;;
-        catppuccin|catppuccin-mocha-dark)
-            echo "Catppuccin Mocha|Catppuccin Latte"
-            ;;
-        catppuccin-latte)
-            echo "Catppuccin Latte|Catppuccin Latte"
-            ;;
-        gruvbox)
-            echo "Gruvbox Dark|Gruvbox Light"
-            ;;
-        nord)
-            echo "Nord|Nord Light"
-            ;;
-        everforest)
-            echo "Everforest Dark Hard|Everforest Light Med"
-            ;;
-        kanagawa)
-            echo "Kanagawa Dragon|Kanagawa Dragon"
-            ;;
-        flexoki-light)
-            echo "Flexoki Light|Flexoki Light"
-            ;;
-        rose-pine)
-            echo "Rosé Pine|Rosé Pine Dawn"
-            ;;
-        matte-black)
-            echo "Nord|Nord Light"
-            ;;
-        droptica-dark|hackerman)
-            echo "TokyoNight Storm|TokyoNight Day"
-            ;;
-        osaka-jade|verdant-dark|verdant-light)
-            echo "Everforest Dark Hard|Everforest Light Med"
-            ;;
-        miasma)
-            echo "Gruvbox Dark|Gruvbox Light"
-            ;;
-        ristretto)
-            echo "Gruvbox Dark|Gruvbox Light"
-            ;;
-        ethereal)
-            echo "Catppuccin Mocha|Catppuccin Latte"
-            ;;
-        underwater-dark)
-            echo "Nord|Nord Light"
-            ;;
-        underwater-light)
-            echo "Nord Light|Nord Light"
-            ;;
-        cosmic-dark)
-            echo "Nord|Nord Light"
-            ;;
-        cosmic-light)
-            echo "Nord Light|Nord Light"
-            ;;
-        ubuntu-dark)
-            echo "Catppuccin Mocha|Catppuccin Latte"
-            ;;
-        ubuntu-light)
-            echo "Catppuccin Latte|Catppuccin Latte"
-            ;;
-        macos-default-dark)
-            echo "TokyoNight Storm|TokyoNight Day"
-            ;;
-        macos-default-light)
-            echo "TokyoNight Day|TokyoNight Day"
-            ;;
-        *)
-            # Fallback for unknown themes
-            echo "TokyoNight Storm|TokyoNight Day"
-            ;;
-    esac
+    if grep -q '=' "$ghostty_file"; then
+        mkdir -p "$MAKARON_PATH/configs/ghostty/themes"
+        cp "$ghostty_file" "$MAKARON_PATH/configs/ghostty/themes/$theme_name"
+        echo "$theme_name"
+    else
+        head -n 1 "$ghostty_file" | tr -d '\n'
+    fi
 }
 
-# Function to get Ghostty theme name (full name with variant)
-# Returns the complete theme name as it appears in Ghostty
-get_ghostty_theme() {
-    local theme="$1"
+# Find counterpart theme for opposite mode (dark <-> light)
+find_counterpart_theme() {
+    local theme_name="$1"
     local mode="$2"
-
-    local themes=$(get_ghostty_theme_mapping "$theme")
-    local dark_theme="${themes%|*}"
-    local light_theme="${themes#*|}"
+    local counterpart=""
 
     if [ "$mode" = "dark" ]; then
-        echo "$dark_theme"
+        counterpart="${theme_name%-dark}-light"
     else
-        echo "$light_theme"
+        counterpart="${theme_name%-light}-dark"
+    fi
+
+    local counterpart_dir="$MAKARON_PATH/themes/$counterpart"
+    if [ "$counterpart" != "$theme_name" ] && [ -d "$counterpart_dir" ]; then
+        resolve_ghostty_theme "$counterpart_dir" "$counterpart"
+    else
+        if [ "$mode" = "dark" ]; then
+            echo "TokyoNight Day"
+        else
+            echo "TokyoNight Storm"
+        fi
     fi
 }
 
@@ -134,17 +76,10 @@ get_ghostty_theme() {
 rm -f "$CURRENT_THEME_LINK"
 ln -s "$THEME_DIR" "$CURRENT_THEME_LINK"
 
-# Set macOS appearance mode based on theme
+# Read theme mode
 MODE="dark"  # default
 if [ -f "$THEME_DIR/mode" ]; then
     MODE=$(cat "$THEME_DIR/mode")
-    if [ "$MODE" = "dark" ]; then
-        echo "Setting macOS appearance to Dark Mode..."
-        osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true' 2>/dev/null || true
-    elif [ "$MODE" = "light" ]; then
-        echo "Setting macOS appearance to Light Mode..."
-        osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to false' 2>/dev/null || true
-    fi
 fi
 
 # Function to update GHOSTTY_THEME environment variable in shell config
@@ -189,12 +124,15 @@ update_ghostty_config_from_env() {
     fi
 }
 
-# Update Ghostty theme configuration using environment variable
-DARK_THEME=$(get_ghostty_theme "$THEME_NAME" "dark")
-LIGHT_THEME=$(get_ghostty_theme "$THEME_NAME" "light")
+# Resolve Ghostty theme from ghostty.theme file
+ACTIVE_THEME=$(resolve_ghostty_theme "$THEME_DIR" "$THEME_NAME")
+OPPOSITE_THEME=$(find_counterpart_theme "$THEME_NAME" "$MODE")
 
-# Build theme string: dark:ThemeName, light:ThemeName
-GHOSTTY_THEME_VALUE="dark:$DARK_THEME, light:$LIGHT_THEME"
+if [ "$MODE" = "dark" ]; then
+    GHOSTTY_THEME_VALUE="dark:$ACTIVE_THEME, light:$OPPOSITE_THEME"
+else
+    GHOSTTY_THEME_VALUE="dark:$OPPOSITE_THEME, light:$ACTIVE_THEME"
+fi
 
 # Update environment variable in shell config files
 ensure_shell_configs() {
@@ -213,17 +151,23 @@ export GHOSTTY_THEME="$GHOSTTY_THEME_VALUE"
 update_ghostty_config_from_env "$GHOSTTY_THEME_VALUE"
 echo "Updated Ghostty theme configuration (using GHOSTTY_THEME environment variable)"
 
-# Reload Ghostty configuration using SIGUSR2 signal
-GHOSTTY_PID=$(pgrep -f "ghostty" | head -n 1)
-if [ -n "$GHOSTTY_PID" ]; then
-    if kill -SIGUSR2 "$GHOSTTY_PID" 2>/dev/null; then
-        echo "Reloaded Ghostty configuration (PID: $GHOSTTY_PID)"
-    else
-        echo "Note: Could not send reload signal. Press Cmd+Shift+, in Ghostty to reload config"
-    fi
-else
-    echo "Note: Ghostty not running. Config will be loaded on next start"
+# Reload Ghostty config via AppleScript menu click
+# (pgrep/pkill can't see Ghostty from within its own terminal on macOS)
+osascript -e '
+    tell application "System Events"
+        tell process "Ghostty"
+            click menu item "Reload Configuration" of menu "Ghostty" of menu bar item "Ghostty" of menu bar 1
+        end tell
+    end tell
+' 2>/dev/null || true
+
+# Set macOS appearance mode (after Ghostty config reload so it picks up correct theme)
+if [ "$MODE" = "dark" ]; then
+    osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true' 2>/dev/null || true
+elif [ "$MODE" = "light" ]; then
+    osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to false' 2>/dev/null || true
 fi
+echo "Reloaded Ghostty theme"
 
 # Set wallpaper if backgrounds directory exists
 if [ -d "$THEME_DIR/backgrounds" ]; then

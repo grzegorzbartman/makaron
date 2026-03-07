@@ -106,6 +106,12 @@ MAKARON_MIGRATIONS_STATE_PATH="$HOME/.local/state/makaron/migrations"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 ```
 
+### Development vs Installed Repo
+- **Dev repo**: your local clone — where you edit code
+- **Installed repo**: `~/.local/share/makaron/` — separate clone, symlinked to `~/.config/`
+
+For quick testing you can modify files directly in `~/.local/share/makaron/`, but **revert those changes before running `makaron-update`** — it does `git reset --hard origin/main` and will fail if there are untracked/conflicting changes (except `configs/ghostty/config` which is protected by skip-worktree).
+
 ---
 
 ## User Configuration
@@ -213,6 +219,7 @@ killall ServiceName 2>/dev/null || true
    - `borders.colors`
    - `sketchybar.colors`
    - `mode` (dark/light)
+   - `ghostty.theme` (see below)
    - `backgrounds/` dir with wallpaper
 
 2. Create executable `bin/makaron-theme-<name>`:
@@ -221,15 +228,33 @@ killall ServiceName 2>/dev/null || true
 exec makaron-switch-theme <name>
 ```
 
-3. Add Ghostty theme mapping in `bin/makaron-switch-theme` function `get_ghostty_theme_mapping()`:
-```bash
-        <theme-name>)
-            echo "Ghostty Dark Theme|Ghostty Light Theme"
-            ;;
-```
-   Available Ghostty themes: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest, Kanagawa, Rosé Pine, Flexoki Light.
+3. Create `ghostty.theme` — either a **built-in theme name** or a **custom palette**:
 
-4. Update `README.md` with theme name and command.
+   **Built-in** (single line, no `=`):
+   ```
+   TokyoNight Storm
+   ```
+   Available: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest Dark Hard/Light Med, Kanagawa Dragon, Rosé Pine/Dawn, Flexoki Light.
+
+   **Custom palette** (multiple lines with `=`):
+   ```
+   background = #0f2838
+   foreground = #c5d5dd
+   cursor-color = #5a8ba8
+   selection-background = #1e3d52
+   selection-foreground = #c5d5dd
+   palette = 0=#0a1b27
+   ...
+   palette = 15=#f9fbfb
+   ```
+   Custom palettes are auto-installed to `configs/ghostty/themes/<name>` during theme switch.
+   Use `makaron-dev-generate-ghostty-theme <name>` to generate a starting palette from sketchybar/borders colors.
+
+   **Dark/light counterparts**: The script auto-discovers pairs (e.g., `cosmic-dark` ↔ `cosmic-light`).
+
+4. If custom palette: copy the file to `configs/ghostty/themes/<name>` and commit it.
+
+5. Update `README.md` with theme name and command.
 
 ---
 
