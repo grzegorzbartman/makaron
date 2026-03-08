@@ -8,6 +8,7 @@ install_formula "lazydocker" "lazydocker" "lazydocker"
 install_formula "lazygit" "lazygit" "lazygit"
 install_formula "node" "Node.js" "node"
 install_formula "yarn" "Yarn" "yarn"
+install_formula "pnpm" "pnpm" "pnpm"
 install_formula "platformsh/tap/upsun-cli" "Upsun CLI" "upsun"
 install_cask "bruno" "Bruno"
 install_cask "docker-desktop" "Docker"
@@ -15,3 +16,4 @@ install_cask "sequel-ace" "Sequel Ace"
 
 # Tools with additional setup
 source "$MAKARON_PATH/install/development/pipx.sh"
+source "$MAKARON_PATH/install/development/fnm.sh"
