@@ -1,0 +1,6 @@
+#!/bin/bash
+# Vantablack color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff8D8D8D
+export INACTIVE_BORDER_COLOR=0xff1B1B1B
+export BORDER_WIDTH=5.0
