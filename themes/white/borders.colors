@@ -1,0 +1,6 @@
+#!/bin/bash
+# White color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff6E6E6E
+export INACTIVE_BORDER_COLOR=0xffC0C0C0
+export BORDER_WIDTH=5.0
