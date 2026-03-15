@@ -92,16 +92,20 @@ check_app() {
     fi
 }
 
-echo "Core UI Components:"
-check_installed "aerospace" "AeroSpace"
-check_installed "sketchybar" "SketchyBar"
-check_installed "borders" "Borders"
+echo "Core Components:"
+check_installed "aerospace" "AeroSpace" || true
+check_installed "sketchybar" "SketchyBar" || true
+check_installed "borders" "Borders" || true
+check_app "Ghostty" || true
 
-echo ""
-echo "Terminal & Tools:"
-check_app "Ghostty"
-check_installed "nvim" "Neovim"
-check_installed "tmux" "tmux"
+if [ -f "$HOME/.config/makaron/packages.conf" ]; then
+    source "$HOME/.config/makaron/packages.conf"
+    if [ -n "$MAKARON_PACKAGES" ]; then
+        _pkg_count=$(echo "$MAKARON_PACKAGES" | wc -w | xargs)
+        echo ""
+        echo "Optional: $_pkg_count packages selected"
+    fi
+fi
 
 echo ""
 

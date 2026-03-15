@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. Core desktop → install/mandatory.sh, extras → install/packages.sh
 
 # Desktop tools
 install_cask "alt-tab" "AltTab"

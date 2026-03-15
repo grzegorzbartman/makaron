@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+export MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+source "$MAKARON_PATH/install/helpers.sh"
+source "$MAKARON_PATH/install/packages.sh"
+
+EXISTING=$(load_package_selections)
+show_package_selector "$EXISTING"
