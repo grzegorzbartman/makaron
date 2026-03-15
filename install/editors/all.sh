@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. See install/packages.sh
 
 # Editors - simple installs
 install_cask "sublime-text" "Sublime Text"

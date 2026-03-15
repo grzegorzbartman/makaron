@@ -80,6 +80,7 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ### System Commands
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
+- `makaron-select-packages` — Re-run optional package selection UI (gum-based)
 - `makaron-reload-aerospace-sketchybar` — Reloads AeroSpace + SketchyBar configs, restarts Borders with theme colors
 - `makaron-macos-config-reload` — Re-applies macOS settings from `install/macos_settings.sh`
 - `makaron-debug` — Diagnostic tool: checks all components, symlinks, configs, migrations
@@ -187,21 +188,40 @@ curl -sL install.sh | bash
        |
    install/main.sh    # Sources all.sh, sets up PATH in .zshrc/.bashrc, chmod +x bin/
        |
-   install/all.sh     # Sources all category scripts in order:
-       |-- helpers.sh
-       |-- makaron-conf.sh
-       |-- brew.sh
-       |-- desktop/all.sh    (aerospace, sketchybar, borders, fonts, default theme)
-       |-- terminal/all.sh   (ghostty, tmux, etc.)
-       |-- editors/all.sh    (vscode, cursor, phpstorm)
-       |-- ai/all.sh         (claude, chatgpt)
-       |-- development/all.sh (docker, ddev, languages)
-       |-- apps/all.sh       (misc casks)
+   install/all.sh     # Orchestrates mandatory + optional installs:
+       |
+       |-- install/mandatory.sh      # Always installed:
+       |     |-- helpers.sh
+       |     |-- makaron-conf.sh
+       |     |-- brew.sh
+       |     |-- gum, jq
+       |     |-- desktop/ (aerospace, sketchybar, borders, fonts)
+       |     |-- terminal/ghostty.sh
+       |     └── default theme symlink
+       |
+       |-- install/packages.sh       # Optional packages:
+       |     |-- Fresh install: gum UI per-app selection (6 groups)
+       |     └── Update/reinstall: installs from ~/.config/makaron/packages.conf
+       |
        |-- macos_settings.sh
-       |-- migrations.sh     (runs pending migrations)
+       └── migrations.sh
 ```
 
-**Key detail**: `install.sh` runs `bash "$MAKARON_PATH/install/main.sh"` from file, not piped stdin — this allows interactive `read` prompts in install scripts.
+**Key detail**: `install.sh` runs `bash "$MAKARON_PATH/install/main.sh"` from file, not piped stdin — this allows interactive `read` prompts and gum UI in install scripts.
+
+### Mandatory vs Optional Packages
+
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty.
+
+**Optional** (user selects per-app via gum UI, grouped into 6 categories):
+- Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
+- Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
+- AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
+- Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
+- Desktop Extras: AltTab, Command X, Stats
+- Apps: Flameshot, Slack, Spotify, VLC
+
+Selections stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
 
 ---
 
@@ -230,25 +250,22 @@ makaron/
 │   ├── sketchybar/plugins/
 │   └── ghostty/
 ├── install/                # Installation scripts
-│   ├── all.sh              # Sources all category scripts
+│   ├── all.sh              # Orchestrator: mandatory -> packages -> settings
+│   ├── mandatory.sh        # Core components (always installed)
+│   ├── packages.sh         # Optional packages: registry, gum UI, installer
 │   ├── main.sh             # Main installer (called by install.sh)
 │   ├── helpers.sh          # Helper functions (install_cask, install_formula)
 │   ├── brew.sh             # Homebrew + CLT setup
-│   ├── ai/all.sh           # AI tools
-│   ├── apps/all.sh         # General apps
 │   ├── desktop/            # Desktop environment
-│   │   ├── all.sh
 │   │   ├── aerospace.sh, borders.sh, sketchybar.sh  # (with config)
 │   │   └── fonts.sh
 │   ├── development/        # Dev tools
-│   │   ├── all.sh
-│   │   └── pipx.sh, rbenv.sh  # (with additional setup)
+│   │   └── pipx.sh, fnm.sh, rbenv.sh  # (with additional setup)
 │   ├── editors/            # Code editors
-│   │   ├── all.sh
 │   │   └── neovim_lazyvim.sh  # (with LazyVim setup)
 │   └── terminal/           # Terminal tools
-│       ├── all.sh
-│       └── ghostty.sh      # (with config setup)
+│       ├── ghostty.sh      # (with config setup)
+│       └── p10k.sh         # (with zsh config setup)
 ├── migrations/             # Timestamped migration scripts
 ├── src/                    # Swift source files (compiled to bin/)
 ├── themes/                 # Theme definitions
@@ -269,6 +286,9 @@ $HOME/
 ├── .local/share/makaron/           # Clone of repo
 │   └── current-theme -> themes/X   # Active theme symlink
 ├── .local/state/makaron/migrations/ # Migration state
+├── .config/makaron/
+│   ├── makaron.conf                # User settings
+│   └── packages.conf              # Optional package selections
 ├── .config/sketchybar -> ...       # Symlink
 ├── .config/ghostty -> ...          # Symlink
 └── .aerospace.toml -> ...          # Symlink
@@ -279,6 +299,7 @@ $HOME/
 MAKARON_PATH="$HOME/.local/share/makaron"
 MAKARON_MIGRATIONS_STATE_PATH="$HOME/.local/state/makaron/migrations"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
+MAKARON_PACKAGES_CONF="$HOME/.config/makaron/packages.conf"
 ```
 
 ### Development vs Installed Repo

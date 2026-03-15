@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. See install/packages.sh
 
 # Apps
 install_cask "flameshot" "Flameshot"

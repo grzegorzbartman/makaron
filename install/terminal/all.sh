@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. gum/jq/ghostty → install/mandatory.sh, rest → install/packages.sh
 
 # Terminal tools
 install_formula "btop" "btop" "btop"

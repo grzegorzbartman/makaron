@@ -1,14 +1,21 @@
 #!/bin/bash
 
-# Source all installation scripts
-source "$MAKARON_PATH/install/helpers.sh"
-source "$MAKARON_PATH/install/makaron-conf.sh"
-source "$MAKARON_PATH/install/brew.sh"
-source "$MAKARON_PATH/install/desktop/all.sh"
-source "$MAKARON_PATH/install/terminal/all.sh"
-source "$MAKARON_PATH/install/editors/all.sh"
-source "$MAKARON_PATH/install/ai/all.sh"
-source "$MAKARON_PATH/install/development/all.sh"
-source "$MAKARON_PATH/install/apps/all.sh"
+# Mandatory components (always installed)
+source "$MAKARON_PATH/install/mandatory.sh"
+
+# Optional packages (user selection via gum UI)
+source "$MAKARON_PATH/install/packages.sh"
+
+EXISTING_SELECTIONS=$(load_package_selections)
+
+if [ -n "$EXISTING_SELECTIONS" ]; then
+    echo ""
+    echo "Installing previously selected packages..."
+    install_selected_packages "$EXISTING_SELECTIONS"
+else
+    show_package_selector
+fi
+
+# System settings and migrations (always run)
 source "$MAKARON_PATH/install/macos_settings.sh"
 source "$MAKARON_PATH/install/migrations.sh"

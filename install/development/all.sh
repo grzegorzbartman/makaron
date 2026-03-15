@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. See install/packages.sh
 
 # Development tools - simple installs
 install_formula "composer" "Composer" "composer"

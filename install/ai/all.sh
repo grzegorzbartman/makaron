@@ -1,4 +1,5 @@
 #!/bin/bash
+# DEPRECATED: No longer sourced. See install/packages.sh
 
 # AI tools
 install_cask "chatgpt" "ChatGPT"
