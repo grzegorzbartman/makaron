@@ -125,6 +125,7 @@ automatically-unhide-macos-hidden-apps = false
     alt-slash = 'layout tiles horizontal vertical'
     alt-comma = 'layout accordion horizontal vertical'
     alt-f = 'layout floating tiling'
+    alt-shift-f = 'exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/float-all-toggle.sh'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
     ctrl-alt-left = 'focus left'
