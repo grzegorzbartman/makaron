@@ -65,8 +65,10 @@ automatically-unhide-macos-hidden-apps = false
     outer.left =       15
     outer.bottom =     15
     # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
-    # Full mode: menu bar hidden, SketchyBar 40px → 45px covers it with 5px margin.
-    # Minimal mode: set via switch_aerospace_config in makaron-ui-helpers (8px for both monitors).
+    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers based on notch detection:
+    # Full mode + notch:    [{ monitor."Built-in" = 15 }, 45] (notch area absorbs SketchyBar)
+    # Full mode + no notch: 45 (all monitors same — 40px bar + 5px margin)
+    # Minimal mode:         8 (no SketchyBar, just small gap)
     outer.top = [{ monitor."Built-in" = 15 }, 45]
     outer.right =      10
 

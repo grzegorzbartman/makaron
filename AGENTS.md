@@ -116,9 +116,11 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ## UI Modes Detail
 
 ### AeroSpace Gaps Switching
-`switch_aerospace_config()` in `makaron-ui-helpers` uses `sed` to update `outer.top` in `~/.aerospace.toml`:
-- **Full mode**: `outer.top = [{ monitor."Built-in" = 15 }, 45]` — 45px for SketchyBar (40px bar + 5px margin), 15px for built-in display (below notch)
-- **Minimal mode**: `outer.top = [{ monitor."Built-in" = 8 }, 8]` — no SketchyBar, just small margin
+`switch_aerospace_config()` in `makaron-ui-helpers` uses `sed` to update `outer.top` in `~/.aerospace.toml`.
+It auto-detects whether the built-in display has a notch via `_has_builtin_notch()` (Swift `NSScreen.safeAreaInsets.top > 0`):
+- **Full mode + notch**: `outer.top = [{ monitor."Built-in" = 15 }, 45]` — 45px for SketchyBar, 15px for built-in (notch area absorbs the bar)
+- **Full mode + no notch**: `outer.top = 45` — same for all monitors (40px bar + 5px margin)
+- **Minimal mode**: `outer.top = 8` — no SketchyBar, just small margin (same for all monitors)
 
 The function resolves the symlink target before editing to modify the actual config file.
 

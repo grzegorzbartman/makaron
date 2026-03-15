@@ -24,6 +24,7 @@ reload_current_ui() {
     case "$mode" in
         full)
             echo "Reloading full UI..."
+            switch_aerospace_config "full"
             if command -v aerospace &> /dev/null; then
                 aerospace reload-config
             fi
@@ -46,6 +47,14 @@ reload_current_ui() {
 }
 
 # --- AeroSpace Config ---
+
+# Detect if the built-in display has a notch (safeAreaInsets.top > 0)
+_has_builtin_notch() {
+    local notch
+    notch=$(swift -e 'import AppKit; print(NSScreen.screens.contains { $0.safeAreaInsets.top > 0 } ? "1" : "0")' 2>/dev/null)
+    [[ "$notch" == "1" ]]
+}
+
 switch_aerospace_config() {
     local mode="$1"  # "full" or "minimal"
 
@@ -64,12 +73,21 @@ switch_aerospace_config() {
         return 1
     fi
 
+    local has_notch=true
+    if ! _has_builtin_notch; then
+        has_notch=false
+    fi
+
     case "$mode" in
         full)
-            local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
+            if $has_notch; then
+                local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
+            else
+                local outer_top='    outer.top = 45'
+            fi
             ;;
         minimal)
-            local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 8]'
+            local outer_top='    outer.top = 8'
             ;;
         *)
             echo "  ⚠️  Unknown aerospace config mode: $mode"
@@ -78,7 +96,7 @@ switch_aerospace_config() {
     esac
 
     sed -i '' "s/    outer\.top = .*/$outer_top/" "$config_file"
-    echo "  ✓ AeroSpace outer.top set for: $mode mode"
+    echo "  ✓ AeroSpace outer.top set for: $mode mode (notch: $has_notch)"
 }
 
 # --- AeroSpace ---
