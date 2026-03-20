@@ -4,3 +4,6 @@
 # Battery low threshold (percentage)
 BATTERY_LOW_THRESHOLD=20
 
+# Window borders (JankyBorders) — set to false to disable
+BORDERS_ENABLED=true
+

@@ -28,7 +28,12 @@ else
 fi
 
 # Restart borders service with theme colors
-if command -v borders &> /dev/null; then
+source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
+if [[ "${BORDERS_ENABLED:-true}" != "true" ]]; then
+    killall borders 2>/dev/null || true
+    brew services stop borders 2>/dev/null || true
+    echo "Borders disabled (makaron.conf), skipping"
+elif command -v borders &> /dev/null; then
     # Stop borders service
     brew services stop borders 2>/dev/null || true
     sleep 0.5

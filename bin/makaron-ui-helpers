@@ -162,6 +162,11 @@ stop_sketchybar() {
 
 # --- Borders ---
 start_borders() {
+    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
+    if [[ "${BORDERS_ENABLED:-true}" != "true" ]]; then
+        echo "  Borders disabled (makaron.conf)"
+        return 0
+    fi
     if command -v borders &> /dev/null; then
         local THEME_DIR="$MAKARON_PATH/current-theme"
         if [ -f "$THEME_DIR/borders.colors" ]; then

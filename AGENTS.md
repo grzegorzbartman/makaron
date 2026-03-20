@@ -78,6 +78,7 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-theme-*` — Shortcuts, each calls `exec makaron-switch-theme <name>`
 
 ### System Commands
+- `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
@@ -331,6 +332,7 @@ User-specific settings stored outside the repo in `~/.config/makaron/makaron.con
 ### Current Variables
 ```bash
 BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
+BORDERS_ENABLED=true      # Window borders (JankyBorders) — false to disable
 ```
 
 ---
