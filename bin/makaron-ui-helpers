@@ -78,12 +78,23 @@ switch_aerospace_config() {
         has_notch=false
     fi
 
+    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
+    local borders="${BORDERS_ENABLED:-true}"
+
     case "$mode" in
         full)
-            if $has_notch; then
-                local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
+            if [[ "$borders" == "true" ]]; then
+                if $has_notch; then
+                    local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
+                else
+                    local outer_top='    outer.top = 45'
+                fi
             else
-                local outer_top='    outer.top = 45'
+                if $has_notch; then
+                    local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 42]'
+                else
+                    local outer_top='    outer.top = 42'
+                fi
             fi
             ;;
         minimal)
@@ -97,6 +108,32 @@ switch_aerospace_config() {
 
     sed -i '' "s/    outer\.top = .*/$outer_top/" "$config_file"
     echo "  ✓ AeroSpace outer.top set for: $mode mode (notch: $has_notch)"
+}
+
+# Set AeroSpace inner/outer gaps (excluding outer.top which depends on SketchyBar/notch)
+_set_aerospace_gaps() {
+    local size="$1"  # gap size in px
+
+    local config_link="$HOME/.aerospace.toml"
+    local config_file
+    if [ -L "$config_link" ]; then
+        config_file="$(readlink "$config_link")"
+        [[ "$config_file" != /* ]] && config_file="$(dirname "$config_link")/$config_file"
+    else
+        config_file="$config_link"
+    fi
+
+    [ ! -f "$config_file" ] && return 1
+
+    sed -i '' \
+        -e "s/    inner\.horizontal = .*/    inner.horizontal = $size/" \
+        -e "s/    inner\.vertical =.*/    inner.vertical =   $size/" \
+        -e "s/    outer\.left =.*/    outer.left =       $size/" \
+        -e "s/    outer\.bottom =.*/    outer.bottom =     $size/" \
+        -e "s/    outer\.right =.*/    outer.right =      $size/" \
+        "$config_file"
+
+    echo "  ✓ AeroSpace gaps set to ${size}px"
 }
 
 # --- AeroSpace ---
