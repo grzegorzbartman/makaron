@@ -67,7 +67,6 @@ This will:
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator
-- **Alt-Tab** - Windows-style alt-tab for macOS
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor

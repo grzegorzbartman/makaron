@@ -58,7 +58,6 @@ PKGS_DEV=(
 )
 
 PKGS_DESKTOP=(
-    "alttab|AltTab|window switcher"
     "command-x|Command X|cut files in Finder"
     "stats|Stats|system monitor menubar"
 )
@@ -138,7 +137,6 @@ install_package() {
         pipx)       source "$MAKARON_PATH/install/development/pipx.sh" ;;
         rbenv)      source "$MAKARON_PATH/install/development/rbenv.sh" ;;
         # Desktop extras
-        alttab)     install_cask "alt-tab" "AltTab" ;;
         command-x)  install_cask "command-x" "Command X" ;;
         stats)      install_cask "stats" "Stats" ;;
         # Apps
