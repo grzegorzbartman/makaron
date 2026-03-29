@@ -262,33 +262,37 @@ compile_calendar_plugin() {
 
 # --- macOS Settings ---
 
-# Toggle menu bar autohide by setting opposite value first, then target.
-# macOS requires this "toggle" to actually apply the change.
+# Toggle menu bar autohide via AppleScript UI click (toggle trick).
+# macOS ignores defaults write / CFPreferences — must click the dropdown in System Settings.
 _set_menubar_autohide() {
-    local hide="$1"  # true = always hide, false = never hide
-    if [ "$hide" = "true" ]; then
-        # First set opposite (show), restart, then set target (hide)
-        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
-        defaults write -g _HIHideMenuBar -bool false
-        killall ControlCenter 2>/dev/null || true
-        killall SystemUIServer 2>/dev/null || true
-        sleep 1
-        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
-        defaults write -g _HIHideMenuBar -bool true
-        defaults write -g AppleMenuBarVisibleInFullscreen -bool false
+    local target="$1"  # "In Full Screen Only" or "Never"
+    local opposite
+    if [ "$target" = "In Full Screen Only" ]; then
+        opposite="Never"
     else
-        # First set opposite (hide), restart, then set target (show)
-        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 0
-        defaults write -g _HIHideMenuBar -bool true
-        killall ControlCenter 2>/dev/null || true
-        killall SystemUIServer 2>/dev/null || true
-        sleep 1
-        defaults write com.apple.controlcenter AutoHideMenuBarOption -int 3
-        defaults write -g _HIHideMenuBar -bool false
-        defaults write -g AppleMenuBarVisibleInFullscreen -bool true
+        opposite="In Full Screen Only"
     fi
-    killall ControlCenter 2>/dev/null || true
-    killall SystemUIServer 2>/dev/null || true
+
+    osascript <<EOF
+tell application "System Settings" to activate
+delay 2
+open location "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension?MenuBar"
+delay 2
+tell application "System Events"
+    tell first process whose frontmost is true
+        set menuPopup to pop up button 1 of group 1 of scroll area 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+        click menuPopup
+        delay 0.5
+        click menu item "$opposite" of menu 1 of menuPopup
+        delay 1
+        click menuPopup
+        delay 0.5
+        click menu item "$target" of menu 1 of menuPopup
+        delay 0.5
+    end tell
+end tell
+tell application "System Settings" to quit
+EOF
 }
 
 apply_macos_full_settings() {
@@ -306,14 +310,9 @@ apply_macos_full_settings() {
     defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
     echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
 
-    echo "  Hiding menu bar (auto-hide always)..."
-    _set_menubar_autohide true
-    echo "  ✓ Menu bar set to auto-hide (Always)"
-
-    echo ""
-    echo "  ℹ️  Opening menu bar settings to verify..."
-    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
-    sleep 1
+    echo "  Hiding menu bar (auto-hide in full screen)..."
+    _set_menubar_autohide "In Full Screen Only"
+    echo "  ✓ Menu bar set to auto-hide (In Full Screen Only)"
 }
 
 apply_macos_minimal_settings() {
@@ -332,13 +331,8 @@ apply_macos_minimal_settings() {
     echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
 
     echo "  Showing menu bar (auto-hide off)..."
-    _set_menubar_autohide false
+    _set_menubar_autohide "Never"
     echo "  ✓ Menu bar visible (Never auto-hide)"
-
-    echo ""
-    echo "  ℹ️  Opening menu bar settings to verify..."
-    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
-    sleep 1
 }
 
 restore_macos_defaults() {
@@ -357,12 +351,7 @@ restore_macos_defaults() {
     echo "  ✓ Three Finger Drag enabled"
 
     echo "  Showing menu bar (auto-hide off)..."
-    _set_menubar_autohide false
+    _set_menubar_autohide "Never"
     echo "  ✓ Menu bar visible (Never auto-hide)"
-
-    echo ""
-    echo "  ℹ️  Opening menu bar settings to verify..."
-    open "x-apple.systempreferences:com.apple.ControlCenter-Settings.extension"
-    sleep 1
 }
 
