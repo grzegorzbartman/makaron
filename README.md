@@ -256,22 +256,24 @@ source ~/.zshrc
 
 **Problem: Top bar (menu bar) is not auto-hiding**
 
-The menu bar autohide is configured through macOS settings. To enable it:
+Makaron switches the menu bar through the UI mode helpers. To re-apply it:
 
 ```bash
-# Run the macOS settings script
-~/.local/share/makaron/install/macos_settings.sh
+# Full mode hides the menu bar ("Always")
+makaron-ui-full
 
-# Then restart SystemUIServer to apply changes
-killall SystemUIServer
+# Minimal and stop modes keep it visible on desktop ("In Full Screen Only")
+makaron-ui-minimal
+# or
+makaron-ui-stop
 ```
 
 Alternatively, enable it manually:
 1. Open **System Settings**
-2. Go to **Desktop & Dock**
-3. Enable **Automatically hide and show the menu bar**
+2. Go to **Control Center** -> **Menu Bar**
+3. Set **Automatically hide and show the menu bar** to **Always**
 
-**Note**: On some macOS versions, you might need to log out and log back in for the menu bar autohide to take effect.
+**Note**: On macOS Sequoia, `defaults write` may update the preference without moving the menu bar. The UI click in System Settings is the reliable path.
 
 **Problem: `makaron-update` fails with "configs/ghostty/config not uptodate, cannot merge"**
 
