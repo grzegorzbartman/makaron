@@ -56,6 +56,7 @@ swiftc -O -o bin/makaron-set-accent-color src/set_accent_color.swift
 - `memory_stats.swift` — Uses Mach `host_statistics64` API to match Activity Monitor exactly. Shell-based alternatives (`vm_stat`, `top`) give inaccurate numbers.
 - `set_accent_color.swift` — Uses `CFPreferences` API + `DistributedNotificationCenter` for instant system-wide accent color change with live notification (no logout required).
 
+
 ---
 
 ## User Commands (`bin/`)
@@ -131,8 +132,8 @@ The function resolves the symlink target before editing to modify the actual con
 - **Minimal**: dock visible, window grouping on, Three Finger Drag off, menu bar visible
 - **Stop**: dock visible, window grouping off, Three Finger Drag on (restored)
 
-### Menu Bar Autohide Workaround
-`_set_menubar_autohide()` toggles the opposite value first, restarts ControlCenter/SystemUIServer, then sets the target value. macOS won't apply the change without this "toggle trick".
+### Menu Bar Autohide
+`_set_menubar_autohide()` uses AppleScript to open System Settings and click the menu bar dropdown (toggle trick: set opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting — UI click is the only reliable method.
 
 ---
 
