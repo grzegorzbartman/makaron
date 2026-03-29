@@ -5,6 +5,8 @@
 # Configures comprehensive macOS settings for optimal use with AeroSpace
 #------------------------------------------------------------------------------
 
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+
 # Keyboard settings
 configure_keyboard() {
     echo "Setting comfortable keyboard repeat rates..."
@@ -115,8 +117,24 @@ configure_dock() {
 # Menu bar autohide
 configure_menubar() {
     echo "Configuring menu bar to autohide..."
-    defaults write NSGlobalDomain _HIHideMenuBar -bool true
-    echo "Menu bar autohide configured"
+    local ui_helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
+
+    if [ -f "$ui_helpers" ]; then
+        # Reuse the same UI scripting path as the mode switchers because Sequoia ignores defaults.
+        source "$ui_helpers"
+        if _set_menubar_autohide "Always"; then
+            echo "Menu bar autohide configured"
+            return
+        fi
+    fi
+
+    if defaults write NSGlobalDomain _HIHideMenuBar -bool true 2>/dev/null; then
+        echo "Menu bar autohide preference updated"
+        echo "Note: macOS Sequoia may ignore this until changed via System Settings UI"
+    else
+        echo "⚠️  Could not enable menu bar autohide automatically."
+        echo "   Please enable it in System Settings > Control Center > Menu Bar > Automatically hide and show the menu bar > Always"
+    fi
 }
 
 # Accessibility - Reduce transparency

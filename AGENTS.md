@@ -133,7 +133,7 @@ The function resolves the symlink target before editing to modify the actual con
 - **Stop**: dock visible, window grouping off, Three Finger Drag on (restored)
 
 ### Menu Bar Autohide
-`_set_menubar_autohide()` uses AppleScript to open System Settings and click the menu bar dropdown (toggle trick: set opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting — UI click is the only reliable method.
+`_set_menubar_autohide()` uses AppleScript to quit and reopen System Settings on the Menu Bar pane, find the dropdown by its current value, then apply a toggle trick (opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting — UI click is the only reliable method.
 
 ---
 

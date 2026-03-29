@@ -29,11 +29,22 @@ fi
 # Apply Menu Bar autohide (always)
 if [ "$MENUBAR_AUTOHIDE" != "1" ]; then
     echo "Enabling Menu Bar autohide (always)..."
-    if defaults write NSGlobalDomain _HIHideMenuBar -bool true 2>/dev/null; then
+    if [ -f "$HOME/.local/share/makaron/bin/makaron-ui-helpers" ]; then
+        source "$HOME/.local/share/makaron/bin/makaron-ui-helpers"
+        if _set_menubar_autohide "Always"; then
+            echo "✓ Menu Bar autohide enabled"
+        elif defaults write NSGlobalDomain _HIHideMenuBar -bool true 2>/dev/null; then
+            echo "✓ Menu Bar autohide preference updated"
+            echo "  Note: macOS Sequoia may ignore this until changed via System Settings UI"
+        else
+            echo "⚠️  Could not enable Menu Bar autohide automatically."
+            echo "   Please enable manually: System Settings → Control Center → Menu Bar → Automatically hide and show the menu bar → Always"
+        fi
+    elif defaults write NSGlobalDomain _HIHideMenuBar -bool true 2>/dev/null; then
         echo "✓ Menu Bar autohide enabled"
     else
         echo "⚠️  Could not enable Menu Bar autohide automatically."
-        echo "   Please enable manually: System Settings → Desktop & Dock → Automatically hide and show the menu bar → Always"
+        echo "   Please enable manually: System Settings → Control Center → Menu Bar → Automatically hide and show the menu bar → Always"
     fi
 fi
 
