@@ -14,6 +14,7 @@ if [ -z "$THEME_NAME" ]; then
 fi
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+MAKARON_CONF="${MAKARON_CONF:-$HOME/.config/makaron/makaron.conf}"
 THEME_DIR="$MAKARON_PATH/themes/$THEME_NAME"
 CURRENT_THEME_LINK="$MAKARON_PATH/current-theme"
 GHOSTTY_CONFIG="$MAKARON_PATH/configs/ghostty/config"
@@ -125,6 +126,54 @@ update_editor_theme() {
                 "$settings"
         fi
     done
+}
+
+ensure_makaron_conf() {
+    mkdir -p "$(dirname "$MAKARON_CONF")"
+    touch "$MAKARON_CONF"
+}
+
+set_makaron_conf_value() {
+    local key="$1"
+    local value="$2"
+
+    ensure_makaron_conf
+
+    if grep -q "^${key}=" "$MAKARON_CONF" 2>/dev/null; then
+        sed -i '' "s/^${key}=.*/${key}=${value}/" "$MAKARON_CONF"
+    else
+        echo "${key}=${value}" >> "$MAKARON_CONF"
+    fi
+}
+
+apply_theme_border_behavior() {
+    case "$1" in
+        macos-default-dark|macos-default-light)
+            set_makaron_conf_value "BORDERS_ENABLED" "false"
+
+            local ui_helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
+            [ ! -f "$ui_helpers" ] && return 0
+
+            # shellcheck source=/dev/null
+            source "$ui_helpers"
+
+            local ui_mode
+            ui_mode=$(get_ui_mode 2>/dev/null || echo "full")
+
+            if [ "$ui_mode" != "stop" ]; then
+                _set_aerospace_gaps 8 || true
+                if [ "$ui_mode" = "minimal" ]; then
+                    switch_aerospace_config "minimal" || true
+                else
+                    switch_aerospace_config "full" || true
+                fi
+
+                if command -v aerospace &> /dev/null; then
+                    aerospace reload-config || true
+                fi
+            fi
+            ;;
+    esac
 }
 
 # Update current-theme symlink
@@ -246,6 +295,8 @@ if [ -d "$THEME_DIR/backgrounds" ]; then
         osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$WALLPAPER\""
     fi
 fi
+
+apply_theme_border_behavior "$THEME_NAME"
 
 # Reload configurations
 echo "Reloading UI configurations..."
