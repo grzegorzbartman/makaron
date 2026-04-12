@@ -22,6 +22,13 @@ if [ -f "$MAKARON_PATH/src/set_accent_color.swift" ]; then
     }
 fi
 
+if [ -f "$MAKARON_PATH/src/calendar_next_event.swift" ]; then
+    echo "Compiling calendar_next_event..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-calendar-next" "$MAKARON_PATH/src/calendar_next_event.swift" -framework EventKit 2>/dev/null || {
+        echo "Warning: Failed to compile calendar_next_event.swift; SketchyBar calendar item may use icalBuddy only"
+    }
+fi
+
 # Setup SketchyBar config
 mkdir -p "$HOME/.config"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# This script reloads SketchyBar when display configuration changes
-# (monitor connected/disconnected)
+# Invalidate screen-width cache so plugins re-measure on new display config
+rm -f /tmp/makaron_screen_width 2>/dev/null
 
 # Get current monitor count
 CURRENT_MONITOR_COUNT=$(aerospace list-monitors 2>/dev/null | wc -l | tr -d ' ')
