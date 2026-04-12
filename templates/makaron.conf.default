@@ -7,7 +7,7 @@ BATTERY_LOW_THRESHOLD=20
 # Window borders (JankyBorders) — set to false to disable
 BORDERS_ENABLED=true
 
-# SketchyBar: Todoist next-task item (requires: npm i -g @doist/todoist-cli + td auth login, or TODOIST_API_TOKEN)
+# SketchyBar: Todoist next-task item (requires: td auth login, or TODOIST_API_TOKEN)
 SKETCHYBAR_TODOIST_ENABLED=true
 
 # SketchyBar: next calendar event (uses makaron-calendar-next binary; optional: brew install icalbuddy)
@@ -16,6 +16,6 @@ SKETCHYBAR_CALENDAR_ENABLED=true
 # SketchyBar: hide CPU / memory / storage widgets (more room for workspaces + agenda)
 SKETCHYBAR_COMPACT_MODE=false
 
-# Optional: full path to todoist-cli if not on PATH (default: td)
+# Optional: full path to td if not on PATH (default: td)
 # TODOIST_CLI=td
 
