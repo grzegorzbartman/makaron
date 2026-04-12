@@ -14,6 +14,7 @@ tmp
 
 # Compiled binaries (built from src/)
 bin/makaron-memory-stats
+bin/makaron-calendar-next
 
 # OpenCode planning directory
 .opencode/
