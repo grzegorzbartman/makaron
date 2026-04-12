@@ -43,3 +43,19 @@ makaron_label_max_chars() {
   else echo 55
   fi
 }
+
+# Calendar on the e-slot has much less room than q/right items on small screens.
+# Use a tighter cap so it does not overlap the system widgets.
+makaron_calendar_label_max_chars() {
+  local w="${1:-}"
+  [ -z "$w" ] && w=$(makaron_min_display_width)
+  w="${w//[^0-9]/}"
+  [ -z "$w" ] && w=1440
+  if   [ "$w" -lt 1450 ]; then echo 5
+  elif [ "$w" -lt 1550 ]; then echo 8
+  elif [ "$w" -lt 1720 ]; then echo 10
+  elif [ "$w" -lt 1800 ]; then echo 12
+  elif [ "$w" -lt 2560 ]; then echo 22
+  else echo 32
+  fi
+}
