@@ -16,6 +16,9 @@ else
     show_package_selector
 fi
 
+# Install Todoist CLI for SketchyBar integration.
+install_npm_global_package "@doist/todoist-cli" "Todoist CLI" || true
+
 # System settings and migrations (always run)
 source "$MAKARON_PATH/install/macos_settings.sh"
 source "$MAKARON_PATH/install/migrations.sh"

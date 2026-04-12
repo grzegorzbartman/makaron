@@ -72,3 +72,33 @@ install_formula() {
     return 0
 }
 
+# Helper for global npm installs - continues on failure
+install_npm_global_package() {
+    local package="$1"
+    local name="${2:-$package}"
+    local package_installed=1
+
+    if ! command -v npm &>/dev/null; then
+        echo "npm not found, installing Node.js..."
+        install_formula "node" "Node.js" "node" || return 1
+    fi
+
+    if ! command -v npm &>/dev/null; then
+        echo "Warning: npm still not available, skipping $name"
+        return 1
+    fi
+
+    npm ls -g --depth=0 "$package" &>/dev/null || package_installed=0
+    if [ "$package_installed" -eq 1 ]; then
+        echo "$name already installed globally"
+        return 0
+    fi
+
+    echo "Installing $name..."
+    npm install -g "$package" || {
+        echo "Warning: Failed to install $name (continuing...)"
+        return 1
+    }
+    return 0
+}
+
