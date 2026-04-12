@@ -40,7 +40,15 @@ _todoist_next_title() {
     local json
     json=$("$TD_BIN" today --json --full 2>/dev/null) || return 1
     local t
-    t=$(echo "$json" | jq -r '.results | sort_by(.dayOrder) | .[0].content // empty' 2>/dev/null) || return 1
+    t=$(echo "$json" | jq -r "
+      [.results[] | . + {
+        _has_time: (if .due.datetime != null then 0 else 1 end),
+        _time: (if .due.datetime != null then .due.datetime else \"9999-12-31T23:59:59Z\" end),
+        _prio: (-((.priority // 1)))
+      }]
+      | sort_by(._has_time, ._prio, ._time, .dayOrder)
+      | .[0].content // empty
+    " 2>/dev/null) || return 1
     [ -n "$t" ] && echo "$t" && return 0
   fi
   local tok="${TODOIST_API_TOKEN:-}"
@@ -67,6 +75,5 @@ sketchybar --set "$NAME" drawing=on \
   icon.color="${ICON_COLOR:-0xffc0caf5}" \
   label.color="${LABEL_COLOR:-0xffc0caf5}" \
   label.max_chars="$_max_chars" \
-  scroll_texts=on \
   label="$title" \
   click_script="open 'https://app.todoist.com/app/today'"

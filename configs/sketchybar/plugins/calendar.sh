@@ -62,6 +62,5 @@ sketchybar --set "$NAME" drawing=on \
   icon.color="${ICON_COLOR:-0xffc0caf5}" \
   label.color="${LABEL_COLOR:-0xffc0caf5}" \
   label.max_chars="$_max_chars" \
-  scroll_texts=on \
   label="$line" \
   click_script="open -a Calendar"
