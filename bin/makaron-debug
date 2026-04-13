@@ -11,6 +11,26 @@ echo ""
 # Set MAKARON_PATH
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 
+_todoist_jq_cli='
+  [.results[] | . + {
+    _has_time: (if .due.datetime != null then 0 else 1 end),
+    _time: (if .due.datetime != null then .due.datetime else "9999-12-31T23:59:59Z" end),
+    _prio: (-((.priority // 1)))
+  }]
+  | sort_by(._has_time, ._prio, ._time, .dayOrder)
+  | .[0].content // empty
+'
+
+_todoist_jq_api='
+  [.[] | . + {
+    _has_time: (if .due.datetime != null then 0 else 1 end),
+    _time: (if .due.datetime != null then .due.datetime else (.due.date // "9999-12-31") + "T23:59:59Z" end),
+    _prio: (-((.priority // 1)))
+  }]
+  | sort_by(._has_time, ._time, ._prio, .createdAt)
+  | .[0].content // empty
+'
+
 # ============================================================================
 # SECTION: System Information
 # ============================================================================
@@ -450,6 +470,136 @@ if command -v sketchybar &> /dev/null; then
     fi
 else
     echo "  ❌ SketchyBar is NOT installed"
+fi
+echo ""
+
+# ============================================================================
+# SECTION: Todoist (SketchyBar)
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 TODOIST (SKETCHYBAR)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+TODOIST_PLUGIN="$MAKARON_PATH/configs/sketchybar/plugins/todoist.sh"
+TODOIST_SKETCHYBARRC="$MAKARON_PATH/configs/sketchybar/sketchybarrc"
+TODOIST_CONF="$HOME/.config/makaron/makaron.conf"
+SKETCHYBAR_TODOIST_ENABLED="true"
+
+if [ -f "$TODOIST_CONF" ]; then
+    # shellcheck disable=SC1090
+    . "$TODOIST_CONF"
+fi
+
+TD_BIN="${TODOIST_CLI:-td}"
+
+echo "  Config:"
+echo "    SKETCHYBAR_TODOIST_ENABLED=${SKETCHYBAR_TODOIST_ENABLED}"
+if [ -n "${TODOIST_CLI:-}" ]; then
+    echo "    TODOIST_CLI=$TODOIST_CLI"
+else
+    echo "    TODOIST_CLI=(not set, using: $TD_BIN)"
+fi
+if [ -n "${TODOIST_API_TOKEN:-}" ]; then
+    echo "    TODOIST_API_TOKEN=set (${#TODOIST_API_TOKEN} chars)"
+else
+    echo "    TODOIST_API_TOKEN=(not set)"
+fi
+echo ""
+
+echo "  Plugin files:"
+if [ -f "$TODOIST_PLUGIN" ]; then
+    echo "    ✓ Plugin exists: $TODOIST_PLUGIN"
+else
+    echo "    ❌ Plugin missing: $TODOIST_PLUGIN"
+fi
+
+if [ -f "$TODOIST_SKETCHYBARRC" ]; then
+    if grep -q 'script="\$PLUGIN_DIR/todoist\.sh"' "$TODOIST_SKETCHYBARRC"; then
+        echo "    ✓ sketchybarrc references todoist.sh"
+    else
+        echo "    ⚠️  sketchybarrc does not reference todoist.sh"
+    fi
+
+    if grep -q 'sketchybar --add item todoist ' "$TODOIST_SKETCHYBARRC"; then
+        echo "    ✓ sketchybarrc adds todoist item"
+    else
+        echo "    ⚠️  sketchybarrc does not add todoist item"
+    fi
+else
+    echo "    ❌ sketchybarrc missing: $TODOIST_SKETCHYBARRC"
+fi
+echo ""
+
+echo "  SketchyBar item state:"
+if command -v sketchybar &> /dev/null; then
+    TODOIST_QUERY=$(sketchybar --query todoist 2>/dev/null)
+    if [ $? -eq 0 ] && [ -n "$TODOIST_QUERY" ]; then
+        echo "    ✓ todoist item is registered in SketchyBar"
+        if command -v jq &> /dev/null; then
+            TODOIST_DRAWING=$(echo "$TODOIST_QUERY" | jq -r '.geometry.drawing // "unknown"' 2>/dev/null)
+            TODOIST_LABEL=$(echo "$TODOIST_QUERY" | jq -r '.label.value // empty' 2>/dev/null)
+            TODOIST_SCRIPT=$(echo "$TODOIST_QUERY" | jq -r '.scripting.script // empty' 2>/dev/null)
+            echo "    drawing=$TODOIST_DRAWING"
+            [ -n "$TODOIST_LABEL" ] && echo "    label=$TODOIST_LABEL" || echo "    label=(empty)"
+            [ -n "$TODOIST_SCRIPT" ] && echo "    script=$TODOIST_SCRIPT"
+        fi
+    else
+        echo "    ⚠️  todoist item is NOT registered in SketchyBar"
+        if [ "$SKETCHYBAR_TODOIST_ENABLED" = "false" ]; then
+            echo "    Note: item is disabled by SKETCHYBAR_TODOIST_ENABLED=false"
+        fi
+    fi
+else
+    echo "    SketchyBar command unavailable"
+fi
+echo ""
+
+echo "  Todoist CLI:"
+if command -v "$TD_BIN" >/dev/null 2>&1; then
+    echo "    ✓ Found CLI at: $(command -v "$TD_BIN")"
+    TODOIST_CLI_OUTPUT=$("$TD_BIN" today --json --full 2>&1)
+    TODOIST_CLI_STATUS=$?
+    echo "    td today --json --full exit code: $TODOIST_CLI_STATUS"
+    if [ $TODOIST_CLI_STATUS -eq 0 ]; then
+        if command -v jq &> /dev/null; then
+            TODOIST_CLI_COUNT=$(echo "$TODOIST_CLI_OUTPUT" | jq -r '.results | length' 2>/dev/null)
+            TODOIST_CLI_TITLE=$(echo "$TODOIST_CLI_OUTPUT" | jq -r "$_todoist_jq_cli" 2>/dev/null)
+            echo "    Tasks returned: ${TODOIST_CLI_COUNT:-unknown}"
+            [ -n "$TODOIST_CLI_TITLE" ] && echo "    Next task: $TODOIST_CLI_TITLE" || echo "    Next task: (none)"
+        else
+            echo "    jq missing - cannot parse CLI JSON"
+        fi
+    else
+        echo "    ⚠️  CLI request failed"
+        echo "    Output: $(echo "$TODOIST_CLI_OUTPUT" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
+    fi
+else
+    echo "    ⚠️  CLI not found: $TD_BIN"
+fi
+echo ""
+
+echo "  Todoist API fallback:"
+if [ -n "${TODOIST_API_TOKEN:-}" ]; then
+    if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+        TODOIST_API_OUTPUT=$(curl -sf -G "https://api.todoist.com/rest/v2/tasks" \
+            -H "Authorization: Bearer ${TODOIST_API_TOKEN}" \
+            --data-urlencode "filter=today | overdue" 2>&1)
+        TODOIST_API_STATUS=$?
+        echo "    API request exit code: $TODOIST_API_STATUS"
+        if [ $TODOIST_API_STATUS -eq 0 ]; then
+            TODOIST_API_COUNT=$(echo "$TODOIST_API_OUTPUT" | jq -r 'length' 2>/dev/null)
+            TODOIST_API_TITLE=$(echo "$TODOIST_API_OUTPUT" | jq -r "$_todoist_jq_api" 2>/dev/null)
+            echo "    Tasks returned: ${TODOIST_API_COUNT:-unknown}"
+            [ -n "$TODOIST_API_TITLE" ] && echo "    Next task: $TODOIST_API_TITLE" || echo "    Next task: (none)"
+        else
+            echo "    ⚠️  API request failed"
+            echo "    Output: $(echo "$TODOIST_API_OUTPUT" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
+        fi
+    else
+        echo "    ⚠️  curl and/or jq missing"
+    fi
+else
+    echo "    Skipped - TODOIST_API_TOKEN not set"
 fi
 echo ""
 
