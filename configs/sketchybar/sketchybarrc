@@ -146,9 +146,34 @@ if [ "$SKETCHYBAR_TODOIST_ENABLED" != "false" ]; then
       background.corner_radius=6 \
       background.height=24 \
       background.drawing=on \
+      popup.align=left \
+      popup.y_offset=6 \
+      popup.height=24 \
+      popup.blur_radius=0 \
+      popup.background.color=$BAR_COLOR \
+      popup.background.border_color=$SPACE_BORDER_COLOR \
+      popup.background.border_width=1 \
+      popup.background.corner_radius=8 \
       script="$PLUGIN_DIR/todoist.sh" \
-    --subscribe todoist display_change system_woke
+    --subscribe todoist display_change system_woke mouse.clicked space_change front_app_switched
+
+  for idx in $(seq 1 10); do
+    sketchybar --add item "todoist.popup.$idx" popup.todoist \
+               --set "todoist.popup.$idx" \
+                           drawing=off \
+                           width=260 \
+                           align=left \
+                           icon.drawing=off \
+                           label.padding_left=8 \
+                           label.padding_right=8 \
+                           label.font="Hack Nerd Font:Bold:11.0" \
+                           label.color=$LABEL_COLOR \
+                           background.color=$SPACE_BACKGROUND_COLOR \
+                           background.corner_radius=6 \
+                           background.height=22
+  done
 fi
+sketchybar --add event timer_refresh
 if [ "$SKETCHYBAR_TIMER_ENABLED" != "false" ]; then
   sketchybar --add item timer q \
     --set timer update_freq=5 \
@@ -168,7 +193,7 @@ if [ "$SKETCHYBAR_TIMER_ENABLED" != "false" ]; then
       popup.background.border_width=1 \
       popup.background.corner_radius=8 \
       script="$PLUGIN_DIR/timer.sh" \
-    --subscribe timer mouse.clicked system_woke display_change space_change front_app_switched
+    --subscribe timer mouse.clicked system_woke display_change space_change front_app_switched timer_refresh
 
   sketchybar --add item timer.popup.header popup.timer \
              --set timer.popup.header \
@@ -184,7 +209,7 @@ if [ "$SKETCHYBAR_TIMER_ENABLED" != "false" ]; then
                          background.corner_radius=6 \
                          background.height=22
 
-  for idx in $(seq 1 8); do
+  for idx in $(seq 1 18); do
     sketchybar --add item "timer.popup.$idx" popup.timer \
                --set "timer.popup.$idx" \
                            drawing=off \
@@ -210,8 +235,32 @@ if [ "$SKETCHYBAR_CALENDAR_ENABLED" != "false" ]; then
       background.corner_radius=6 \
       background.height=24 \
       background.drawing=on \
+      popup.align=left \
+      popup.y_offset=6 \
+      popup.height=24 \
+      popup.blur_radius=0 \
+      popup.background.color=$BAR_COLOR \
+      popup.background.border_color=$SPACE_BORDER_COLOR \
+      popup.background.border_width=1 \
+      popup.background.corner_radius=8 \
       script="$PLUGIN_DIR/calendar.sh" \
-    --subscribe calendar display_change system_woke
+    --subscribe calendar display_change system_woke mouse.clicked space_change front_app_switched
+
+  for idx in $(seq 1 10); do
+    sketchybar --add item "calendar.popup.$idx" popup.calendar \
+               --set "calendar.popup.$idx" \
+                           drawing=off \
+                           width=260 \
+                           align=left \
+                           icon.drawing=off \
+                           label.padding_left=8 \
+                           label.padding_right=8 \
+                           label.font="Hack Nerd Font:Bold:11.0" \
+                           label.color=$LABEL_COLOR \
+                           background.color=$SPACE_BACKGROUND_COLOR \
+                           background.corner_radius=6 \
+                           background.height=22
+  done
 fi
 
 ##### Adding Right Items #####

@@ -19,11 +19,14 @@ SKETCHYBAR_COMPACT_MODE=false
 # SketchyBar: Timewarrior timer widget
 SKETCHYBAR_TIMER_ENABLED=true
 
-# Timewarrior: default tag used by makaron-timer start/toggle
-SKETCHYBAR_TIMER_DEFAULT_TAG=default
+# Timewarrior: comma-separated tags shown in timer popup (add your own)
+SKETCHYBAR_TIMER_TAGS="sales,marketing,delivery,hr_recruitment,finance,meeting,other"
+
+# Timewarrior: default tag used by makaron-timer start/toggle (CLI fallback)
+SKETCHYBAR_TIMER_DEFAULT_TAG=other
 
 # SketchyBar: number of recent Timewarrior entries shown in timer popup
-SKETCHYBAR_TIMER_RECENT_COUNT=5
+SKETCHYBAR_TIMER_RECENT_COUNT=4
 
 # Optional: full path to td if not on PATH (default: td)
 # TODOIST_CLI=td
