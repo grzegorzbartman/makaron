@@ -16,6 +16,15 @@ SKETCHYBAR_CALENDAR_ENABLED=true
 # SketchyBar: hide CPU / memory / storage widgets (more room for workspaces + agenda)
 SKETCHYBAR_COMPACT_MODE=false
 
+# SketchyBar: Timewarrior timer widget
+SKETCHYBAR_TIMER_ENABLED=true
+
+# Timewarrior: default tag used by makaron-timer start/toggle
+SKETCHYBAR_TIMER_DEFAULT_TAG=default
+
+# SketchyBar: number of recent Timewarrior entries shown in timer popup
+SKETCHYBAR_TIMER_RECENT_COUNT=5
+
 # Optional: full path to td if not on PATH (default: td)
 # TODOIST_CLI=td
 

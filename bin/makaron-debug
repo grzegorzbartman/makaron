@@ -640,6 +640,82 @@ fi
 echo ""
 
 # ============================================================================
+# SECTION: Timewarrior Timer (SketchyBar)
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "⏱️  TIMEWARRIOR TIMER"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+TIMER_PLUGIN="$MAKARON_PATH/configs/sketchybar/plugins/timer.sh"
+TIMER_CMD="$MAKARON_PATH/bin/makaron-timer"
+TIMER_CONF="$HOME/.config/makaron/makaron.conf"
+SKETCHYBAR_TIMER_ENABLED="true"
+
+if [ -f "$TIMER_CONF" ]; then
+    # shellcheck disable=SC1090
+    . "$TIMER_CONF"
+fi
+
+echo "  Config:"
+echo "    SKETCHYBAR_TIMER_ENABLED=${SKETCHYBAR_TIMER_ENABLED}"
+echo "    SKETCHYBAR_TIMER_DEFAULT_TAG=${SKETCHYBAR_TIMER_DEFAULT_TAG:-default}"
+echo "    SKETCHYBAR_TIMER_RECENT_COUNT=${SKETCHYBAR_TIMER_RECENT_COUNT:-5}"
+echo ""
+
+echo "  Files:"
+[ -f "$TIMER_PLUGIN" ] && echo "    ✓ Plugin exists: $TIMER_PLUGIN" || echo "    ❌ Plugin missing: $TIMER_PLUGIN"
+[ -x "$TIMER_CMD" ] && echo "    ✓ Command exists: $TIMER_CMD" || echo "    ❌ Command missing or not executable: $TIMER_CMD"
+echo ""
+
+echo "  Timewarrior:"
+if command -v timew &> /dev/null; then
+    echo "    ✓ timew installed"
+    TIMER_ACTIVE=$(timew get dom.active 2>/dev/null || echo "0")
+    echo "    Active tracking: $TIMER_ACTIVE"
+else
+    echo "    ⚠️  timew not installed"
+fi
+echo ""
+
+echo "  makaron-timer status:"
+if [ -x "$TIMER_CMD" ]; then
+    TIMER_STATUS_OUTPUT=$("$TIMER_CMD" status 2>&1)
+    TIMER_STATUS_EXIT=$?
+    echo "    exit code: $TIMER_STATUS_EXIT"
+    if [ $TIMER_STATUS_EXIT -eq 0 ]; then
+        echo "    output: $(echo "$TIMER_STATUS_OUTPUT" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
+    else
+        echo "    ⚠️  command failed"
+        echo "    output: $(echo "$TIMER_STATUS_OUTPUT" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
+    fi
+fi
+echo ""
+
+echo "  SketchyBar item state:"
+if command -v sketchybar &> /dev/null; then
+    TIMER_QUERY=$(sketchybar --query timer 2>/dev/null)
+    if [ $? -eq 0 ] && [ -n "$TIMER_QUERY" ]; then
+        echo "    ✓ timer item is registered in SketchyBar"
+        if command -v jq &> /dev/null; then
+            TIMER_DRAWING=$(echo "$TIMER_QUERY" | jq -r '.geometry.drawing // "unknown"' 2>/dev/null)
+            TIMER_LABEL=$(echo "$TIMER_QUERY" | jq -r '.label.value // empty' 2>/dev/null)
+            TIMER_SCRIPT=$(echo "$TIMER_QUERY" | jq -r '.scripting.script // empty' 2>/dev/null)
+            echo "    drawing=$TIMER_DRAWING"
+            [ -n "$TIMER_LABEL" ] && echo "    label=$TIMER_LABEL" || echo "    label=(empty)"
+            [ -n "$TIMER_SCRIPT" ] && echo "    script=$TIMER_SCRIPT"
+        fi
+    else
+        echo "    ⚠️  timer item is NOT registered in SketchyBar"
+        if [ "$SKETCHYBAR_TIMER_ENABLED" = "false" ]; then
+            echo "    Note: item is disabled by SKETCHYBAR_TIMER_ENABLED=false"
+        fi
+    fi
+else
+    echo "    SketchyBar command unavailable"
+fi
+echo ""
+
+# ============================================================================
 # SECTION: Borders
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
