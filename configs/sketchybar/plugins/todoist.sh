@@ -22,8 +22,39 @@ if [ -f "$THEME_DIR/sketchybar.colors" ]; then
 fi
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
-TD_BIN="${TODOIST_CLI:-td}"
 _max_chars=$(makaron_label_max_chars)
+
+_find_td_bin() {
+  local candidate
+
+  if [ -n "${TODOIST_CLI:-}" ] && [ -x "$TODOIST_CLI" ]; then
+    echo "$TODOIST_CLI"
+    return 0
+  fi
+
+  candidate=$(command -v td 2>/dev/null)
+  if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+    echo "$candidate"
+    return 0
+  fi
+
+  for candidate in \
+    "$HOME/.nvm/versions/node"/*/bin/td \
+    "$HOME/.fnm/node-versions"/*/installation/bin/td \
+    "$HOME/Library/Application Support/fnm/node-versions"/*/installation/bin/td \
+    "$HOME/.volta/bin/td" \
+    "$HOME/.npm-global/bin/td"
+  do
+    if [ -x "$candidate" ]; then
+      echo "$candidate"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+TD_BIN=$(_find_td_bin 2>/dev/null || true)
 
 _smart_sort_first='
   [.[] | . + {
@@ -36,7 +67,7 @@ _smart_sort_first='
 '
 
 _todoist_next_title() {
-  if command -v "$TD_BIN" >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  if [ -n "$TD_BIN" ] && [ -x "$TD_BIN" ] && command -v jq >/dev/null 2>&1; then
     local json
     json=$("$TD_BIN" today --json --full 2>/dev/null) || return 1
     local t

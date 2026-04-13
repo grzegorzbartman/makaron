@@ -31,6 +31,37 @@ _todoist_jq_api='
   | .[0].content // empty
 '
 
+_find_td_bin() {
+    local candidate
+    local plugin_path="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+    if [ -n "${TODOIST_CLI:-}" ] && [ -x "$TODOIST_CLI" ]; then
+        echo "$TODOIST_CLI"
+        return 0
+    fi
+
+    candidate=$(PATH="$plugin_path" command -v td 2>/dev/null)
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+        echo "$candidate"
+        return 0
+    fi
+
+    for candidate in \
+        "$HOME/.nvm/versions/node"/*/bin/td \
+        "$HOME/.fnm/node-versions"/*/installation/bin/td \
+        "$HOME/Library/Application Support/fnm/node-versions"/*/installation/bin/td \
+        "$HOME/.volta/bin/td" \
+        "$HOME/.npm-global/bin/td"
+    do
+        if [ -x "$candidate" ]; then
+            echo "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 # ============================================================================
 # SECTION: System Information
 # ============================================================================
@@ -490,19 +521,24 @@ if [ -f "$TODOIST_CONF" ]; then
     . "$TODOIST_CONF"
 fi
 
-TD_BIN="${TODOIST_CLI:-td}"
+TD_BIN=$(_find_td_bin 2>/dev/null || true)
 
 echo "  Config:"
 echo "    SKETCHYBAR_TODOIST_ENABLED=${SKETCHYBAR_TODOIST_ENABLED}"
 if [ -n "${TODOIST_CLI:-}" ]; then
     echo "    TODOIST_CLI=$TODOIST_CLI"
 else
-    echo "    TODOIST_CLI=(not set, using: $TD_BIN)"
+    echo "    TODOIST_CLI=(not set)"
 fi
 if [ -n "${TODOIST_API_TOKEN:-}" ]; then
     echo "    TODOIST_API_TOKEN=set (${#TODOIST_API_TOKEN} chars)"
 else
     echo "    TODOIST_API_TOKEN=(not set)"
+fi
+if [ -n "$TD_BIN" ]; then
+    echo "    Resolved plugin td path: $TD_BIN"
+else
+    echo "    Resolved plugin td path: (not found)"
 fi
 echo ""
 
@@ -555,8 +591,8 @@ fi
 echo ""
 
 echo "  Todoist CLI:"
-if command -v "$TD_BIN" >/dev/null 2>&1; then
-    echo "    ✓ Found CLI at: $(command -v "$TD_BIN")"
+if [ -n "$TD_BIN" ] && [ -x "$TD_BIN" ]; then
+    echo "    ✓ Found CLI at: $TD_BIN"
     TODOIST_CLI_OUTPUT=$("$TD_BIN" today --json --full 2>&1)
     TODOIST_CLI_STATUS=$?
     echo "    td today --json --full exit code: $TODOIST_CLI_STATUS"
@@ -574,7 +610,7 @@ if command -v "$TD_BIN" >/dev/null 2>&1; then
         echo "    Output: $(echo "$TODOIST_CLI_OUTPUT" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g' | cut -c1-220)"
     fi
 else
-    echo "    ⚠️  CLI not found: $TD_BIN"
+    echo "    ⚠️  CLI not found by plugin resolver"
 fi
 echo ""
 
