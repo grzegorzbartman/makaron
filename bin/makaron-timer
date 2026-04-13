@@ -1,0 +1,315 @@
+#!/bin/bash
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+if [ -f "$MAKARON_CONF" ]; then
+  # shellcheck disable=SC1090
+  source "$MAKARON_CONF"
+fi
+
+SKETCHYBAR_TIMER_DEFAULT_TAG="${SKETCHYBAR_TIMER_DEFAULT_TAG:-default}"
+SKETCHYBAR_TIMER_RECENT_COUNT="${SKETCHYBAR_TIMER_RECENT_COUNT:-5}"
+
+_ensure_timewarrior_layout() {
+  local config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/timewarrior"
+  local data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/timewarrior"
+
+  mkdir -p "$config_dir/extensions" "$data_dir/data"
+  touch "$config_dir/timewarrior.cfg"
+}
+
+_timew_available() {
+  command -v timew >/dev/null 2>&1
+}
+
+_now_epoch() {
+  date -u +%s
+}
+
+_iso_extended_to_epoch() {
+  date -ju -f "%Y-%m-%dT%H:%M:%SZ" "$1" "+%s" 2>/dev/null || echo 0
+}
+
+_iso_local_to_epoch() {
+  date -j -f "%Y-%m-%dT%H:%M:%S" "$1" "+%s" 2>/dev/null || echo 0
+}
+
+_iso_compact_to_epoch() {
+  date -ju -f "%Y%m%dT%H%M%SZ" "$1" "+%s" 2>/dev/null || echo 0
+}
+
+_format_active_duration() {
+  local total="$1"
+  local hours=$((total / 3600))
+  local minutes=$(((total % 3600) / 60))
+  local seconds=$((total % 60))
+
+  if [ "$hours" -gt 0 ]; then
+    printf "%02d:%02d" "$hours" "$minutes"
+  else
+    printf "%02d:%02d" "$minutes" "$seconds"
+  fi
+}
+
+_format_interval_duration() {
+  local total="$1"
+  local hours=$((total / 3600))
+  local minutes=$(((total % 3600) / 60))
+  local seconds=$((total % 60))
+
+  if [ "$hours" -gt 0 ]; then
+    printf "%02d:%02d" "$hours" "$minutes"
+  else
+    printf "%02d:%02d" "$minutes" "$seconds"
+  fi
+}
+
+_day_label() {
+  local epoch="$1"
+  local today
+  local day
+  today=$(date '+%Y-%m-%d')
+  day=$(date -r "$epoch" '+%Y-%m-%d' 2>/dev/null || echo "")
+
+  if [ "$day" = "$today" ]; then
+    echo "Today"
+  else
+    date -r "$epoch" '+%m-%d' 2>/dev/null || echo ""
+  fi
+}
+
+_status_json() {
+  if ! _timew_available; then
+    jq -n \
+      --arg label "install" \
+      --arg detail "Timewarrior missing" \
+      '{available:false, active:false, label:$label, detail:$detail, duration:"", tag:"", tags:"", annotation:""}'
+    return 0
+  fi
+
+  _ensure_timewarrior_layout
+
+  if [ "$(timew get dom.active 2>/dev/null || echo 0)" != "1" ]; then
+    jq -n \
+      --arg label "off" \
+      --arg detail "No active timer" \
+      '{available:true, active:false, label:$label, detail:$detail, duration:"", tag:"", tags:"", annotation:""}'
+    return 0
+  fi
+
+  local start_iso current_json start_epoch now_epoch elapsed primary_tag all_tags annotation label
+  start_iso=$(timew get dom.active.start 2>/dev/null)
+  current_json=$(timew get dom.active.json 2>/dev/null)
+  if [[ "$start_iso" == *Z ]]; then
+    start_epoch=$(_iso_extended_to_epoch "$start_iso")
+  else
+    start_epoch=$(_iso_local_to_epoch "$start_iso")
+  fi
+  now_epoch=$(_now_epoch)
+  elapsed=$((now_epoch - start_epoch))
+  [ "$elapsed" -lt 0 ] && elapsed=0
+
+  primary_tag=$(printf '%s' "$current_json" | jq -r '.tags[0] // ""' 2>/dev/null)
+  all_tags=$(printf '%s' "$current_json" | jq -r '(.tags // []) | join(", ")' 2>/dev/null)
+  annotation=$(printf '%s' "$current_json" | jq -r '.annotation // ""' 2>/dev/null)
+  label=$(_format_active_duration "$elapsed")
+
+  jq -n \
+    --arg label "$label" \
+    --arg detail "${primary_tag:-$annotation}" \
+    --arg duration "$label" \
+    --arg tag "$primary_tag" \
+    --arg tags "$all_tags" \
+    --arg annotation "$annotation" \
+    '{available:true, active:true, label:$label, detail:$detail, duration:$duration, tag:$tag, tags:$tags, annotation:$annotation}'
+}
+
+_today_json() {
+  if ! _timew_available; then
+    jq -n '{available:false, total:"0:00", total_seconds:0, entries:0}'
+    return 0
+  fi
+
+  _ensure_timewarrior_layout
+
+  local export_json rows row total_seconds=0 count=0
+  export_json=$(timew export today 2>/dev/null || true)
+  [ -z "$export_json" ] && jq -n '{available:true, total:"0:00", total_seconds:0, entries:0}' && return 0
+
+  rows=$(printf '%s' "$export_json" | jq -c '.[]' 2>/dev/null || true)
+  [ -z "$rows" ] && jq -n '{available:true, total:"0:00", total_seconds:0, entries:0}' && return 0
+
+  while IFS= read -r row; do
+    [ -z "$row" ] && continue
+    local s e se ee dur
+    s=$(printf '%s' "$row" | jq -r '.start // ""')
+    e=$(printf '%s' "$row" | jq -r '.end // ""')
+    se=$(_iso_compact_to_epoch "$s")
+    if [ -n "$e" ] && [ "$e" != "null" ]; then
+      ee=$(_iso_compact_to_epoch "$e")
+    else
+      ee=$(_now_epoch)
+    fi
+    dur=$((ee - se))
+    [ "$dur" -lt 0 ] && dur=0
+    total_seconds=$((total_seconds + dur))
+    count=$((count + 1))
+  done <<< "$rows"
+
+  local hours minutes formatted
+  hours=$((total_seconds / 3600))
+  minutes=$(((total_seconds % 3600) / 60))
+
+  if [ "$hours" -gt 0 ]; then
+    formatted="${hours}h ${minutes}m"
+  elif [ "$minutes" -gt 0 ]; then
+    formatted="${minutes}m"
+  else
+    formatted="0:00"
+  fi
+
+  jq -n \
+    --arg total "$formatted" \
+    --argjson total_seconds "$total_seconds" \
+    --argjson entries "$count" \
+    '{available:true, total:$total, total_seconds:$total_seconds, entries:$entries}'
+}
+
+_recent_json() {
+  if ! _timew_available; then
+    echo '[]'
+    return 0
+  fi
+
+  _ensure_timewarrior_layout
+
+  local limit="${1:-$SKETCHYBAR_TIMER_RECENT_COUNT}"
+  local export_json rows row items
+
+  case "$limit" in
+    ''|*[!0-9]*)
+      limit="$SKETCHYBAR_TIMER_RECENT_COUNT"
+      ;;
+  esac
+
+  export_json=$(timew export 2>/dev/null || true)
+  [ -z "$export_json" ] && echo '[]' && return 0
+
+  rows=$(printf '%s' "$export_json" | jq -c "sort_by(.start) | reverse | .[:$limit][]" 2>/dev/null || true)
+  [ -z "$rows" ] && echo '[]' && return 0
+
+  items=""
+  while IFS= read -r row; do
+    [ -z "$row" ] && continue
+
+    local id start end title tags annotation start_epoch end_epoch duration_seconds duration day label item
+    id=$(printf '%s' "$row" | jq -r '.id // ""')
+    start=$(printf '%s' "$row" | jq -r '.start // ""')
+    end=$(printf '%s' "$row" | jq -r '.end // ""')
+    title=$(printf '%s' "$row" | jq -r '.tags[0] // .annotation // "untagged"' 2>/dev/null)
+    tags=$(printf '%s' "$row" | jq -r '(.tags // []) | join(", ")' 2>/dev/null)
+    annotation=$(printf '%s' "$row" | jq -r '.annotation // ""' 2>/dev/null)
+
+    start_epoch=$(_iso_compact_to_epoch "$start")
+    if [ -n "$end" ] && [ "$end" != "null" ]; then
+      end_epoch=$(_iso_compact_to_epoch "$end")
+    else
+      end_epoch=$(_now_epoch)
+    fi
+
+    duration_seconds=$((end_epoch - start_epoch))
+    [ "$duration_seconds" -lt 0 ] && duration_seconds=0
+    duration=$(_format_interval_duration "$duration_seconds")
+    day=$(_day_label "$start_epoch")
+    label="$duration $title"
+
+    item=$(jq -n \
+      --arg id "$id" \
+      --arg label "$label" \
+      --arg duration "$duration" \
+      --arg title "$title" \
+      --arg day "$day" \
+      --arg tags "$tags" \
+      --arg annotation "$annotation" \
+      '{id:$id, label:$label, duration:$duration, title:$title, day:$day, tags:$tags, annotation:$annotation}')
+
+    items="${items}${item}"$'\n'
+  done <<< "$rows"
+
+  [ -z "$items" ] && echo '[]' || printf '%s' "$items" | jq -s '.'
+}
+
+_start_timer() {
+  if ! _timew_available; then
+    echo "Timewarrior is not installed" >&2
+    return 1
+  fi
+
+  _ensure_timewarrior_layout
+
+  if [ "$(timew get dom.active 2>/dev/null || echo 0)" = "1" ]; then
+    timew stop >/dev/null
+  fi
+
+  if [ "$#" -gt 0 ]; then
+    timew start "$@" >/dev/null
+  else
+    timew start "$SKETCHYBAR_TIMER_DEFAULT_TAG" >/dev/null
+  fi
+}
+
+_stop_timer() {
+  _timew_available || return 1
+  _ensure_timewarrior_layout
+  if [ "$(timew get dom.active 2>/dev/null || echo 0)" = "1" ]; then
+    timew stop >/dev/null
+  fi
+}
+
+_toggle_timer() {
+  if ! _timew_available; then
+    echo "Timewarrior is not installed" >&2
+    return 1
+  fi
+
+  _ensure_timewarrior_layout
+
+  if [ "$(timew get dom.active 2>/dev/null || echo 0)" = "1" ]; then
+    _stop_timer
+  else
+    _start_timer "$@"
+  fi
+}
+
+case "${1:-status}" in
+  status)
+    shift
+    _status_json "$@"
+    ;;
+  today)
+    shift
+    _today_json "$@"
+    ;;
+  recent)
+    shift
+    _recent_json "$@"
+    ;;
+  start)
+    shift
+    _start_timer "$@"
+    ;;
+  stop)
+    shift
+    _stop_timer "$@"
+    ;;
+  toggle)
+    shift
+    _toggle_timer "$@"
+    ;;
+  *)
+    echo "Usage: makaron-timer [status|today|recent|start|stop|toggle]" >&2
+    exit 1
+    ;;
+esac

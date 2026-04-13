@@ -80,6 +80,7 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 ### System Commands
 - `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
+- `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the SketchyBar timer widget
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
@@ -173,6 +174,7 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 - **memory.sh** — Calls compiled Swift binary `makaron-memory-stats`, shows "X/Y GB"
 - **cpu.sh** — Load average from `uptime` divided by core count
 - **volume.sh** — Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons
+- **timer.sh** — Timewarrior timer: left click toggles tracking, right click shows recent log popup
 - **display_change.sh** — Reloads SketchyBar when monitor count changes
 
 ### SketchyBar Plugin Conventions
@@ -180,6 +182,24 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 - `$INFO` — event data (e.g., volume percentage on `volume_change`)
 - Events subscribed via: `--subscribe item_name event_name`
 - Click handlers: `click_script="aerospace workspace $sid"`
+
+### Responsive Labels On Small Screens
+Some SketchyBar items already adapt to limited width on smaller displays such as MacBook Air.
+
+Use `configs/sketchybar/plugins/lib/screen_max_chars.sh` for responsive `label.max_chars` values based on the narrowest active display:
+- `makaron_label_max_chars` — general cap for items like Todoist
+- `makaron_calendar_label_max_chars` — tighter cap for the `e` slot, where Calendar has much less room
+
+Current usage:
+- `configs/sketchybar/plugins/todoist.sh` uses `makaron_label_max_chars`
+- `configs/sketchybar/plugins/calendar.sh` uses `makaron_calendar_label_max_chars`
+
+The helper caches the narrowest display width for 60 seconds and should be invalidated on `display_change` and `system_woke` via `makaron_invalidate_screen_cache`.
+
+For any new text-heavy SketchyBar item, especially in `q`, `e`, or on the right side:
+- do not hardcode long labels
+- prefer a short primary label and move details into popup content
+- reuse the responsive width helper instead of introducing per-plugin fixed limits
 
 ---
 
@@ -215,7 +235,7 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty, Timewarrior.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
