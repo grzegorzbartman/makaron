@@ -77,6 +77,7 @@ class BarConfig {
 
     private var items: [BarItem: ItemVisibility] = [:]
     private(set) var workspaceDisplay: WorkspaceDisplayMode = .all
+    private(set) var selectedCalendars: Set<String> = []
     private let confPath: String
 
     private init() {
@@ -101,6 +102,11 @@ class BarConfig {
 
     func setWorkspaceDisplay(_ mode: WorkspaceDisplayMode) {
         workspaceDisplay = mode
+        save()
+    }
+
+    func setSelectedCalendars(_ ids: Set<String>) {
+        selectedCalendars = ids
         save()
     }
 
@@ -187,6 +193,11 @@ class BarConfig {
             let val = String(parts[1]).trimmingCharacters(in: .whitespaces)
             if key == "MAKARONBAR_WORKSPACE_DISPLAY" {
                 workspaceDisplay = WorkspaceDisplayMode(rawValue: val) ?? .all
+            } else if key == "MAKARONBAR_CALENDARS" {
+                let ids = val.trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+                    .split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) }
+                    .filter { !$0.isEmpty }
+                selectedCalendars = Set(ids)
             } else if let item = BarItem(rawValue: key), let vis = ItemVisibility(rawValue: val) {
                 items[item] = vis
             }
@@ -216,6 +227,15 @@ class BarConfig {
         } else {
             if !content.hasSuffix("\n") { content += "\n" }
             content += "\(wsLine)\n"
+        }
+
+        let calKey = "MAKARONBAR_CALENDARS"
+        let calLine = "\(calKey)=\(selectedCalendars.sorted().joined(separator: ","))"
+        if let range = content.range(of: "(?m)^\(calKey)=.*$", options: .regularExpression) {
+            content.replaceSubrange(range, with: calLine)
+        } else {
+            if !content.hasSuffix("\n") { content += "\n" }
+            content += "\(calLine)\n"
         }
 
         try? content.write(toFile: confPath, atomically: true, encoding: .utf8)
