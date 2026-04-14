@@ -63,6 +63,43 @@ default=(
 )
 sketchybar --default "${default[@]}"
 
+##### Tools Menu (left, first item) #####
+sketchybar --add item tools left \
+  --set tools \
+    padding_left=4 padding_right=2 \
+    icon.padding_left=6 icon.padding_right=6 \
+    label.drawing=off \
+    background.color=$SPACE_BACKGROUND_COLOR \
+    background.corner_radius=6 \
+    background.height=24 \
+    background.drawing=on \
+    popup.align=left \
+    popup.y_offset=6 \
+    popup.height=24 \
+    popup.blur_radius=0 \
+    popup.background.color=$BAR_COLOR \
+    popup.background.border_color=$SPACE_BORDER_COLOR \
+    popup.background.border_width=1 \
+    popup.background.corner_radius=8 \
+    script="$PLUGIN_DIR/tools.sh" \
+  --subscribe tools mouse.clicked space_change front_app_switched
+
+for idx in $(seq 1 6); do
+  sketchybar --add item "tools.popup.$idx" popup.tools \
+             --set "tools.popup.$idx" \
+                         drawing=off \
+                         width=220 \
+                         align=left \
+                         icon.drawing=off \
+                         label.padding_left=8 \
+                         label.padding_right=8 \
+                         label.font="Hack Nerd Font:Bold:11.0" \
+                         label.color=$LABEL_COLOR \
+                         background.color=$SPACE_BACKGROUND_COLOR \
+                         background.corner_radius=6 \
+                         background.height=22
+done
+
 ##### Adding AeroSpace Workspace Indicators #####
 # Integration with AeroSpace window manager
 # https://nikitabobko.github.io/AeroSpace/goodness#show-aerospace-workspaces-in-sketchybar
