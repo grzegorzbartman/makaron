@@ -124,7 +124,7 @@ class OptionsWindowController {
                     contentView.addSubview(calHint)
                     y += 32
                 } else {
-                    let calendars = SystemInfoProvider.shared.listCalendars()
+                    let calendars = Self.fetchCalendarsDirectly()
                     if !calendars.isEmpty {
                         let selected = config.selectedCalendars
                         let allSelected = selected.isEmpty
@@ -214,6 +214,13 @@ class OptionsWindowController {
             return status == .fullAccess
         }
         return status == .authorized
+    }
+
+    private static func fetchCalendarsDirectly() -> [(id: String, title: String, source: String)] {
+        let store = EKEventStore()
+        return store.calendars(for: .event)
+            .map { (id: $0.calendarIdentifier, title: $0.title, source: $0.source?.title ?? "") }
+            .sorted { $0.title.lowercased() < $1.title.lowercased() }
     }
 }
 
