@@ -1,5 +1,6 @@
 import AppKit
 import Carbon
+import EventKit
 
 class OptionsWindowController {
     private var window: NSPanel?
@@ -110,6 +111,25 @@ class OptionsWindowController {
             contentView.addSubview(seg)
 
             y += rowHeight
+
+            if item == .calendar {
+                let calStatus = checkCalendarAccess()
+                let statusText: String
+                let statusColor: NSColor
+                if calStatus {
+                    statusText = "✓ Calendar access granted"
+                    statusColor = .secondaryLabelColor
+                } else {
+                    statusText = "⚠ No calendar access — grant in System Settings → Privacy & Security → Calendars"
+                    statusColor = .systemOrange
+                }
+                let calHint = NSTextField(wrappingLabelWithString: statusText)
+                calHint.font = NSFont.systemFont(ofSize: 10)
+                calHint.textColor = statusColor
+                calHint.frame = NSRect(x: padding + 4, y: y, width: 310, height: calStatus ? 14 : 28)
+                contentView.addSubview(calHint)
+                y += calStatus ? 18 : 32
+            }
         }
 
         y += padding / 2
@@ -154,6 +174,14 @@ class OptionsWindowController {
 
     func close() {
         window?.close()
+    }
+
+    private func checkCalendarAccess() -> Bool {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        if #available(macOS 14.0, *) {
+            return status == .fullAccess
+        }
+        return status == .authorized
     }
 }
 
