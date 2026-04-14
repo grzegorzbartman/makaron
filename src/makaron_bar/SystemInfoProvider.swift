@@ -253,8 +253,10 @@ class SystemInfoProvider {
         }
 
         items.sort { a, b in
-            let da = a["dayOrder"] as? Int ?? 999
-            let db = b["dayOrder"] as? Int ?? 999
+            let rawA = a["dayOrder"] as? Int ?? 999
+            let rawB = b["dayOrder"] as? Int ?? 999
+            let da = rawA < 0 ? 999 : rawA
+            let db = rawB < 0 ? 999 : rawB
             return da < db
         }
 
