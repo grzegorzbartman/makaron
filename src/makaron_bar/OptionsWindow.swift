@@ -2,6 +2,10 @@ import AppKit
 import Carbon
 import EventKit
 
+private class FlippedView: NSView {
+    override var isFlipped: Bool { true }
+}
+
 class OptionsWindowController {
     private var window: NSPanel?
     private var segments: [BarItem: NSSegmentedControl] = [:]
@@ -11,6 +15,12 @@ class OptionsWindowController {
     var onChanged: (() -> Void)?
     var onHotkeyChanged: (() -> Void)?
 
+    private let W: CGFloat = 400
+    private let pad: CGFloat = 20
+    private let innerPad: CGFloat = 14
+    private let rowH: CGFloat = 32
+    private let lblW: CGFloat = 100
+
     func show() {
         if let w = window, w.isVisible {
             w.makeKeyAndOrderFront(nil)
@@ -19,10 +29,9 @@ class OptionsWindowController {
         }
 
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 340, height: 0),
+            contentRect: NSRect(x: 0, y: 0, width: W, height: 600),
             styleMask: [.titled, .closable, .nonactivatingPanel, .utilityWindow],
-            backing: .buffered,
-            defer: false
+            backing: .buffered, defer: false
         )
         panel.title = "MakaronBar Options"
         panel.isFloatingPanel = true
@@ -31,130 +40,203 @@ class OptionsWindowController {
         panel.isReleasedWhenClosed = false
 
         calendarCheckboxes = []
-        let contentView = NSView()
-        let padding: CGFloat = 16
-        let rowHeight: CGFloat = 32
-        let labelWidth: CGFloat = 100
-        let segWidth: CGFloat = 200
-        var y: CGFloat = padding
+        segments = [:]
 
-        // Hotkey recorder
-        let hkLabel = NSTextField(labelWithString: "Hotkey")
-        hkLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        hkLabel.frame = NSRect(x: padding, y: y + 5, width: labelWidth, height: 20)
-        contentView.addSubview(hkLabel)
+        let scroll = NSScrollView(frame: NSRect(x: 0, y: 0, width: W, height: 600))
+        scroll.hasVerticalScroller = true
+        scroll.drawsBackground = false
+        scroll.autohidesScrollers = true
 
-        let field = HotkeyField(frame: NSRect(x: padding + labelWidth, y: y + 2, width: segWidth, height: 26))
-        field.currentHotkey = config.readHotkeyString()
-        field.onChanged = { [weak self] newValue in
-            self?.config.writeHotkeyString(newValue)
-            self?.onHotkeyChanged?()
-        }
-        contentView.addSubview(field)
-        hotkeyField = field
-        y += rowHeight
+        let cv = FlippedView()
+        cv.frame = NSRect(x: 0, y: 0, width: W, height: 2000)
+        scroll.documentView = cv
+        var y: CGFloat = pad
 
-        let hint = NSTextField(labelWithString: "Click the field, then press your shortcut. Restart to apply.")
-        hint.font = NSFont.systemFont(ofSize: 10, weight: .regular)
-        hint.textColor = .secondaryLabelColor
-        hint.frame = NSRect(x: padding, y: y, width: 310, height: 14)
-        contentView.addSubview(hint)
-        y += 22
+        y = buildGeneralSection(in: cv, y: y)
+        y += 16
+        y = buildItemsSection(in: cv, y: y)
+        y += 16
+        y = buildCalendarsSection(in: cv, y: y)
+        y += pad
 
-        // Separator
-        let sep = NSBox(frame: NSRect(x: padding, y: y, width: 308, height: 1))
-        sep.boxType = .separator
-        contentView.addSubview(sep)
-        y += 12
+        cv.frame = NSRect(x: 0, y: 0, width: W, height: y)
 
-        // Workspace display mode
-        let wsLabel = NSTextField(labelWithString: "Workspaces")
-        wsLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        wsLabel.frame = NSRect(x: padding, y: y + 5, width: labelWidth, height: 20)
-        contentView.addSubview(wsLabel)
-
-        let wsSeg = NSSegmentedControl(labels: ["All", "Active Only", "Current Only"], trackingMode: .selectOne, target: self, action: #selector(workspaceDisplayChanged(_:)))
-        wsSeg.segmentStyle = .rounded
-        wsSeg.frame = NSRect(x: padding + labelWidth, y: y + 2, width: segWidth, height: 26)
-        switch config.workspaceDisplay {
-        case .all: wsSeg.selectedSegment = 0
-        case .focused: wsSeg.selectedSegment = 1
-        case .current: wsSeg.selectedSegment = 2
-        }
-        contentView.addSubview(wsSeg)
-        y += rowHeight
-
-        let sep2 = NSBox(frame: NSRect(x: padding, y: y, width: 308, height: 1))
-        sep2.boxType = .separator
-        contentView.addSubview(sep2)
-        y += 12
-
-        // Item visibility controls
-        let items = BarItem.allCases.reversed()
-
-        for item in items {
-            let label = NSTextField(labelWithString: item.displayName)
-            label.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-            label.frame = NSRect(x: padding, y: y + 5, width: labelWidth, height: 20)
-            contentView.addSubview(label)
-
-            let seg = NSSegmentedControl(labels: ["Off", "Menu", "Top Bar"], trackingMode: .selectOne, target: self, action: #selector(segmentChanged(_:)))
-            seg.segmentStyle = .rounded
-            seg.frame = NSRect(x: padding + labelWidth, y: y + 2, width: segWidth, height: 26)
-            seg.tag = item.hashValue
-
-            switch config.visibility(for: item) {
-            case .off: seg.selectedSegment = 0
-            case .menu: seg.selectedSegment = 1
-            case .bar: seg.selectedSegment = 2
-            }
-
-            segments[item] = seg
-            contentView.addSubview(seg)
-
-            y += rowHeight
-
-            if item == .calendar {
-                let calAccess = checkCalendarAccess()
-                if !calAccess {
-                    let calHint = NSTextField(wrappingLabelWithString: "⚠ No calendar access — grant in System Settings → Privacy & Security → Calendars")
-                    calHint.font = NSFont.systemFont(ofSize: 10)
-                    calHint.textColor = .systemOrange
-                    calHint.frame = NSRect(x: padding + 4, y: y, width: 310, height: 28)
-                    contentView.addSubview(calHint)
-                    y += 32
-                } else {
-                    let calendars = Self.fetchCalendarsDirectly()
-                    if !calendars.isEmpty {
-                        let selected = config.selectedCalendars
-                        let allSelected = selected.isEmpty
-                        for cal in calendars {
-                            let cb = NSButton(checkboxWithTitle: "\(cal.title)  (\(cal.source))", target: self, action: #selector(calendarCheckboxChanged(_:)))
-                            cb.font = NSFont.systemFont(ofSize: 11)
-                            cb.frame = NSRect(x: padding + 12, y: y, width: 300, height: 18)
-                            cb.state = allSelected || selected.contains(cal.id) ? .on : .off
-                            cb.identifier = NSUserInterfaceItemIdentifier(cal.id)
-                            calendarCheckboxes.append(cb)
-                            contentView.addSubview(cb)
-                            y += 20
-                        }
-                        y += 4
-                    }
-                }
-            }
-        }
-
-        y += padding / 2
-        let totalHeight = y + padding
-
-        contentView.frame = NSRect(x: 0, y: 0, width: 340, height: totalHeight)
-        panel.contentView = contentView
-        panel.setContentSize(NSSize(width: 340, height: totalHeight))
+        let visibleH = min(y, 700)
+        panel.setContentSize(NSSize(width: W, height: visibleH))
+        scroll.frame = NSRect(x: 0, y: 0, width: W, height: visibleH)
+        panel.contentView = scroll
         panel.center()
         panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-
         window = panel
+    }
+
+    // MARK: - General
+
+    private func buildGeneralSection(in cv: NSView, y startY: CGFloat) -> CGFloat {
+        var y = startY
+        addSectionLabel("General", in: cv, y: y)
+        y += 22
+
+        let boxContent: [(CGFloat) -> CGFloat] = [
+            { y in self.addGroupRow("AeroSpace", in: cv, y: y) { ctrlX, ctrlW in
+                let seg = NSSegmentedControl(labels: ["All", "Active Only", "Current Only"],
+                                              trackingMode: .selectOne, target: self,
+                                              action: #selector(self.workspaceDisplayChanged(_:)))
+                seg.segmentStyle = .rounded
+                seg.frame = NSRect(x: ctrlX, y: y + 4, width: ctrlW, height: 24)
+                switch self.config.workspaceDisplay {
+                case .all: seg.selectedSegment = 0
+                case .focused: seg.selectedSegment = 1
+                case .current: seg.selectedSegment = 2
+                }
+                cv.addSubview(seg)
+            }},
+            { y in self.addGroupRow("Hotkey", in: cv, y: y) { ctrlX, ctrlW in
+                let field = HotkeyField(frame: NSRect(x: ctrlX, y: y + 4, width: ctrlW, height: 24))
+                field.currentHotkey = self.config.readHotkeyString()
+                field.onChanged = { [weak self] val in
+                    self?.config.writeHotkeyString(val)
+                    self?.onHotkeyChanged?()
+                }
+                self.hotkeyField = field
+                cv.addSubview(field)
+            }},
+        ]
+
+        let boxY = y
+        for row in boxContent { y = row(y) }
+        addGroupBox(in: cv, y: boxY, height: y - boxY)
+
+        y += 4
+        let hint = NSTextField(labelWithString: "Click the hotkey field and press your shortcut. Restart to apply.")
+        hint.font = NSFont.systemFont(ofSize: 10)
+        hint.textColor = .tertiaryLabelColor
+        hint.frame = NSRect(x: pad + 4, y: y, width: W - pad * 2, height: 14)
+        cv.addSubview(hint)
+        y += 18
+        return y
+    }
+
+    // MARK: - Status Bar Items
+
+    private func buildItemsSection(in cv: NSView, y startY: CGFloat) -> CGFloat {
+        var y = startY
+        addSectionLabel("Status Bar Items", in: cv, y: y)
+        y += 22
+
+        let boxY = y
+        for item in BarItem.allCases {
+            y = addGroupRow(item.displayName, in: cv, y: y) { ctrlX, ctrlW in
+                let seg = NSSegmentedControl(labels: ["Off", "Menu", "Top Bar"],
+                                              trackingMode: .selectOne, target: self,
+                                              action: #selector(self.segmentChanged(_:)))
+                seg.segmentStyle = .rounded
+                seg.frame = NSRect(x: ctrlX, y: y + 4, width: ctrlW, height: 24)
+                seg.tag = item.hashValue
+                switch self.config.visibility(for: item) {
+                case .off: seg.selectedSegment = 0
+                case .menu: seg.selectedSegment = 1
+                case .bar: seg.selectedSegment = 2
+                }
+                self.segments[item] = seg
+                cv.addSubview(seg)
+            }
+        }
+        addGroupBox(in: cv, y: boxY, height: y - boxY)
+        return y
+    }
+
+    // MARK: - Calendars
+
+    private func buildCalendarsSection(in cv: NSView, y startY: CGFloat) -> CGFloat {
+        var y = startY
+        addSectionLabel("Calendars", in: cv, y: y)
+        y += 22
+
+        let boxY = y
+
+        guard checkCalendarAccess() else {
+            let warn = NSTextField(wrappingLabelWithString: "⚠ No calendar access — grant in System Settings → Privacy & Security → Calendars")
+            warn.font = NSFont.systemFont(ofSize: 11)
+            warn.textColor = .systemOrange
+            warn.frame = NSRect(x: pad + innerPad, y: y + 8, width: W - pad * 2 - innerPad * 2, height: 36)
+            cv.addSubview(warn)
+            y += 52
+            addGroupBox(in: cv, y: boxY, height: y - boxY)
+            return y
+        }
+
+        let calendars = Self.fetchCalendarsDirectly()
+        let selected = config.selectedCalendars
+        let allSelected = selected.isEmpty
+
+        if calendars.isEmpty {
+            let empty = NSTextField(labelWithString: "No calendars found.")
+            empty.font = NSFont.systemFont(ofSize: 12)
+            empty.textColor = .secondaryLabelColor
+            empty.frame = NSRect(x: pad + innerPad, y: y + 8, width: W - pad * 2 - innerPad * 2, height: 20)
+            cv.addSubview(empty)
+            y += 36
+        } else {
+            y += 8
+            for cal in calendars {
+                let cb = NSButton(checkboxWithTitle: "\(cal.title)  ·  \(cal.source)",
+                                  target: self, action: #selector(calendarCheckboxChanged(_:)))
+                cb.font = NSFont.systemFont(ofSize: 12)
+                cb.frame = NSRect(x: pad + innerPad, y: y, width: W - pad * 2 - innerPad * 2, height: 20)
+                cb.state = allSelected || selected.contains(cal.id) ? .on : .off
+                cb.identifier = NSUserInterfaceItemIdentifier(cal.id)
+                calendarCheckboxes.append(cb)
+                cv.addSubview(cb)
+                y += 22
+            }
+            y += 6
+        }
+
+        addGroupBox(in: cv, y: boxY, height: y - boxY)
+
+        y += 4
+        let hint = NSTextField(labelWithString: "All selected = show events from all calendars.")
+        hint.font = NSFont.systemFont(ofSize: 10)
+        hint.textColor = .tertiaryLabelColor
+        hint.frame = NSRect(x: pad + 4, y: y, width: W - pad * 2, height: 14)
+        cv.addSubview(hint)
+        y += 18
+
+        return y
+    }
+
+    // MARK: - UI building blocks
+
+    private func addSectionLabel(_ title: String, in cv: NSView, y: CGFloat) {
+        let lbl = NSTextField(labelWithString: title)
+        lbl.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+        lbl.textColor = .labelColor
+        lbl.frame = NSRect(x: pad + 4, y: y, width: W - pad * 2, height: 18)
+        cv.addSubview(lbl)
+    }
+
+    private func addGroupRow(_ label: String, in cv: NSView, y: CGFloat,
+                             control: (_ ctrlX: CGFloat, _ ctrlW: CGFloat) -> Void) -> CGFloat {
+        let lbl = NSTextField(labelWithString: label)
+        lbl.font = NSFont.systemFont(ofSize: 13)
+        lbl.frame = NSRect(x: pad + innerPad, y: y + 6, width: lblW, height: 20)
+        cv.addSubview(lbl)
+
+        let ctrlX = pad + innerPad + lblW
+        let ctrlW = W - pad * 2 - innerPad * 2 - lblW
+        control(ctrlX, ctrlW)
+
+        return y + rowH
+    }
+
+    private func addGroupBox(in cv: NSView, y: CGFloat, height: CGFloat) {
+        let box = NSView(frame: NSRect(x: pad, y: y, width: W - pad * 2, height: height))
+        box.wantsLayer = true
+        box.layer?.cornerRadius = 10
+        box.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        cv.addSubview(box, positioned: .below, relativeTo: nil)
     }
 
     @objc private func segmentChanged(_ sender: NSSegmentedControl) {
