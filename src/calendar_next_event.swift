@@ -57,6 +57,7 @@ if listToday {
     let endOfDay = cal.date(byAdding: .day, value: 1, to: startOfDay)!
     let predicate = store.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: selectedCalendars())
     var events = store.events(matching: predicate)
+        .filter { $0.isAllDay || $0.endDate > now }
     events.sort { $0.startDate < $1.startDate }
     for ev in events {
         let title = ev.title ?? ""
