@@ -3,7 +3,7 @@
 echo "Compiling MakaronBar..."
 swiftc -O -o "$MAKARON_PATH/bin/makaron-bar" \
   "$MAKARON_PATH"/src/makaron_bar/*.swift \
-  -framework AppKit -framework Carbon 2>/dev/null || {
+  -framework AppKit -framework Carbon -framework EventKit 2>/dev/null || {
     echo "Warning: Failed to compile MakaronBar"
 }
 

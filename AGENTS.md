@@ -43,20 +43,35 @@ install_formula_critical "formula" "Display Name" "command-to-check"
 Some components require compiled Swift binaries for performance or API access:
 
 ```bash
-# Compile Swift sources
+# MakaronBar (multi-file Swift project)
+swiftc -O -o bin/makaron-bar src/makaron_bar/*.swift \
+  -framework AppKit -framework Carbon -framework EventKit
+
+# System stats
 swiftc -O -o bin/makaron-memory-stats src/memory_stats.swift
 
-# MakaronBar (multi-file Swift project)
-swiftc -O -o bin/makaron-bar src/makaron_bar/*.swift -framework Cocoa -framework IOKit
+# Calendar CLI
+swiftc -O -o bin/makaron-calendar-next src/calendar_next_event.swift -framework EventKit
 ```
 
 - Source files: `src/*.swift`, `src/makaron_bar/*.swift`
-- Compiled binaries: `bin/` (gitignored)
-- Compilation runs automatically during `install/desktop/makaron-bar.sh`
+- Compiled binaries: `bin/` (gitignored, never committed)
+- Compilation: `install/desktop/makaron-bar.sh` (during install and `makaron-update`)
+
+**Critical:** All Swift binaries are gitignored. They are always compiled from source during install and update. Never commit compiled binaries. When changing Swift source, always update the compile command in `install/desktop/makaron-bar.sh` if new frameworks are needed.
 
 ### Why Swift
-- `memory_stats.swift` — Uses Mach `host_statistics64` API to match Activity Monitor exactly. Shell-based alternatives (`vm_stat`, `top`) give inaccurate numbers.
-- `makaron_bar/` — Native macOS menu bar app using AppKit. Displays AeroSpace workspaces, system info, and quick actions in the menu bar.
+- `memory_stats.swift` — Uses Mach `host_statistics64` API to match Activity Monitor exactly.
+- `calendar_next_event.swift` — Uses EventKit for calendar access with proper macOS permissions.
+- `makaron_bar/` — Native macOS menu bar app using AppKit. Displays AeroSpace workspaces, system info, and quick actions.
+
+### MakaronBar Architecture
+- **WorkspaceStrip** — Renders workspace buttons and bar labels (system stats, timer, calendar, todoist) with vertical separators between each element.
+- **DashboardPanel** — 3-column popup panel opened via hotkey (default: Cmd+Shift+M) or clicking the 🍝 icon.
+- **OptionsWindow** — NSPanel for toggling item visibility (off/menu/top bar), workspace display mode (all/active/current only), calendar selection, and hotkey definition.
+- **BarConfig** — Reads/writes `~/.config/makaron/makaron.conf`. Config variables: `MAKARONBAR_*` prefix.
+- **SystemInfoProvider** — Fetches system data with 3 timer tiers: fast (5s: timer), system (30s: CPU/RAM/battery), slow (60s: Todoist/calendar). Has `refreshCalendar()` for immediate updates after settings change.
+- **ThemeManager** — Uses system colors only (no custom themes). MakaronBar inherits macOS appearance.
 
 
 ---
@@ -67,7 +82,7 @@ All commands are in `bin/` and added to `$PATH` during install.
 
 ### System Commands
 - `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the MakaronBar timer panel
-- `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
+- `makaron-update` — Pulls latest code (`git reset --hard origin/main`), recompiles Swift binaries, runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
 - `makaron-reload` — Reloads AeroSpace config + restarts MakaronBar
@@ -227,6 +242,10 @@ MAKARON_TIMER_TAGS="sales,marketing,…"  # Comma-separated tags shown in timer 
 MAKARON_TIMER_DEFAULT_TAG=other         # Default tag for makaron-timer start/toggle
 MAKARON_TIMER_RECENT_COUNT=4            # Recent entries shown in timer panel
 MAKARON_NOTES_ENABLED=false             # Apple Notes quick action in MakaronBar panel
+MAKARONBAR_HOTKEY=cmd+shift+m           # Dashboard panel hotkey (default: ⌘⇧M)
+MAKARONBAR_WORKSPACE_DISPLAY=all        # Workspace display: all|focused|current
+MAKARONBAR_CALENDARS=                   # Comma-separated calendar IDs to show (empty = all)
+MAKARONBAR_battery=bar                  # Item visibility: off|menu|bar
 ```
 
 ---
@@ -316,12 +335,29 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     'echo "$AEROSPACE_FOCUSED_WORKSPACE" > /tmp/makaron_focused_ws'
 ]
 ```
-MakaronBar watches this file to update the active workspace indicator.
+MakaronBar polls this file every 0.15s to update the active workspace indicator.
+
+### AeroSpace Gaps
+```toml
+[gaps]
+    inner.horizontal = 5
+    inner.vertical =   5
+    outer.left =       5
+    outer.bottom =     5
+    outer.top =        6
+    outer.right =      5
+```
+- `outer.top = 6` — gap below the macOS menu bar. AeroSpace accounts for the menu bar automatically.
+- All other gaps: 5px. Tight gaps since there are no window borders (JankyBorders was removed).
+- **No per-monitor variants, no notch detection, no dynamic calculations.** One static config.
 
 ### Monitor Detection
 - Single monitor: Show all workspaces in one strip
 - Multi-monitor: Each display shows its assigned workspaces
 - Auto-reload on monitor connect/disconnect
+
+### Update Flow
+`makaron-update` → `git reset --hard` → recompile Swift binaries → run migrations → `makaron-reload` (restart AeroSpace + MakaronBar). Recompilation is mandatory because binaries are gitignored.
 
 ---
 
