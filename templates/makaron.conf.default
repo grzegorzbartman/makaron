@@ -13,6 +13,9 @@ MAKARON_TIMER_DEFAULT_TAG=other
 # Timewarrior: number of recent entries shown in timer panel
 MAKARON_TIMER_RECENT_COUNT=4
 
+# MakaronBar dashboard hotkey (default: cmd+shift+m)
+MAKARONBAR_HOTKEY=cmd+shift+m
+
 # Apple Notes — quick action in MakaronBar panel
 MAKARON_NOTES_ENABLED=false
 
