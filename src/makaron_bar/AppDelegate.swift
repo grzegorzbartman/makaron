@@ -135,7 +135,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 _ = AeroSpaceProvider.shell(script, args: ["--action", "new-note"])
             }
         case "options":
-            optionsWindow.onChanged = { [weak self] in self?.updateStrip() }
+            optionsWindow.onChanged = { [weak self] in
+                guard let self = self else { return }
+                DispatchQueue.global(qos: .utility).async {
+                    self.sysInfo.refreshCalendar()
+                    DispatchQueue.main.async { self.updateStrip() }
+                }
+            }
             optionsWindow.show()
         case "reload":
             _ = AeroSpaceProvider.shell("aerospace", args: ["reload-config"])

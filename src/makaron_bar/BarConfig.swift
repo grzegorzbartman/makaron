@@ -116,14 +116,14 @@ class BarConfig {
 
     func readHotkeyString() -> String {
         guard let content = try? String(contentsOfFile: confPath, encoding: .utf8) else {
-            return "option+m"
+            return "cmd+shift+m"
         }
         for line in content.components(separatedBy: "\n") {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             guard trimmed.hasPrefix("MAKARONBAR_HOTKEY=") else { continue }
             return String(trimmed.dropFirst("MAKARONBAR_HOTKEY=".count)).trimmingCharacters(in: .whitespaces)
         }
-        return "option+m"
+        return "cmd+shift+m"
     }
 
     func writeHotkeyString(_ value: String) {
@@ -139,10 +139,10 @@ class BarConfig {
         try? content.write(toFile: confPath, atomically: true, encoding: .utf8)
     }
 
-    // Returns (keyCode, carbonModifiers). Default: ⌥M
+    // Returns (keyCode, carbonModifiers). Default: ⌘⇧M
     func readHotKey() -> (UInt32, UInt32) {
         guard let content = try? String(contentsOfFile: confPath, encoding: .utf8) else {
-            return (46, UInt32(optionKey))
+            return (46, UInt32(cmdKey) | UInt32(shiftKey))
         }
         for line in content.components(separatedBy: "\n") {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
@@ -150,7 +150,7 @@ class BarConfig {
             let val = String(trimmed.dropFirst("MAKARONBAR_HOTKEY=".count)).trimmingCharacters(in: .whitespaces)
             return parseHotKey(val)
         }
-        return (46, UInt32(optionKey))
+        return (46, UInt32(cmdKey) | UInt32(shiftKey))
     }
 
     private func parseHotKey(_ str: String) -> (UInt32, UInt32) {
