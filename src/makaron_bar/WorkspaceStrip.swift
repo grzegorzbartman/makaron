@@ -145,13 +145,13 @@ class WorkspaceStripView: NSView {
     }
 
     private func drawMenuIcon() {
-        let iconFont = NSFont.systemFont(ofSize: 13, weight: .regular)
-        let attrs: [NSAttributedString.Key: Any] = [.font: iconFont]
-        let icon = NSAttributedString(string: "🍝", attributes: attrs)
-        let size = icon.size()
+        let font = NSFont.systemFont(ofSize: 14, weight: .heavy)
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: theme.labelColor]
+        let str = NSAttributedString(string: "M", attributes: attrs)
+        let size = str.size()
         let x: CGFloat = (iconPadding / 2)
         let y = (bounds.height - size.height) / 2
-        icon.draw(at: NSPoint(x: x, y: y))
+        str.draw(at: NSPoint(x: x, y: y))
     }
 
     override func mouseDown(with event: NSEvent) {
