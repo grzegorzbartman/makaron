@@ -227,7 +227,7 @@ class OptionsWindowController {
 // MARK: - Hotkey recorder field
 
 class HotkeyField: NSView {
-    var currentHotkey: String = "option+m"
+    var currentHotkey: String = "cmd+shift+m"
     var onChanged: ((String) -> Void)?
     private var isRecording = false
     private var label: NSTextField!
