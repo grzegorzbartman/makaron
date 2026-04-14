@@ -79,6 +79,10 @@ class SystemInfoProvider {
         cache.todoistTasks = fetchTodoist()
     }
 
+    func refreshCalendar() {
+        cache.calendarEvents = fetchCalendar()
+    }
+
     // MARK: - Battery
 
     private func fetchBattery() -> String {
