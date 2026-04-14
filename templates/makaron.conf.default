@@ -4,32 +4,17 @@
 # Battery low threshold (percentage)
 BATTERY_LOW_THRESHOLD=20
 
-# Window borders (JankyBorders) — set to false to disable
-BORDERS_ENABLED=true
-
-# SketchyBar: Todoist next-task item (requires: td auth login, or TODOIST_API_TOKEN)
-SKETCHYBAR_TODOIST_ENABLED=true
-
-# SketchyBar: next calendar event (uses makaron-calendar-next binary; optional: brew install icalbuddy)
-SKETCHYBAR_CALENDAR_ENABLED=true
-
-# SketchyBar: hide CPU / memory / storage widgets (more room for workspaces + agenda)
-SKETCHYBAR_COMPACT_MODE=false
-
-# SketchyBar: Timewarrior timer widget
-SKETCHYBAR_TIMER_ENABLED=true
-
-# Timewarrior: comma-separated tags shown in timer popup (add your own)
-SKETCHYBAR_TIMER_TAGS="sales,marketing,delivery,hr_recruitment,finance,meeting,other"
+# Timewarrior: comma-separated tags shown in timer panel (add your own)
+MAKARON_TIMER_TAGS="sales,marketing,delivery,hr_recruitment,finance,meeting,other"
 
 # Timewarrior: default tag used by makaron-timer start/toggle (CLI fallback)
-SKETCHYBAR_TIMER_DEFAULT_TAG=other
+MAKARON_TIMER_DEFAULT_TAG=other
 
-# SketchyBar: number of recent Timewarrior entries shown in timer popup
-SKETCHYBAR_TIMER_RECENT_COUNT=4
+# Timewarrior: number of recent entries shown in timer panel
+MAKARON_TIMER_RECENT_COUNT=4
 
-# SketchyBar: Apple Notes — click to create a new note in a new window
-SKETCHYBAR_NOTES_ENABLED=false
+# Apple Notes — quick action in MakaronBar panel
+MAKARON_NOTES_ENABLED=false
 
 # Optional: full path to td if not on PATH (default: td)
 # TODOIST_CLI=td

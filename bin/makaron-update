@@ -131,11 +131,10 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         bash "$MAKARON_PATH/bin/makaron-migrate"
     fi
 
-    # Reload configurations based on current UI mode
-    if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
-        echo "Reloading configurations..."
-        source "$MAKARON_PATH/bin/makaron-ui-helpers"
-        reload_current_ui
+    # Reload configurations
+    echo "Reloading configurations..."
+    if [ -f "$MAKARON_PATH/bin/makaron-reload" ]; then
+        bash "$MAKARON_PATH/bin/makaron-reload"
     fi
 
     echo ""

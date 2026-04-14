@@ -1,7 +1,0 @@
-#!/bin/bash
-# Everforest color scheme for Borders
-
-export ACTIVE_BORDER_COLOR=0xffd3c6aa
-export INACTIVE_BORDER_COLOR=0xff475258
-export BORDER_WIDTH=5.0
-

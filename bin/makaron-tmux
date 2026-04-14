@@ -16,14 +16,6 @@ MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 # Load theme colors (0xffRRGGBB -> #RRGGBB)
 hex() { echo "#${1:4:6}"; }
 
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/borders.colors" ]; then
-  source "$THEME_DIR/borders.colors"
-fi
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
-
 ACCENT=$(hex "${ACTIVE_BORDER_COLOR:-0xff89b4fa}")
 DIM=$(hex "${INACTIVE_BORDER_COLOR:-0xff313244}")
 BG=$(hex "${BAR_COLOR:-0xff0a0a0a}")

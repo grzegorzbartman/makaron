@@ -8,13 +8,11 @@
 start-at-login = true
 
 # Commands to run after AeroSpace startup
-# Border colors are loaded from theme file via makaron-reload-aerospace-sketchybar
 after-startup-command = []
 
-# Trigger SketchyBar when workspace changes
-# This passes the focused workspace number to SketchyBar plugins
+# Write focused workspace to file for MakaronBar polling
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+    'echo "$AEROSPACE_FOCUSED_WORKSPACE" > /tmp/makaron_focused_ws'
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
@@ -64,12 +62,7 @@ automatically-unhide-macos-hidden-apps = false
     inner.vertical =   15
     outer.left =       15
     outer.bottom =     15
-    # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
-    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers based on notch detection:
-    # Full mode + notch:    [{ monitor."Built-in" = 15 }, 45] (notch area absorbs SketchyBar)
-    # Full mode + no notch: 45 (all monitors same — 40px bar + 5px margin)
-    # Minimal mode:         8 (no SketchyBar, just small gap)
-    outer.top = [{ monitor."Built-in" = 15 }, 45]
+    outer.top = 4
     outer.right =      10
 
 # Workspace assignment for dual monitor setup

@@ -2,9 +2,9 @@
 
 ## What Is Makaron
 
-Makaron is a macOS desktop environment manager. It sets up and orchestrates a tiling window manager (AeroSpace), a custom status bar (SketchyBar), window borders (JankyBorders), and a terminal (Ghostty) — all tied together by a theming system that switches colors across every component simultaneously, including VSCode/Cursor, macOS accent color, dark/light mode, and wallpaper.
+Makaron is a macOS desktop environment manager. It sets up and orchestrates a tiling window manager (AeroSpace), a native menu bar app (MakaronBar), and a terminal (Ghostty).
 
-The project is a collection of bash scripts, SketchyBar plugins, config files, and two Swift binaries. It installs via a single `curl | bash` command and updates itself via `makaron-update`.
+The project is a collection of bash scripts, config files, and Swift binaries. It installs via a single `curl | bash` command and updates itself via `makaron-update`.
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -43,18 +43,20 @@ install_formula_critical "formula" "Display Name" "command-to-check"
 Some components require compiled Swift binaries for performance or API access:
 
 ```bash
-# Compile all Swift sources
+# Compile Swift sources
 swiftc -O -o bin/makaron-memory-stats src/memory_stats.swift
-swiftc -O -o bin/makaron-set-accent-color src/set_accent_color.swift
+
+# MakaronBar (multi-file Swift project)
+swiftc -O -o bin/makaron-bar src/makaron_bar/*.swift -framework Cocoa -framework IOKit
 ```
 
-- Source files: `src/*.swift`
+- Source files: `src/*.swift`, `src/makaron_bar/*.swift`
 - Compiled binaries: `bin/` (gitignored)
-- Compilation runs automatically during `install/desktop/sketchybar.sh`
+- Compilation runs automatically during `install/desktop/makaron-bar.sh`
 
 ### Why Swift
 - `memory_stats.swift` — Uses Mach `host_statistics64` API to match Activity Monitor exactly. Shell-based alternatives (`vm_stat`, `top`) give inaccurate numbers.
-- `set_accent_color.swift` — Uses `CFPreferences` API + `DistributedNotificationCenter` for instant system-wide accent color change with live notification (no logout required).
+- `makaron_bar/` — Native macOS menu bar app using AppKit. Displays AeroSpace workspaces, system info, and quick actions in the menu bar.
 
 
 ---
@@ -63,143 +65,19 @@ swiftc -O -o bin/makaron-set-accent-color src/set_accent_color.swift
 
 All commands are in `bin/` and added to `$PATH` during install.
 
-### UI Mode Commands
-Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
-
-| Command | Components | Dock | Menu Bar |
-|---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar + Borders | Hidden (autohide) | Hidden (autohide) |
-| `makaron-ui-minimal` | AeroSpace only | Visible | Visible |
-| `makaron-ui-stop` | Nothing | Visible | Visible |
-
-- `makaron-ui-helpers` — Shared library (not a command). Contains: `start/stop_aerospace()`, `start/stop_sketchybar()`, `start/stop_borders()`, `switch_aerospace_config()`, `apply_macos_full/minimal_settings()`, `restore_macos_defaults()`, `save/get_ui_mode()`, `reload_current_ui()`.
-
-### Theme Commands
-- `makaron-switch-theme <name>` — Core theme switcher (see Theme Switching section)
-- `makaron-theme-*` — Shortcuts, each calls `exec makaron-switch-theme <name>`
-
 ### System Commands
-- `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
-- `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the SketchyBar timer widget
+- `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the MakaronBar timer panel
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
-- `makaron-reload-aerospace-sketchybar` — Reloads AeroSpace + SketchyBar configs, restarts Borders with theme colors
+- `makaron-reload` — Reloads AeroSpace config + restarts MakaronBar
 - `makaron-macos-config-reload` — Re-applies macOS settings from `install/macos_settings.sh`
 - `makaron-debug` — Diagnostic tool: checks all components, symlinks, configs, migrations
 - `makaron-tmux` — Custom tmux session launcher
+- `makaron-tools` — Quick actions (e.g., new Apple Note with workspace restore)
 
 ### Development Commands
-- `makaron-dev-generate-ghostty-theme <name>` — Generates Ghostty palette from sketchybar/borders colors
 - `makaron-dev-add-migration` — Creates a new timestamped migration script
-
----
-
-## Theme Switching
-
-### How `makaron-switch-theme` Works (execution order)
-
-1. **Update `current-theme` symlink** — `$MAKARON_PATH/current-theme` points to `themes/<name>/`
-2. **Resolve Ghostty theme** — If `ghostty.theme` contains `=` (custom palette), copies to `configs/ghostty/themes/<name>`. If single line (built-in name), uses as-is. Default: "TokyoNight Storm".
-3. **Find counterpart theme** — Auto-pairs dark/light variants (`cosmic-dark` <-> `cosmic-light`). Falls back to TokyoNight Storm/Day.
-4. **Build Ghostty theme string** — `dark:$ACTIVE_THEME, light:$OPPOSITE_THEME` format
-5. **Update shell configs** — Writes `export GHOSTTY_THEME="..."` to `.zshrc` and `.bashrc`
-6. **Update Ghostty config** — Sets `theme = ...` in `configs/ghostty/config`
-7. **Reload Ghostty** — AppleScript clicks "Reload Configuration" menu item (can't use pgrep from within Ghostty terminal)
-8. **Update VSCode/Cursor** — Sets `workbench.colorTheme` and `workbench.preferredDark/LightColorTheme` in main + profile settings.json
-9. **Set macOS accent color** — Reads `accent.color`, calls Swift binary (falls back to `defaults write`)
-10. **Set macOS appearance** — AppleScript sets dark/light mode
-11. **Set wallpaper** — First image from `themes/<name>/backgrounds/` via Finder AppleScript
-12. **Reload UI** — Calls `makaron-reload-aerospace-sketchybar` to apply SketchyBar + Borders colors
-
-### The `current-theme` Symlink
-`$MAKARON_PATH/current-theme` -> `themes/<name>/` — all plugins read colors from this symlink, so theme changes propagate without restarting processes.
-
----
-
-## UI Modes Detail
-
-### AeroSpace Gaps Switching
-`switch_aerospace_config()` in `makaron-ui-helpers` uses `sed` to update `outer.top` in `~/.aerospace.toml`.
-It auto-detects whether the built-in display has a notch via `_has_builtin_notch()` (Swift `NSScreen.safeAreaInsets.top > 0`):
-- **Full mode + notch**: `outer.top = [{ monitor."Built-in" = 15 }, 45]` — 45px for SketchyBar, 15px for built-in (notch area absorbs the bar)
-- **Full mode + no notch**: `outer.top = 45` — same for all monitors (40px bar + 5px margin)
-- **Minimal mode**: `outer.top = 8` — no SketchyBar, just small margin (same for all monitors)
-
-The function resolves the symlink target before editing to modify the actual config file.
-
-### macOS Settings Per Mode
-- **Full**: dock autohide, window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar autohide
-- **Minimal**: dock visible, window grouping on, Three Finger Drag off, menu bar visible
-- **Stop**: dock visible, window grouping off, Three Finger Drag on (restored)
-
-### Menu Bar Autohide
-`_set_menubar_autohide()` uses AppleScript to quit and reopen System Settings on the Menu Bar pane, find the dropdown by its current value, then apply a toggle trick (opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting — UI click is the only reliable method.
-
----
-
-## SketchyBar Plugins
-
-### Architecture
-Plugins live in `configs/sketchybar/plugins/`. Each plugin follows this pattern:
-1. Load theme colors: `source "$THEME_DIR/sketchybar.colors"`
-2. Get data (system call, compiled binary, etc.)
-3. Update SketchyBar: `sketchybar --set "$NAME" icon="..." label="..." icon.color=$COLOR`
-
-### Color Format
-All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). Exported as bash variables in theme files.
-
-### Theme Color Variables
-
-`sketchybar.colors` exports:
-```bash
-# Bar
-BAR_COLOR, BAR_BACKGROUND_COLOR
-# Items
-ICON_COLOR, LABEL_COLOR
-# Workspaces (inactive)
-SPACE_ICON_COLOR, SPACE_LABEL_COLOR, SPACE_BACKGROUND_COLOR, SPACE_BORDER_COLOR
-# Workspaces (focused)
-SPACE_FOCUSED_ICON_COLOR, SPACE_FOCUSED_LABEL_COLOR, SPACE_FOCUSED_BACKGROUND_COLOR, SPACE_FOCUSED_BORDER_COLOR
-```
-
-`borders.colors` exports:
-```bash
-ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
-```
-
-### Key Plugins
-- **aerospace.sh** — Workspace indicator: shows focused state + app icons (Nerd Font). Multi-monitor aware via `$MONITOR` parameter.
-- **battery.sh** — Battery status with low-threshold warning from `makaron.conf`
-- **memory.sh** — Calls compiled Swift binary `makaron-memory-stats`, shows "X/Y GB"
-- **cpu.sh** — Load average from `uptime` divided by core count
-- **volume.sh** — Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons
-- **timer.sh** — Timewarrior timer: left click toggles tracking, right click shows recent log popup
-- **display_change.sh** — Reloads SketchyBar when monitor count changes
-
-### SketchyBar Plugin Conventions
-- `$NAME` — item name (set by SketchyBar, identifies which item to update)
-- `$INFO` — event data (e.g., volume percentage on `volume_change`)
-- Events subscribed via: `--subscribe item_name event_name`
-- Click handlers: `click_script="aerospace workspace $sid"`
-
-### Responsive Labels On Small Screens
-Some SketchyBar items already adapt to limited width on smaller displays such as MacBook Air.
-
-Use `configs/sketchybar/plugins/lib/screen_max_chars.sh` for responsive `label.max_chars` values based on the narrowest active display:
-- `makaron_label_max_chars` — general cap for items like Todoist
-- `makaron_calendar_label_max_chars` — tighter cap for the `e` slot, where Calendar has much less room
-
-Current usage:
-- `configs/sketchybar/plugins/todoist.sh` uses `makaron_label_max_chars`
-- `configs/sketchybar/plugins/calendar.sh` uses `makaron_calendar_label_max_chars`
-
-The helper caches the narrowest display width for 60 seconds and should be invalidated on `display_change` and `system_woke` via `makaron_invalidate_screen_cache`.
-
-For any new text-heavy SketchyBar item, especially in `q`, `e`, or on the right side:
-- do not hardcode long labels
-- prefer a short primary label and move details into popup content
-- reuse the responsive width helper instead of introducing per-plugin fixed limits
 
 ---
 
@@ -219,9 +97,8 @@ curl -sL install.sh | bash
        |     |-- makaron-conf.sh
        |     |-- brew.sh
        |     |-- gum, jq
-       |     |-- desktop/ (aerospace, sketchybar, borders, fonts)
-       |     |-- terminal/ghostty.sh
-       |     └── default theme symlink
+       |     |-- desktop/ (aerospace, makaron-bar, fonts)
+       |     └── terminal/ghostty.sh
        |
        |-- install/packages.sh       # Optional packages:
        |     |-- Fresh install: gum UI per-app selection (6 groups)
@@ -235,15 +112,15 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty, Timewarrior.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, MakaronBar, Nerd Fonts, Ghostty, Timewarrior.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
 - AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
 - Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
-- Desktop Extras: AltTab, Command X, Stats
-- Apps: Flameshot, Slack, Spotify, VLC
+- Desktop Extras: Command X, Stats
+- Apps: Todoist, Flameshot, Slack, Spotify, VLC
 
 Selections stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
 
@@ -251,7 +128,7 @@ Selections stored in `~/.config/makaron/packages.conf` (survives update/reinstal
 
 ## Ghostty Config Protection
 
-`configs/ghostty/config` is protected by `git update-index --skip-worktree` so user-specific Ghostty settings survive `makaron-update` (which does `git reset --hard`). The `theme = ...` line in this file is updated by `makaron-switch-theme` via sed.
+`configs/ghostty/config` is protected by `git update-index --skip-worktree` so user-specific Ghostty settings survive `makaron-update` (which does `git reset --hard`).
 
 If `makaron-update` fails with "Entry not uptodate":
 ```bash
@@ -269,9 +146,11 @@ makaron-update -y
 ```
 makaron/
 ├── bin/                    # User commands (added to PATH)
+│   ├── makaron-bar         # Compiled MakaronBar binary (gitignored)
+│   ├── makaron-tools       # Quick actions script
+│   └── ...
 ├── configs/                # Config files (symlinked to ~/.config/)
 │   ├── aerospace/
-│   ├── sketchybar/plugins/
 │   └── ghostty/
 ├── install/                # Installation scripts
 │   ├── all.sh              # Orchestrator: mandatory -> packages -> settings
@@ -281,7 +160,7 @@ makaron/
 │   ├── helpers.sh          # Helper functions (install_cask, install_formula)
 │   ├── brew.sh             # Homebrew + CLT setup
 │   ├── desktop/            # Desktop environment
-│   │   ├── aerospace.sh, borders.sh, sketchybar.sh  # (with config)
+│   │   ├── aerospace.sh, makaron-bar.sh  # (with config)
 │   │   └── fonts.sh
 │   ├── development/        # Dev tools
 │   │   └── pipx.sh, fnm.sh, rbenv.sh  # (with additional setup)
@@ -292,15 +171,8 @@ makaron/
 │       └── p10k.sh         # (with zsh config setup)
 ├── migrations/             # Timestamped migration scripts
 ├── src/                    # Swift source files (compiled to bin/)
-├── themes/                 # Theme definitions
-│   └── <name>/
-│       ├── sketchybar.colors
-│       ├── borders.colors
-│       ├── mode
-│       ├── ghostty.theme    # Built-in name or custom palette
-│       ├── vscode.theme     # (optional) VSCode/Cursor color theme
-│       ├── accent.color     # (optional) macOS accent color (-1..6)
-│       └── backgrounds/
+│   ├── memory_stats.swift
+│   └── makaron_bar/        # MakaronBar multi-file Swift project
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
 
@@ -308,12 +180,10 @@ makaron/
 ```
 $HOME/
 ├── .local/share/makaron/           # Clone of repo
-│   └── current-theme -> themes/X   # Active theme symlink
 ├── .local/state/makaron/migrations/ # Migration state
 ├── .config/makaron/
 │   ├── makaron.conf                # User settings
 │   └── packages.conf              # Optional package selections
-├── .config/sketchybar -> ...       # Symlink
 ├── .config/ghostty -> ...          # Symlink
 └── .aerospace.toml -> ...          # Symlink
 ```
@@ -352,8 +222,11 @@ User-specific settings stored outside the repo in `~/.config/makaron/makaron.con
 
 ### Current Variables
 ```bash
-BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
-BORDERS_ENABLED=true      # Window borders (JankyBorders) — false to disable
+BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
+MAKARON_TIMER_TAGS="sales,marketing,…"  # Comma-separated tags shown in timer panel
+MAKARON_TIMER_DEFAULT_TAG=other         # Default tag for makaron-timer start/toggle
+MAKARON_TIMER_RECENT_COUNT=4            # Recent entries shown in timer panel
+MAKARON_NOTES_ENABLED=false             # Apple Notes quick action in MakaronBar panel
 ```
 
 ---
@@ -434,131 +307,21 @@ killall ServiceName 2>/dev/null || true
 
 ---
 
-## Adding a New Theme
+## AeroSpace + MakaronBar Integration
 
-1. Create `themes/<name>/` with:
-   - `borders.colors`
-   - `sketchybar.colors`
-   - `mode` (dark/light)
-   - `ghostty.theme` (see below)
-   - `vscode.theme` (optional, see below)
-   - `accent.color` (optional) — single line with macOS accent color value (-1=graphite, 0=red, 1=orange, 2=yellow, 3=green, 4=blue, 5=purple, 6=pink)
-   - `backgrounds/` dir with wallpaper
-
-2. Create executable `bin/makaron-theme-<name>`:
-```bash
-#!/bin/bash
-exec makaron-switch-theme <name>
-```
-
-3. Create `ghostty.theme` — either a **built-in theme name** or a **custom palette**:
-
-   **Built-in** (single line, no `=`):
-   ```
-   TokyoNight Storm
-   ```
-   Available: Nord, Catppuccin Mocha/Latte, TokyoNight Storm/Day, Gruvbox Dark/Light, Everforest Dark Hard/Light Med, Kanagawa Dragon, Rose Pine/Dawn/Moon, Flexoki Light.
-
-   **Custom palette** (multiple lines with `=`):
-   ```
-   background = #0f2838
-   foreground = #c5d5dd
-   cursor-color = #5a8ba8
-   selection-background = #1e3d52
-   selection-foreground = #c5d5dd
-   palette = 0=#0a1b27
-   ...
-   palette = 15=#f9fbfb
-   ```
-   Custom palettes are auto-installed to `configs/ghostty/themes/<name>` during theme switch.
-   Use `makaron-dev-generate-ghostty-theme <name>` to generate a starting palette from sketchybar/borders colors.
-
-   **Dark/light counterparts**: The script auto-discovers pairs (e.g., `cosmic-dark` ↔ `cosmic-light`).
-
-4. Create `vscode.theme` (optional) — a single line with the exact VSCode color theme name:
-   ```
-   Tokyo Night Storm
-   ```
-   Sets `workbench.colorTheme` in both VSCode and Cursor `settings.json` (including profiles).
-   If the file doesn't exist or `settings.json` is missing, the editor is silently skipped.
-
-5. If custom palette: copy the file to `configs/ghostty/themes/<name>` and commit it.
-
-6. Update `README.md` with theme name and command.
-
----
-
-## Editor Profiles
-
-### Overview
-Pre-configured profiles for VSCode and Cursor with settings, extensions, and keybindings.
-
-### Structure
-```
-profiles/
-└── <profile-name>/
-    ├── settings.json      # Editor settings
-    ├── extensions.txt     # Extension IDs (one per line, # for comments)
-    └── keybindings.json   # Custom keybindings (optional)
-```
-
-### Paths
-```bash
-# VSCode
-~/Library/Application Support/Code/User/settings.json
-~/Library/Application Support/Code/User/keybindings.json
-
-# Cursor
-~/Library/Application Support/Cursor/User/settings.json
-~/Library/Application Support/Cursor/User/keybindings.json
-```
-
-### Usage
-```bash
-makaron-apply-editor-profile <profile-name> [--cursor-only|--vscode-only]
-```
-
-### Creating New Profile
-1. Create `profiles/<name>/` directory
-2. Add `settings.json` with editor settings
-3. Add `extensions.txt` with extension IDs
-4. Optionally add `keybindings.json`
-5. Update `README.md`
-
----
-
-## AeroSpace + SketchyBar Integration
-
-### Critical Config
+### Workspace Change Notification
 In `configs/aerospace/.aerospace.toml`:
 ```toml
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+    'echo "$AEROSPACE_FOCUSED_WORKSPACE" > /tmp/makaron_focused_ws'
 ]
 ```
-**Required** - without this, empty workspaces won't highlight correctly.
-
-### Plugin Logic (`aerospace.sh`)
-```bash
-# Multi-monitor: use --monitor --visible
-if [[ -n "$MONITOR" ]]; then
-  IS_FOCUSED=$(aerospace list-workspaces --monitor "$MONITOR" --visible 2>/dev/null)
-else
-  # Single monitor: use env var with fallback
-  if [[ -z "$FOCUSED_WORKSPACE" ]]; then
-    FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused 2>/dev/null)
-  fi
-  IS_FOCUSED="$FOCUSED_WORKSPACE"
-fi
-```
+MakaronBar watches this file to update the active workspace indicator.
 
 ### Monitor Detection
-- Single monitor: Show all workspaces on one bar
-- Multi-monitor: Each bar shows only its assigned workspaces
-- Auto-reload on monitor connect/disconnect via `display_change.sh`
-
-### Known Issue
-`aerospace list-workspaces --focused` fails for empty workspaces - returns last non-empty workspace. Solution: Use event-driven `$FOCUSED_WORKSPACE` from callback.
+- Single monitor: Show all workspaces in one strip
+- Multi-monitor: Each display shows its assigned workspaces
+- Auto-reload on monitor connect/disconnect
 
 ---
 
@@ -566,7 +329,7 @@ fi
 
 ### Diagnostics Tool
 Use `makaron-debug` to check system status:
-- Shows all component statuses (AeroSpace, SketchyBar, Borders, Ghostty)
+- Shows all component statuses (AeroSpace, MakaronBar, Ghostty)
 - Verifies symlinks and configs
 - Checks migration status
 - Useful when debugging issues or verifying installation
@@ -576,14 +339,6 @@ Use `makaron-debug` to check system status:
 ls ~/.local/state/makaron/migrations/  # Check if marked completed
 rm ~/.local/state/makaron/migrations/TIMESTAMP.sh  # Remove to re-run
 makaron-migrate
-```
-
-### Empty Workspaces Not Highlighting
-Check `exec-on-workspace-change` in aerospace.toml, then `aerospace reload-config`.
-
-### Wrong Workspaces After Monitor Change
-```bash
-sketchybar --reload
 ```
 
 ### makaron-update Fails (Entry not uptodate / Local changes)

@@ -1,3 +1,0 @@
-#!/bin/bash
-exec makaron-switch-theme macos-default-dark
-

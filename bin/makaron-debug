@@ -389,19 +389,6 @@ echo "    Value: $APPLE_INTELLIGENCE"
 echo "    Expected: 0 (disabled)"
 echo ""
 
-# Wallpaper
-echo "🖼️  WALLPAPER"
-echo "────────────────────────────────────────────────────────────────"
-WALLPAPER_PATH="$MAKARON_PATH/assets/1-scenery-pink-lakeside-sunset-lake-landscape-scenic-panorama-7680x3215-144.png"
-if [ -f "$WALLPAPER_PATH" ]; then
-    echo "  Default Wallpaper File:"
-    echo "    ✓ Exists at $WALLPAPER_PATH"
-else
-    echo "  Default Wallpaper File:"
-    echo "    ❌ Not found at $WALLPAPER_PATH"
-fi
-echo ""
-
 # ============================================================================
 # SECTION: AeroSpace
 # ============================================================================
@@ -463,58 +450,35 @@ fi
 echo ""
 
 # ============================================================================
-# SECTION: SketchyBar
+# SECTION: MakaronBar
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📊 SKETCHYBAR"
+echo "📊 MAKARONBAR"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-if command -v sketchybar &> /dev/null; then
-    echo "  ✓ SketchyBar installed"
-
-    # Check if running
-    if pgrep -f "sketchybar" > /dev/null; then
-        echo "  ✓ SketchyBar is running"
-    else
-        echo "  ⚠️  SketchyBar is NOT running"
-    fi
-
-    # Check brew service
-    if brew services list | grep -q "sketchybar.*started"; then
-        echo "  ✓ Brew service: started"
-    else
-        echo "  ○ Brew service: stopped"
-    fi
-
-    # Check config
-    if [ -L "$HOME/.config/sketchybar" ]; then
-        TARGET=$(readlink "$HOME/.config/sketchybar")
-        echo "  Config symlink: ✓"
-        echo "    Target: $TARGET"
-        if [ "$TARGET" = "$MAKARON_PATH/configs/sketchybar" ]; then
-            echo "    ✓ Points to correct location"
-        else
-            echo "    ⚠️  Points to different location"
-        fi
-    else
-        echo "  Config symlink: ❌ Not found or not a symlink"
-    fi
+MAKARONBAR_BIN="$MAKARON_PATH/bin/makaron-bar"
+if [ -f "$MAKARONBAR_BIN" ]; then
+    echo "  ✓ Binary exists: $MAKARONBAR_BIN"
 else
-    echo "  ❌ SketchyBar is NOT installed"
+    echo "  ❌ Binary not found: $MAKARONBAR_BIN"
+fi
+
+MAKARONBAR_PID=$(pgrep -f makaron-bar 2>/dev/null)
+if [ -n "$MAKARONBAR_PID" ]; then
+    echo "  ✓ MakaronBar is running (PID: $MAKARONBAR_PID)"
+else
+    echo "  ⚠️  MakaronBar is NOT running"
 fi
 echo ""
 
 # ============================================================================
-# SECTION: Todoist (SketchyBar)
+# SECTION: Todoist
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "📝 TODOIST (SKETCHYBAR)"
+echo "📝 TODOIST"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-TODOIST_PLUGIN="$MAKARON_PATH/configs/sketchybar/plugins/todoist.sh"
-TODOIST_SKETCHYBARRC="$MAKARON_PATH/configs/sketchybar/sketchybarrc"
 TODOIST_CONF="$HOME/.config/makaron/makaron.conf"
-SKETCHYBAR_TODOIST_ENABLED="true"
 
 if [ -f "$TODOIST_CONF" ]; then
     # shellcheck disable=SC1090
@@ -524,7 +488,6 @@ fi
 TD_BIN=$(_find_td_bin 2>/dev/null || true)
 
 echo "  Config:"
-echo "    SKETCHYBAR_TODOIST_ENABLED=${SKETCHYBAR_TODOIST_ENABLED}"
 if [ -n "${TODOIST_CLI:-}" ]; then
     echo "    TODOIST_CLI=$TODOIST_CLI"
 else
@@ -536,57 +499,9 @@ else
     echo "    TODOIST_API_TOKEN=(not set)"
 fi
 if [ -n "$TD_BIN" ]; then
-    echo "    Resolved plugin td path: $TD_BIN"
+    echo "    Resolved td path: $TD_BIN"
 else
-    echo "    Resolved plugin td path: (not found)"
-fi
-echo ""
-
-echo "  Plugin files:"
-if [ -f "$TODOIST_PLUGIN" ]; then
-    echo "    ✓ Plugin exists: $TODOIST_PLUGIN"
-else
-    echo "    ❌ Plugin missing: $TODOIST_PLUGIN"
-fi
-
-if [ -f "$TODOIST_SKETCHYBARRC" ]; then
-    if grep -q 'script="\$PLUGIN_DIR/todoist\.sh"' "$TODOIST_SKETCHYBARRC"; then
-        echo "    ✓ sketchybarrc references todoist.sh"
-    else
-        echo "    ⚠️  sketchybarrc does not reference todoist.sh"
-    fi
-
-    if grep -q 'sketchybar --add item todoist ' "$TODOIST_SKETCHYBARRC"; then
-        echo "    ✓ sketchybarrc adds todoist item"
-    else
-        echo "    ⚠️  sketchybarrc does not add todoist item"
-    fi
-else
-    echo "    ❌ sketchybarrc missing: $TODOIST_SKETCHYBARRC"
-fi
-echo ""
-
-echo "  SketchyBar item state:"
-if command -v sketchybar &> /dev/null; then
-    TODOIST_QUERY=$(sketchybar --query todoist 2>/dev/null)
-    if [ $? -eq 0 ] && [ -n "$TODOIST_QUERY" ]; then
-        echo "    ✓ todoist item is registered in SketchyBar"
-        if command -v jq &> /dev/null; then
-            TODOIST_DRAWING=$(echo "$TODOIST_QUERY" | jq -r '.geometry.drawing // "unknown"' 2>/dev/null)
-            TODOIST_LABEL=$(echo "$TODOIST_QUERY" | jq -r '.label.value // empty' 2>/dev/null)
-            TODOIST_SCRIPT=$(echo "$TODOIST_QUERY" | jq -r '.scripting.script // empty' 2>/dev/null)
-            echo "    drawing=$TODOIST_DRAWING"
-            [ -n "$TODOIST_LABEL" ] && echo "    label=$TODOIST_LABEL" || echo "    label=(empty)"
-            [ -n "$TODOIST_SCRIPT" ] && echo "    script=$TODOIST_SCRIPT"
-        fi
-    else
-        echo "    ⚠️  todoist item is NOT registered in SketchyBar"
-        if [ "$SKETCHYBAR_TODOIST_ENABLED" = "false" ]; then
-            echo "    Note: item is disabled by SKETCHYBAR_TODOIST_ENABLED=false"
-        fi
-    fi
-else
-    echo "    SketchyBar command unavailable"
+    echo "    Resolved td path: (not found)"
 fi
 echo ""
 
@@ -640,16 +555,15 @@ fi
 echo ""
 
 # ============================================================================
-# SECTION: Timewarrior Timer (SketchyBar)
+# SECTION: Timewarrior Timer
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "⏱️  TIMEWARRIOR TIMER"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-TIMER_PLUGIN="$MAKARON_PATH/configs/sketchybar/plugins/timer.sh"
 TIMER_CMD="$MAKARON_PATH/bin/makaron-timer"
 TIMER_CONF="$HOME/.config/makaron/makaron.conf"
-SKETCHYBAR_TIMER_ENABLED="true"
+MAKARON_TIMER_ENABLED="true"
 
 if [ -f "$TIMER_CONF" ]; then
     # shellcheck disable=SC1090
@@ -657,13 +571,12 @@ if [ -f "$TIMER_CONF" ]; then
 fi
 
 echo "  Config:"
-echo "    SKETCHYBAR_TIMER_ENABLED=${SKETCHYBAR_TIMER_ENABLED}"
-echo "    SKETCHYBAR_TIMER_DEFAULT_TAG=${SKETCHYBAR_TIMER_DEFAULT_TAG:-default}"
-echo "    SKETCHYBAR_TIMER_RECENT_COUNT=${SKETCHYBAR_TIMER_RECENT_COUNT:-5}"
+echo "    MAKARON_TIMER_ENABLED=${MAKARON_TIMER_ENABLED}"
+echo "    MAKARON_TIMER_DEFAULT_TAG=${MAKARON_TIMER_DEFAULT_TAG:-default}"
+echo "    MAKARON_TIMER_RECENT_COUNT=${MAKARON_TIMER_RECENT_COUNT:-5}"
 echo ""
 
 echo "  Files:"
-[ -f "$TIMER_PLUGIN" ] && echo "    ✓ Plugin exists: $TIMER_PLUGIN" || echo "    ❌ Plugin missing: $TIMER_PLUGIN"
 [ -x "$TIMER_CMD" ] && echo "    ✓ Command exists: $TIMER_CMD" || echo "    ❌ Command missing or not executable: $TIMER_CMD"
 echo ""
 
@@ -691,56 +604,6 @@ if [ -x "$TIMER_CMD" ]; then
 fi
 echo ""
 
-echo "  SketchyBar item state:"
-if command -v sketchybar &> /dev/null; then
-    TIMER_QUERY=$(sketchybar --query timer 2>/dev/null)
-    if [ $? -eq 0 ] && [ -n "$TIMER_QUERY" ]; then
-        echo "    ✓ timer item is registered in SketchyBar"
-        if command -v jq &> /dev/null; then
-            TIMER_DRAWING=$(echo "$TIMER_QUERY" | jq -r '.geometry.drawing // "unknown"' 2>/dev/null)
-            TIMER_LABEL=$(echo "$TIMER_QUERY" | jq -r '.label.value // empty' 2>/dev/null)
-            TIMER_SCRIPT=$(echo "$TIMER_QUERY" | jq -r '.scripting.script // empty' 2>/dev/null)
-            echo "    drawing=$TIMER_DRAWING"
-            [ -n "$TIMER_LABEL" ] && echo "    label=$TIMER_LABEL" || echo "    label=(empty)"
-            [ -n "$TIMER_SCRIPT" ] && echo "    script=$TIMER_SCRIPT"
-        fi
-    else
-        echo "    ⚠️  timer item is NOT registered in SketchyBar"
-        if [ "$SKETCHYBAR_TIMER_ENABLED" = "false" ]; then
-            echo "    Note: item is disabled by SKETCHYBAR_TIMER_ENABLED=false"
-        fi
-    fi
-else
-    echo "    SketchyBar command unavailable"
-fi
-echo ""
-
-# ============================================================================
-# SECTION: Borders
-# ============================================================================
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔲 BORDERS"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-if command -v borders &> /dev/null; then
-    echo "  ✓ Borders installed"
-
-    # Check if running
-    if pgrep -f "borders" > /dev/null; then
-        echo "  ✓ Borders is running"
-    else
-        echo "  ⚠️  Borders is NOT running"
-    fi
-
-    # Check brew service
-    if brew services list | grep -q "borders.*started"; then
-        echo "  ✓ Brew service: started"
-    else
-        echo "  ○ Brew service: stopped"
-    fi
-else
-    echo "  ❌ Borders is NOT installed"
-fi
 echo ""
 
 # ============================================================================
@@ -762,13 +625,6 @@ if [ -f "$GHOSTTY_CONFIG" ]; then
         echo "    ❌ File is NOT writable!"
     fi
 
-    # Check theme line
-    if grep -q "^theme = " "$GHOSTTY_CONFIG"; then
-        THEME_LINE=$(grep "^theme = " "$GHOSTTY_CONFIG")
-        echo "    Current theme: $THEME_LINE"
-    else
-        echo "    ⚠️  No theme line found in config"
-    fi
 else
     echo "  ❌ Config file does not exist!"
 fi
@@ -788,100 +644,6 @@ else
     echo "  Config symlink: ❌ Not found or not a symlink"
 fi
 
-# Check GHOSTTY_THEME env var
-if [ -n "$GHOSTTY_THEME" ]; then
-    echo "  GHOSTTY_THEME env: $GHOSTTY_THEME"
-else
-    echo "  GHOSTTY_THEME env: (not set)"
-fi
-
-# Check actual config file content
-echo ""
-echo "  Ghostty Config File Content:"
-echo "  ────────────────────────────────────────────────────────────────"
-if [ -f "$HOME/.config/ghostty/config" ]; then
-    echo "  Location: $HOME/.config/ghostty/config"
-    if grep -q "^theme = " "$HOME/.config/ghostty/config"; then
-        THEME_VALUE=$(grep "^theme = " "$HOME/.config/ghostty/config" | head -1)
-        echo "  Theme line: $THEME_VALUE"
-
-        # Check for "One Dark" references
-        if echo "$THEME_VALUE" | grep -qi "One Dark"; then
-            echo "  ❌ ERROR: Config contains 'One Dark' theme (does not exist in Ghostty!)"
-        else
-            echo "  ✓ No 'One Dark' references found"
-        fi
-    else
-        echo "  ⚠️  No theme line found"
-    fi
-else
-    echo "  ❌ Config file not found at $HOME/.config/ghostty/config"
-fi
-
-# Check shell config files for GHOSTTY_THEME
-echo ""
-echo "  Shell Config Files:"
-echo "  ────────────────────────────────────────────────────────────────"
-for config_file in "$HOME/.zshrc" "$HOME/.bashrc"; do
-    if [ -f "$config_file" ]; then
-        echo "  $(basename $config_file):"
-        if grep -q "GHOSTTY_THEME" "$config_file"; then
-            GHOSTTY_LINE=$(grep "GHOSTTY_THEME" "$config_file" | tail -1)
-            echo "    Found: $GHOSTTY_LINE"
-            if echo "$GHOSTTY_LINE" | grep -qi "One Dark"; then
-                echo "    ❌ ERROR: Contains 'One Dark' theme reference!"
-            else
-                echo "    ✓ No 'One Dark' references"
-            fi
-        else
-            echo "    No GHOSTTY_THEME variable found"
-        fi
-    fi
-done
-
-# Check migration status
-echo ""
-echo "  Migration Status (1764134080 - Fix One Dark):"
-echo "  ────────────────────────────────────────────────────────────────"
-MIGRATION_STATE_DIR="$HOME/.local/state/makaron/migrations"
-if [ -f "$MIGRATION_STATE_DIR/1764134080.sh" ]; then
-    echo "  ✓ Migration completed"
-    echo "    Completed at: $(stat -f "%Sm" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null || stat -c "%y" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null)"
-elif [ -f "$MIGRATION_STATE_DIR/skipped/1764134080.sh" ]; then
-    echo "  ⚠️  Migration was skipped"
-else
-    echo "  ⚠️  Migration NOT run yet (run: makaron-migrate)"
-fi
-echo ""
-
-# ============================================================================
-# SECTION: Current Theme
-# ============================================================================
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎨 CURRENT THEME"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -L "$THEME_DIR" ]; then
-    TARGET=$(readlink "$THEME_DIR")
-    THEME_NAME=$(basename "$TARGET")
-    echo "  ✓ Current theme: $THEME_NAME"
-    echo "    Path: $TARGET"
-
-    # Check mode
-    if [ -f "$THEME_DIR/mode" ]; then
-        MODE=$(cat "$THEME_DIR/mode")
-        echo "    Mode: $MODE"
-    fi
-
-    # Check if theme files exist
-    echo ""
-    echo "  Theme files:"
-    [ -f "$THEME_DIR/borders.colors" ] && echo "    ✓ borders.colors" || echo "    ⚠️  borders.colors missing"
-    [ -f "$THEME_DIR/sketchybar.colors" ] && echo "    ✓ sketchybar.colors" || echo "    ⚠️  sketchybar.colors missing"
-else
-    echo "  ⚠️  No theme symlink found"
-fi
 echo ""
 
 # ============================================================================
@@ -898,8 +660,8 @@ WARNINGS=0
 # Check critical components
 [ ! -d "$MAKARON_PATH" ] && ((ERRORS++))
 ! command -v aerospace &> /dev/null && ((WARNINGS++))
-! command -v sketchybar &> /dev/null && ((WARNINGS++))
-! command -v borders &> /dev/null && ((WARNINGS++))
+[ ! -f "$MAKARON_PATH/bin/makaron-bar" ] && ((WARNINGS++))
+! pgrep -f makaron-bar > /dev/null 2>&1 && ((WARNINGS++))
 
 if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
     echo "  ✅ All systems operational"
