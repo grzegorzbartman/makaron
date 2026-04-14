@@ -61,11 +61,13 @@ enum BarItem: String, CaseIterable {
 enum WorkspaceDisplayMode: String {
     case all = "all"
     case focused = "focused"
+    case current = "current"
 
     var label: String {
         switch self {
         case .all: return "All"
         case .focused: return "Active Only"
+        case .current: return "Current Only"
         }
     }
 }

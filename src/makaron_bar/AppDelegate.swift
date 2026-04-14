@@ -223,9 +223,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStrip() {
         let labels = buildBarLabels()
         let visibleWS: [Workspace]
-        if config.workspaceDisplay == .focused {
+        switch config.workspaceDisplay {
+        case .focused:
             visibleWS = workspaces.filter { $0.isFocused || !$0.apps.isEmpty }
-        } else {
+        case .current:
+            visibleWS = workspaces.filter { $0.isFocused }
+        case .all:
             visibleWS = workspaces
         }
         stripView.update(workspaces: visibleWS, theme: theme, barLabels: labels)

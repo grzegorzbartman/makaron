@@ -70,10 +70,14 @@ class OptionsWindowController {
         wsLabel.frame = NSRect(x: padding, y: y + 5, width: labelWidth, height: 20)
         contentView.addSubview(wsLabel)
 
-        let wsSeg = NSSegmentedControl(labels: ["All", "Active Only"], trackingMode: .selectOne, target: self, action: #selector(workspaceDisplayChanged(_:)))
+        let wsSeg = NSSegmentedControl(labels: ["All", "Active Only", "Current Only"], trackingMode: .selectOne, target: self, action: #selector(workspaceDisplayChanged(_:)))
         wsSeg.segmentStyle = .rounded
         wsSeg.frame = NSRect(x: padding + labelWidth, y: y + 2, width: segWidth, height: 26)
-        wsSeg.selectedSegment = config.workspaceDisplay == .all ? 0 : 1
+        switch config.workspaceDisplay {
+        case .all: wsSeg.selectedSegment = 0
+        case .focused: wsSeg.selectedSegment = 1
+        case .current: wsSeg.selectedSegment = 2
+        }
         contentView.addSubview(wsSeg)
         y += rowHeight
 
@@ -138,7 +142,12 @@ class OptionsWindowController {
     }
 
     @objc private func workspaceDisplayChanged(_ sender: NSSegmentedControl) {
-        let mode: WorkspaceDisplayMode = sender.selectedSegment == 0 ? .all : .focused
+        let mode: WorkspaceDisplayMode
+        switch sender.selectedSegment {
+        case 0: mode = .all
+        case 2: mode = .current
+        default: mode = .focused
+        }
         config.setWorkspaceDisplay(mode)
         onChanged?()
     }
