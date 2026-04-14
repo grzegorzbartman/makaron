@@ -28,6 +28,9 @@ SKETCHYBAR_TIMER_DEFAULT_TAG=other
 # SketchyBar: number of recent Timewarrior entries shown in timer popup
 SKETCHYBAR_TIMER_RECENT_COUNT=4
 
+# SketchyBar: Apple Notes — click to create a new note in a new window
+SKETCHYBAR_NOTES_ENABLED=false
+
 # Optional: full path to td if not on PATH (default: td)
 # TODOIST_CLI=td
 
