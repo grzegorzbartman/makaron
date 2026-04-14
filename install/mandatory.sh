@@ -17,16 +17,10 @@ install_formula "jq" "jq" "jq"
 
 # Core desktop components
 source "$MAKARON_PATH/install/desktop/aerospace.sh"
-source "$MAKARON_PATH/install/desktop/borders.sh"
 source "$MAKARON_PATH/install/desktop/fonts.sh"
-source "$MAKARON_PATH/install/desktop/sketchybar.sh"
+source "$MAKARON_PATH/install/desktop/makaron-bar.sh"
 
 # Terminal
 source "$MAKARON_PATH/install/terminal/timewarrior.sh"
 source "$MAKARON_PATH/install/terminal/ghostty.sh"
 
-# Default theme
-if [ ! -L "$MAKARON_PATH/current-theme" ]; then
-    ln -s "$MAKARON_PATH/themes/tokyo-night" "$MAKARON_PATH/current-theme"
-    echo "Default theme set to Tokyo Night"
-fi

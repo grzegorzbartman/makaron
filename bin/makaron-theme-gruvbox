@@ -1,4 +1,0 @@
-#!/bin/bash
-# Switch to Gruvbox theme
-"$(dirname "$0")/makaron-switch-theme" gruvbox
-

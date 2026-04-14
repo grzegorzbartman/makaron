@@ -1,6 +1,6 @@
 #!/bin/bash
 # Migration: Compile calendar_next_event Swift binary
-# Required for SketchyBar calendar widget added in PR #19
+# Required for MakaronBar calendar widget
 
 set -e
 error_exit() { echo -e "\033[31mERROR: Migration failed!\033[0m" >&2; exit 1; }
