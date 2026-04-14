@@ -45,11 +45,11 @@ class WorkspaceStripView: NSView {
             totalWidth += cellWidth(for: ws) + cellSpacing
         }
         if !barLabels.isEmpty {
-            totalWidth += separatorPadding
             let font = NSFont.monospacedDigitSystemFont(ofSize: barFontSize, weight: .regular)
             for lbl in barLabels {
+                totalWidth += separatorPadding
                 let size = (lbl.text as NSString).size(withAttributes: [.font: font])
-                totalWidth += size.width + 8
+                totalWidth += size.width + 4
             }
         }
         totalWidth += 2
@@ -119,27 +119,27 @@ class WorkspaceStripView: NSView {
         }
 
         if !barLabels.isEmpty {
-            x += separatorPadding / 2
             let sepColor = theme.labelColor.withAlphaComponent(0.15)
-            sepColor.setStroke()
-            let sep = NSBezierPath()
-            sep.move(to: NSPoint(x: x, y: bounds.height * 0.2))
-            sep.line(to: NSPoint(x: x, y: bounds.height * 0.8))
-            sep.lineWidth = 1
-            sep.stroke()
-            x += separatorPadding / 2
-
             let barFont = NSFont.monospacedDigitSystemFont(ofSize: barFontSize, weight: .regular)
             let dimColor = theme.labelColor.withAlphaComponent(0.6)
 
             for lbl in barLabels {
+                x += separatorPadding / 2
+                let sep = NSBezierPath()
+                sep.move(to: NSPoint(x: x, y: bounds.height * 0.2))
+                sep.line(to: NSPoint(x: x, y: bounds.height * 0.8))
+                sep.lineWidth = 1
+                sepColor.setStroke()
+                sep.stroke()
+                x += separatorPadding / 2
+
                 let c = lbl.highlight ? theme.labelColor : dimColor
                 let attrs: [NSAttributedString.Key: Any] = [.font: barFont, .foregroundColor: c]
                 let attrStr = NSAttributedString(string: lbl.text, attributes: attrs)
                 let size = attrStr.size()
                 let y = (bounds.height - size.height) / 2
-                attrStr.draw(at: NSPoint(x: x + 4, y: y))
-                x += size.width + 8
+                attrStr.draw(at: NSPoint(x: x + 2, y: y))
+                x += size.width + 4
             }
         }
     }
