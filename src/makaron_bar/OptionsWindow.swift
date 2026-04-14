@@ -5,6 +5,7 @@ import EventKit
 class OptionsWindowController {
     private var window: NSPanel?
     private var segments: [BarItem: NSSegmentedControl] = [:]
+    private var calendarCheckboxes: [NSButton] = []
     private let config = BarConfig.shared
     private var hotkeyField: HotkeyField?
     var onChanged: (() -> Void)?
@@ -29,6 +30,7 @@ class OptionsWindowController {
         panel.level = .floating
         panel.isReleasedWhenClosed = false
 
+        calendarCheckboxes = []
         let contentView = NSView()
         let padding: CGFloat = 16
         let rowHeight: CGFloat = 32
@@ -113,22 +115,32 @@ class OptionsWindowController {
             y += rowHeight
 
             if item == .calendar {
-                let calStatus = checkCalendarAccess()
-                let statusText: String
-                let statusColor: NSColor
-                if calStatus {
-                    statusText = "✓ Calendar access granted"
-                    statusColor = .secondaryLabelColor
+                let calAccess = checkCalendarAccess()
+                if !calAccess {
+                    let calHint = NSTextField(wrappingLabelWithString: "⚠ No calendar access — grant in System Settings → Privacy & Security → Calendars")
+                    calHint.font = NSFont.systemFont(ofSize: 10)
+                    calHint.textColor = .systemOrange
+                    calHint.frame = NSRect(x: padding + 4, y: y, width: 310, height: 28)
+                    contentView.addSubview(calHint)
+                    y += 32
                 } else {
-                    statusText = "⚠ No calendar access — grant in System Settings → Privacy & Security → Calendars"
-                    statusColor = .systemOrange
+                    let calendars = SystemInfoProvider.shared.listCalendars()
+                    if !calendars.isEmpty {
+                        let selected = config.selectedCalendars
+                        let allSelected = selected.isEmpty
+                        for cal in calendars {
+                            let cb = NSButton(checkboxWithTitle: "\(cal.title)  (\(cal.source))", target: self, action: #selector(calendarCheckboxChanged(_:)))
+                            cb.font = NSFont.systemFont(ofSize: 11)
+                            cb.frame = NSRect(x: padding + 12, y: y, width: 300, height: 18)
+                            cb.state = allSelected || selected.contains(cal.id) ? .on : .off
+                            cb.identifier = NSUserInterfaceItemIdentifier(cal.id)
+                            calendarCheckboxes.append(cb)
+                            contentView.addSubview(cb)
+                            y += 20
+                        }
+                        y += 4
+                    }
                 }
-                let calHint = NSTextField(wrappingLabelWithString: statusText)
-                calHint.font = NSFont.systemFont(ofSize: 10)
-                calHint.textColor = statusColor
-                calHint.frame = NSRect(x: padding + 4, y: y, width: 310, height: calStatus ? 14 : 28)
-                contentView.addSubview(calHint)
-                y += calStatus ? 18 : 32
             }
         }
 
@@ -159,6 +171,26 @@ class OptionsWindowController {
                 return
             }
         }
+    }
+
+    @objc private func calendarCheckboxChanged(_ sender: NSButton) {
+        var selected: Set<String> = []
+        let allOn = calendarCheckboxes.allSatisfy { $0.state == .on }
+        if allOn {
+            selected = []
+        } else {
+            for cb in calendarCheckboxes {
+                if cb.state == .on, let id = cb.identifier?.rawValue {
+                    selected.insert(id)
+                }
+            }
+            if selected.isEmpty {
+                sender.state = .on
+                selected.insert(sender.identifier!.rawValue)
+            }
+        }
+        config.setSelectedCalendars(selected)
+        onChanged?()
     }
 
     @objc private func workspaceDisplayChanged(_ sender: NSSegmentedControl) {

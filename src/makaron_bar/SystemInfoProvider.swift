@@ -210,9 +210,26 @@ class SystemInfoProvider {
 
     // MARK: - Calendar
 
+    func listCalendars() -> [(id: String, title: String, source: String)] {
+        let bin = "\(makaronPath)/bin/makaron-calendar-next"
+        let out = shell(bin, args: ["--list-calendars"])
+        var cals: [(String, String, String)] = []
+        for line in out.components(separatedBy: "\n") where !line.isEmpty {
+            let parts = line.components(separatedBy: "\t")
+            guard parts.count >= 3 else { continue }
+            cals.append((parts[0], parts[1], parts[2]))
+        }
+        return cals.sorted { $0.1.lowercased() < $1.1.lowercased() }
+    }
+
     private func fetchCalendar() -> [(time: String, title: String)] {
         let bin = "\(makaronPath)/bin/makaron-calendar-next"
-        let out = shell(bin, args: ["--today"])
+        var calArgs = ["--today"]
+        let selectedCals = BarConfig.shared.selectedCalendars
+        if !selectedCals.isEmpty {
+            calArgs.append("--calendars=\(selectedCals.sorted().joined(separator: ","))")
+        }
+        let out = shell(bin, args: calArgs)
         var events: [(String, String)] = []
         for line in out.components(separatedBy: "\n") where !line.isEmpty {
             let parts = line.components(separatedBy: "\t")
