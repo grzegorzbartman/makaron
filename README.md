@@ -118,7 +118,8 @@ After installation, you'll have access to these commands:
 - **`makaron-dev-add-migration`** - Create new migration (development)
 - **`makaron-debug`** - Diagnose system status
 - **`makaron-timer`** - Control the Timewarrior timer backend (`status`, `recent`, `start`, `stop`, `toggle`)
-- **`makaron-ui-start`** - Start UI components (AeroSpace, SketchyBar, Borders)
+- **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
+- **`makaron-ui-minimal`** - Start minimal UI (no SketchyBar, visible menu bar)
 - **`makaron-ui-stop`** - Stop UI components
 - **`makaron-macos-config-reload`** - Apply macOS settings
 - **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
