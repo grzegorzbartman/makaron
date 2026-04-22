@@ -123,12 +123,13 @@ else
     echo "✓ All critical components installed successfully!"
     echo ""
     echo "Commands:"
-    echo "  makaron-ui-start  - Start UI"
-    echo "  makaron-ui-stop   - Stop UI"
-    echo "  makaron-update    - Update"
-    echo "  makaron-debug     - Diagnostics"
+    echo "  makaron-ui-full     - Start UI (full mode: SketchyBar + hidden menu bar)"
+    echo "  makaron-ui-minimal  - Start UI (minimal mode: no SketchyBar)"
+    echo "  makaron-ui-stop     - Stop UI"
+    echo "  makaron-update      - Update"
+    echo "  makaron-debug       - Diagnostics"
     echo ""
-    echo "To start: makaron-ui-start"
+    echo "To start: makaron-ui-full"
 fi
 
 echo ""
