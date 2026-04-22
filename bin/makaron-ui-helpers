@@ -28,9 +28,7 @@ reload_current_ui() {
             if command -v aerospace &> /dev/null; then
                 aerospace reload-config
             fi
-            if command -v sketchybar &> /dev/null && pgrep -f "sketchybar" > /dev/null; then
-                sketchybar --reload
-            fi
+            start_sketchybar
             start_borders
             ;;
         minimal)
