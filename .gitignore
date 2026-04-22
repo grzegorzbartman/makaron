@@ -13,7 +13,6 @@ tmp
 .playwright-mcp/
 
 # Compiled binaries (built from src/)
-bin/makaron-bar
 bin/makaron-memory-stats
 bin/makaron-calendar-next
 
