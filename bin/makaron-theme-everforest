@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Everforest theme
+"$(dirname "$0")/makaron-switch-theme" everforest
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Flexoki Light theme
+"$(dirname "$0")/makaron-switch-theme" flexoki-light
+

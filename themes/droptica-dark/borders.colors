@@ -1,0 +1,8 @@
+#!/bin/bash
+# Droptica Dark color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff00e2d1
+export INACTIVE_BORDER_COLOR=0xff030a3d
+export BORDER_WIDTH=5.0
+
+

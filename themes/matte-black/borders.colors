@@ -1,0 +1,7 @@
+#!/bin/bash
+# Matte Black color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff8A8A8D
+export INACTIVE_BORDER_COLOR=0xff333333
+export BORDER_WIDTH=5.0
+

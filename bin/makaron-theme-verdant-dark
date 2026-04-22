@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Verdant Dark theme
+"$(dirname "$0")/makaron-switch-theme" verdant-dark
+

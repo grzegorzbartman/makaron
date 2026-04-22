@@ -1,0 +1,6 @@
+#!/bin/bash
+# Ubuntu Dark color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xffE95420
+export INACTIVE_BORDER_COLOR=0xff77216F
+export BORDER_WIDTH=5.0

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Tokyo Night color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff7aa2f7
+export INACTIVE_BORDER_COLOR=0xff292e42
+export BORDER_WIDTH=5.0
+

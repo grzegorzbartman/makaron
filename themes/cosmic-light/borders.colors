@@ -1,0 +1,6 @@
+#!/bin/bash
+# COSMIC Light color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff5AD4C4
+export INACTIVE_BORDER_COLOR=0xffD0D7DE
+export BORDER_WIDTH=5.0

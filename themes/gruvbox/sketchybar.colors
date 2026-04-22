@@ -1,0 +1,23 @@
+#!/bin/bash
+# Gruvbox color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff282828
+export BAR_BACKGROUND_COLOR=0xff282828
+
+# Default item colors
+export ICON_COLOR=0xffd4be98
+export LABEL_COLOR=0xffd4be98
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffd4be98
+export SPACE_LABEL_COLOR=0xffd4be98
+export SPACE_BACKGROUND_COLOR=0xff3c3836
+export SPACE_BORDER_COLOR=0x003c3836
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffe78a4e
+export SPACE_FOCUSED_LABEL_COLOR=0xffe78a4e
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff282828
+export SPACE_FOCUSED_BORDER_COLOR=0xffe78a4e
+

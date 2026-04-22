@@ -1,0 +1,7 @@
+#!/bin/bash
+# Flexoki Light color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff205EA6
+export INACTIVE_BORDER_COLOR=0xffCECDC3
+export BORDER_WIDTH=5.0
+

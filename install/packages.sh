@@ -63,7 +63,6 @@ PKGS_DESKTOP=(
 )
 
 PKGS_APPS=(
-    "todoist|Todoist|task manager"
     "flameshot|Flameshot|screenshots"
     "slack|Slack|team chat"
     "spotify|Spotify|music"
@@ -71,6 +70,12 @@ PKGS_APPS=(
 )
 
 # ── Package Installer ────────────────────────────────────────────
+
+_apply_editor_profile() {
+    if [ -x "$MAKARON_PATH/bin/makaron-apply-editor-profile" ]; then
+        "$MAKARON_PATH/bin/makaron-apply-editor-profile" development-php-drupal 2>/dev/null || true
+    fi
+}
 
 install_package() {
     local id="$1"
@@ -89,8 +94,14 @@ install_package() {
             ;;
         p10k) source "$MAKARON_PATH/install/terminal/p10k.sh" ;;
         # Editors
-        vscode)     install_cask "visual-studio-code" "Visual Studio Code" ;;
-        cursor)     install_cask "cursor" "Cursor" ;;
+        vscode)
+            install_cask "visual-studio-code" "Visual Studio Code"
+            _apply_editor_profile
+            ;;
+        cursor)
+            install_cask "cursor" "Cursor"
+            _apply_editor_profile
+            ;;
         sublime)    install_cask "sublime-text" "Sublime Text" ;;
         neovim)     source "$MAKARON_PATH/install/editors/neovim_lazyvim.sh" ;;
         # AI
@@ -129,7 +140,6 @@ install_package() {
         command-x)  install_cask "command-x" "Command X" ;;
         stats)      install_cask "stats" "Stats" ;;
         # Apps
-        todoist)    install_cask "todoist" "Todoist" ;;
         flameshot)  install_cask "flameshot" "Flameshot" ;;
         slack)      install_cask "slack" "Slack" ;;
         spotify)    install_cask "spotify" "Spotify" ;;
@@ -267,7 +277,7 @@ show_package_selector() {
         --foreground 245 \
         --italic \
         --margin "0 2" \
-        "Core installed: AeroSpace, MakaronBar, Ghostty, Fonts." \
+        "Core installed: AeroSpace, SketchyBar, Borders, Ghostty, Fonts." \
         "Select additional packages below."
 
     local total=6

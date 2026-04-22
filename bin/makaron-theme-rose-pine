@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Rose Pine theme
+"$(dirname "$0")/makaron-switch-theme" rose-pine
+

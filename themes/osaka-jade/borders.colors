@@ -1,0 +1,7 @@
+#!/bin/bash
+# Osaka Jade color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff71CEAD
+export INACTIVE_BORDER_COLOR=0xff23372B
+export BORDER_WIDTH=5.0
+

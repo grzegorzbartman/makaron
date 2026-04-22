@@ -1,0 +1,22 @@
+#!/bin/bash
+# Ethereal color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff060B1E
+export BAR_BACKGROUND_COLOR=0xff060B1E
+
+# Default item colors
+export ICON_COLOR=0xffffcead
+export LABEL_COLOR=0xffffcead
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff6d7db6
+export SPACE_LABEL_COLOR=0xff6d7db6
+export SPACE_BACKGROUND_COLOR=0xff1f243a
+export SPACE_BORDER_COLOR=0xff6d7db6
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffffcead
+export SPACE_FOCUSED_LABEL_COLOR=0xffffcead
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff060B1E
+export SPACE_FOCUSED_BORDER_COLOR=0xff7d82d9

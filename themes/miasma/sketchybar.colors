@@ -1,0 +1,23 @@
+#!/bin/bash
+# Miasma color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff222222
+export BAR_BACKGROUND_COLOR=0xff222222
+
+# Default item colors
+export ICON_COLOR=0xffc2c2b0
+export LABEL_COLOR=0xffc2c2b0
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffc2c2b0
+export SPACE_LABEL_COLOR=0xffc2c2b0
+export SPACE_BACKGROUND_COLOR=0xff333333
+export SPACE_BORDER_COLOR=0x00333333
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffc9a554
+export SPACE_FOCUSED_LABEL_COLOR=0xffc9a554
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff222222
+export SPACE_FOCUSED_BORDER_COLOR=0xff78824b
+

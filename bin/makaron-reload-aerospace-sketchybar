@@ -1,0 +1,46 @@
+#!/bin/bash
+# Quick reload script for AeroSpace and SketchyBar
+
+# Check if AeroSpace is running, start if not
+if ! pgrep -f "AeroSpace" > /dev/null; then
+    echo "AeroSpace not running, starting..."
+    open -a AeroSpace
+    sleep 2  # Give it time to start
+fi
+
+# Now reload the configurations
+aerospace reload-config
+
+# Restart SketchyBar
+brew services restart sketchybar
+
+# Load theme colors for borders
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+THEME_DIR="$MAKARON_PATH/current-theme"
+
+if [ -f "$THEME_DIR/borders.colors" ]; then
+  source "$THEME_DIR/borders.colors"
+else
+  # Fallback colors (Tokyo Night)
+  export ACTIVE_BORDER_COLOR=0xff7aa2f7
+  export INACTIVE_BORDER_COLOR=0xff292e42
+  export BORDER_WIDTH=2.0
+fi
+
+# Restart borders service with theme colors
+source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
+if [[ "${BORDERS_ENABLED:-true}" != "true" ]]; then
+    killall borders 2>/dev/null || true
+    brew services stop borders 2>/dev/null || true
+    echo "Borders disabled (makaron.conf), skipping"
+elif command -v borders &> /dev/null; then
+    # Stop borders service
+    brew services stop borders 2>/dev/null || true
+    sleep 0.5
+
+    # Start borders with theme colors
+    borders active_color=$ACTIVE_BORDER_COLOR inactive_color=$INACTIVE_BORDER_COLOR width=$BORDER_WIDTH &
+    echo "Borders restarted with theme colors"
+else
+    echo "Borders command not found, skipping..."
+fi

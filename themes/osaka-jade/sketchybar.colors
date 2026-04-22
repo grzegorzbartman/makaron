@@ -1,0 +1,23 @@
+#!/bin/bash
+# Osaka Jade color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff111c18
+export BAR_BACKGROUND_COLOR=0xff111c18
+
+# Default item colors
+export ICON_COLOR=0xffC1C497
+export LABEL_COLOR=0xffC1C497
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffC1C497
+export SPACE_LABEL_COLOR=0xffC1C497
+export SPACE_BACKGROUND_COLOR=0xff23372B
+export SPACE_BORDER_COLOR=0x0053685B
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffD1D4A7
+export SPACE_FOCUSED_LABEL_COLOR=0xffD1D4A7
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff111c18
+export SPACE_FOCUSED_BORDER_COLOR=0xff9BCF8F
+

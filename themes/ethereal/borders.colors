@@ -1,0 +1,6 @@
+#!/bin/bash
+# Ethereal color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff7d82d9
+export INACTIVE_BORDER_COLOR=0xff1f243a
+export BORDER_WIDTH=5.0

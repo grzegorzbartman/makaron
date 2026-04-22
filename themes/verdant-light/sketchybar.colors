@@ -1,0 +1,23 @@
+#!/bin/bash
+# Verdant color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xffc2dfd0
+export BAR_BACKGROUND_COLOR=0xffc2dfd0
+
+# Default item colors
+export ICON_COLOR=0xff1f4547
+export LABEL_COLOR=0xff1f4547
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff2d5a5c
+export SPACE_LABEL_COLOR=0xff2d5a5c
+export SPACE_BACKGROUND_COLOR=0xffb5d4c0
+export SPACE_BORDER_COLOR=0x00000000
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffffffff
+export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff4a8a7e
+export SPACE_FOCUSED_BORDER_COLOR=0xff2d5a5c
+

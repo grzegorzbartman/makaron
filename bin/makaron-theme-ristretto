@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Ristretto theme
+"$(dirname "$0")/makaron-switch-theme" ristretto
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Nord theme
+"$(dirname "$0")/makaron-switch-theme" nord
+
