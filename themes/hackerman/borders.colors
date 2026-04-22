@@ -1,0 +1,6 @@
+#!/bin/bash
+# Hackerman color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff50f872
+export INACTIVE_BORDER_COLOR=0xff1f202a
+export BORDER_WIDTH=5.0

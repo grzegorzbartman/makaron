@@ -1,0 +1,23 @@
+#!/bin/bash
+# Underwater color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xffd5e0e8
+export BAR_BACKGROUND_COLOR=0xffd5e0e8
+
+# Default item colors
+export ICON_COLOR=0xff1e4159
+export LABEL_COLOR=0xff1e4159
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff2a5873
+export SPACE_LABEL_COLOR=0xff2a5873
+export SPACE_BACKGROUND_COLOR=0xffc5d5dd
+export SPACE_BORDER_COLOR=0x00000000
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffffffff
+export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff6ba5bd
+export SPACE_FOCUSED_BORDER_COLOR=0xff2a5873
+

@@ -162,6 +162,26 @@ configure_apple_intelligence() {
     echo "Apple Intelligence disabled"
 }
 
+# Set wallpaper
+configure_wallpaper() {
+    echo "Setting Tokyo Night wallpaper..."
+    local wallpaper_path="$MAKARON_PATH/assets/1-scenery-pink-lakeside-sunset-lake-landscape-scenic-panorama-7680x3215-144.png"
+    if [ -f "$wallpaper_path" ]; then
+        # Method 1: AppleScript with Finder (most reliable)
+        osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$wallpaper_path\"" 2>/dev/null
+
+        # Method 2: Database method as fallback
+        sqlite3 ~/Library/Application\ Support/Dock/desktoppicture.db "UPDATE data SET value = '$wallpaper_path';" 2>/dev/null
+        killall Dock 2>/dev/null
+
+        # Method 3: System Events as additional fallback
+        osascript -e "tell application \"System Events\" to tell every desktop to set picture to POSIX file \"$wallpaper_path\"" 2>/dev/null
+
+        echo "Wallpaper set to Tokyo Night theme"
+    else
+        echo "Warning: Wallpaper file not found at $wallpaper_path"
+    fi
+}
 
 # Restart affected applications
 restart_applications() {
@@ -192,6 +212,7 @@ configure_menubar
 configure_accessibility
 configure_icloud
 configure_apple_intelligence
+configure_wallpaper
 restart_applications
 
 echo ""

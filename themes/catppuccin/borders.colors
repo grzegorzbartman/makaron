@@ -1,0 +1,7 @@
+#!/bin/bash
+# Catppuccin Mocha color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xff89b4fa
+export INACTIVE_BORDER_COLOR=0xff313244
+export BORDER_WIDTH=5.0
+

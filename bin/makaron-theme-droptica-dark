@@ -1,0 +1,5 @@
+#!/bin/bash
+# Switch to Droptica Dark theme
+"$(dirname "$0")/makaron-switch-theme" droptica-dark
+
+

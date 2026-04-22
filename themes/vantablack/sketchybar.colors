@@ -1,0 +1,22 @@
+#!/bin/bash
+# Vantablack color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xff0D0D0D
+export BAR_BACKGROUND_COLOR=0xff0D0D0D
+
+# Default item colors
+export ICON_COLOR=0xffFFFFFF
+export LABEL_COLOR=0xffFFFFFF
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffB0B0B0
+export SPACE_LABEL_COLOR=0xffB0B0B0
+export SPACE_BACKGROUND_COLOR=0xff1B1B1B
+export SPACE_BORDER_COLOR=0xffB0B0B0
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffFFFFFF
+export SPACE_FOCUSED_LABEL_COLOR=0xffFFFFFF
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0D0D0D
+export SPACE_FOCUSED_BORDER_COLOR=0xff8D8D8D

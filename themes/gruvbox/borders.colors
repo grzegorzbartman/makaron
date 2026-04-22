@@ -1,0 +1,7 @@
+#!/bin/bash
+# Gruvbox color scheme for Borders
+
+export ACTIVE_BORDER_COLOR=0xffa89984
+export INACTIVE_BORDER_COLOR=0xff3c3836
+export BORDER_WIDTH=5.0
+

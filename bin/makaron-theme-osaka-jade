@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Osaka Jade theme
+"$(dirname "$0")/makaron-switch-theme" osaka-jade
+

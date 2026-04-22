@@ -1,0 +1,23 @@
+#!/bin/bash
+# Rose Pine color scheme for SketchyBar
+
+# Bar colors
+export BAR_COLOR=0xfffaf4ed
+export BAR_BACKGROUND_COLOR=0xfffaf4ed
+
+# Default item colors
+export ICON_COLOR=0xff575279
+export LABEL_COLOR=0xff575279
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff797593
+export SPACE_LABEL_COLOR=0xff797593
+export SPACE_BACKGROUND_COLOR=0xfff2e9e1
+export SPACE_BORDER_COLOR=0x00dfdad9
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xff575279
+export SPACE_FOCUSED_LABEL_COLOR=0xff575279
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xffebe5e1
+export SPACE_FOCUSED_BORDER_COLOR=0xffebbcba
+

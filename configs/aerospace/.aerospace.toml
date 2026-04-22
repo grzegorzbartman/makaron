@@ -8,11 +8,13 @@
 start-at-login = true
 
 # Commands to run after AeroSpace startup
+# Border colors are loaded from theme file via makaron-reload-aerospace-sketchybar
 after-startup-command = []
 
-# Write focused workspace to file for MakaronBar polling
+# Trigger SketchyBar when workspace changes
+# This passes the focused workspace number to SketchyBar plugins
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'echo "$AEROSPACE_FOCUSED_WORKSPACE" > /tmp/makaron_focused_ws'
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
@@ -49,14 +51,26 @@ automatically-unhide-macos-hidden-apps = false
 [key-mapping]
     preset = 'qwerty'
 
-# Gaps between windows and between monitor edges
+# Gaps between windows (inner-*) and between monitor edges (outer-*).
+# Possible values:
+# - Constant:     gaps.outer.top = 8
+# - Per monitor:  gaps.outer.top = [{ monitor.main = 16 }, { monitor."some-pattern" = 32 }, 24]
+#                 In this example, 24 is a default value when there is no match.
+#                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
+#                 See:
+#                 https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-    inner.horizontal = 5
-    inner.vertical =   5
-    outer.left =       5
-    outer.bottom =     5
-    outer.top =        6
-    outer.right =      5
+    inner.horizontal = 15
+    inner.vertical =   15
+    outer.left =       15
+    outer.bottom =     15
+    # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
+    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers based on notch detection:
+    # Full mode + notch:    [{ monitor."Built-in" = 15 }, 45] (notch area absorbs SketchyBar)
+    # Full mode + no notch: 45 (all monitors same — 40px bar + 5px margin)
+    # Minimal mode:         8 (no SketchyBar, just small gap)
+    outer.top = [{ monitor."Built-in" = 15 }, 45]
+    outer.right =      10
 
 # Workspace assignment for dual monitor setup
 # This prevents random workspace creation when connecting/disconnecting monitors

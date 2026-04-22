@@ -27,7 +27,10 @@ echo ""
 echo "🗑️  Removing existing installation..."
 
 # Stop any running services first
-pkill -f makaron-bar 2>/dev/null || true
+if command -v sketchybar &> /dev/null; then
+    echo "Stopping SketchyBar..."
+    brew services stop sketchybar 2>/dev/null || true
+fi
 
 # Remove the entire makaron directory
 if [ -d "$MAKARON_PATH" ]; then
@@ -38,6 +41,7 @@ fi
 # Remove symlinks
 echo "Removing symlinks..."
 rm -f "$HOME/.aerospace.toml"
+rm -f "$HOME/.config/sketchybar"
 rm -f "$HOME/.config/ghostty"
 
 echo "✅ Cleanup completed!"
@@ -54,8 +58,9 @@ echo ""
 echo "✅ Makaron reinstalled successfully!"
 echo ""
 echo "Available commands:"
-echo "  makaron-update   - Update the configuration"
-echo "  makaron-reload   - Reload all configurations"
-echo "  makaron-migrate  - Run pending migrations"
+echo "  makaron-update                      - Update the configuration"
+echo "  makaron-reload-aerospace-sketchybar - Reload all configurations"
+echo "  makaron-migrate                    - Run pending migrations"
+echo "  makaron-migration-status           - Show migration status"
 echo ""
 echo "Note: You may need to restart your terminal or run 'source ~/.zshrc' to use the new commands."

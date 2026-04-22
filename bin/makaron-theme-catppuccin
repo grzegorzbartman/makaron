@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Catppuccin theme
+"$(dirname "$0")/makaron-switch-theme" catppuccin
+

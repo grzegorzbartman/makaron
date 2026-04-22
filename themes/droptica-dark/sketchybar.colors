@@ -1,0 +1,24 @@
+#!/bin/bash
+# Droptica Dark color scheme for SketchyBar
+
+# Bar colors - deep navy blue from Droptica
+export BAR_COLOR=0xff030a3d
+export BAR_BACKGROUND_COLOR=0xff030a3d
+
+# Default item colors - bright white/light gray for contrast
+export ICON_COLOR=0xffe0e6f0
+export LABEL_COLOR=0xffe0e6f0
+
+# Workspace/space colors (inactive) - subtle darker navy
+export SPACE_ICON_COLOR=0xffa0aac0
+export SPACE_LABEL_COLOR=0xffa0aac0
+export SPACE_BACKGROUND_COLOR=0xff020730
+export SPACE_BORDER_COLOR=0xff0a1450
+
+# Workspace/space colors (focused) - cyan accent from Droptica
+export SPACE_FOCUSED_ICON_COLOR=0xff00e2d1
+export SPACE_FOCUSED_LABEL_COLOR=0xff00e2d1
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0a1450
+export SPACE_FOCUSED_BORDER_COLOR=0xff00e2d1
+
+

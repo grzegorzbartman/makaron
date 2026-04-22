@@ -94,12 +94,8 @@ check_app() {
 
 echo "Core Components:"
 check_installed "aerospace" "AeroSpace" || true
-if [ -f "$MAKARON_PATH/bin/makaron-bar" ]; then
-    echo "  ✓ MakaronBar"
-else
-    echo "  ✗ MakaronBar (not compiled)"
-    INSTALL_FAILED=1
-fi
+check_installed "sketchybar" "SketchyBar" || true
+check_installed "borders" "Borders" || true
 check_app "Ghostty" || true
 
 if [ -f "$HOME/.config/makaron/packages.conf" ]; then

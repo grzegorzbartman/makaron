@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Matte Black theme
+"$(dirname "$0")/makaron-switch-theme" matte-black
+

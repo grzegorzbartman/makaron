@@ -1,0 +1,19 @@
+#!/bin/bash
+# macOS Default Light - SketchyBar (not used in minimal mode)
+
+export BAR_COLOR=0xfff5f5f7
+export BAR_BACKGROUND_COLOR=0xfff5f5f7
+
+export ICON_COLOR=0xff1d1d1f
+export LABEL_COLOR=0xff1d1d1f
+
+export SPACE_ICON_COLOR=0xff1d1d1f
+export SPACE_LABEL_COLOR=0xff1d1d1f
+export SPACE_BACKGROUND_COLOR=0xffe8e8ed
+export SPACE_BORDER_COLOR=0x00000000
+
+export SPACE_FOCUSED_ICON_COLOR=0xffffffff
+export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff007AFF
+export SPACE_FOCUSED_BORDER_COLOR=0xff007AFF
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Tokyo Night theme
+"$(dirname "$0")/makaron-switch-theme" tokyo-night
+

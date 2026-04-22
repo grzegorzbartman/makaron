@@ -1,0 +1,24 @@
+#!/bin/bash
+# Catppuccin Mocha Dark color scheme for SketchyBar
+# Using darker background #0a0a0a instead of standard #1e1e2e
+
+# Bar colors (darker background)
+export BAR_COLOR=0xff0a0a0a
+export BAR_BACKGROUND_COLOR=0xff0a0a0a
+
+# Default item colors
+export ICON_COLOR=0xffcdd6f4
+export LABEL_COLOR=0xffcdd6f4
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xffbac2de
+export SPACE_LABEL_COLOR=0xffbac2de
+export SPACE_BACKGROUND_COLOR=0xff313244
+export SPACE_BORDER_COLOR=0x0045475a
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xffcdd6f4
+export SPACE_FOCUSED_LABEL_COLOR=0xffcdd6f4
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0a0a0a
+export SPACE_FOCUSED_BORDER_COLOR=0xff89b4fa
+

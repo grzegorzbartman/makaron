@@ -1,0 +1,7 @@
+#!/bin/bash
+# macOS Default Dark - Borders (not used in minimal mode)
+
+export ACTIVE_BORDER_COLOR=0xff0A84FF
+export INACTIVE_BORDER_COLOR=0xff3A3A3C
+export BORDER_WIDTH=2.0
+

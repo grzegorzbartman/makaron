@@ -1,0 +1,23 @@
+#!/bin/bash
+# Catppuccin Latte color scheme for SketchyBar (Light Theme)
+
+# Bar colors
+export BAR_COLOR=0xffeff1f5
+export BAR_BACKGROUND_COLOR=0xffeff1f5
+
+# Default item colors
+export ICON_COLOR=0xff4c4f69
+export LABEL_COLOR=0xff4c4f69
+
+# Workspace/space colors (inactive)
+export SPACE_ICON_COLOR=0xff6c6f85
+export SPACE_LABEL_COLOR=0xff6c6f85
+export SPACE_BACKGROUND_COLOR=0xffccd0da
+export SPACE_BORDER_COLOR=0x00acb0be
+
+# Workspace/space colors (focused)
+export SPACE_FOCUSED_ICON_COLOR=0xff4c4f69
+export SPACE_FOCUSED_LABEL_COLOR=0xff4c4f69
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xffdce0e8
+export SPACE_FOCUSED_BORDER_COLOR=0xff1e66f5
+

@@ -9,8 +9,8 @@ if [ -f "$MAKARON_CONF" ]; then
   source "$MAKARON_CONF"
 fi
 
-MAKARON_TIMER_DEFAULT_TAG="${MAKARON_TIMER_DEFAULT_TAG:-${SKETCHYBAR_TIMER_DEFAULT_TAG:-default}}"
-MAKARON_TIMER_RECENT_COUNT="${MAKARON_TIMER_RECENT_COUNT:-${SKETCHYBAR_TIMER_RECENT_COUNT:-5}}"
+SKETCHYBAR_TIMER_DEFAULT_TAG="${SKETCHYBAR_TIMER_DEFAULT_TAG:-default}"
+SKETCHYBAR_TIMER_RECENT_COUNT="${SKETCHYBAR_TIMER_RECENT_COUNT:-5}"
 
 _ensure_timewarrior_layout() {
   local config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/timewarrior"
@@ -185,12 +185,12 @@ _recent_json() {
 
   _ensure_timewarrior_layout
 
-  local limit="${1:-$MAKARON_TIMER_RECENT_COUNT}"
+  local limit="${1:-$SKETCHYBAR_TIMER_RECENT_COUNT}"
   local export_json rows row items
 
   case "$limit" in
     ''|*[!0-9]*)
-      limit="$MAKARON_TIMER_RECENT_COUNT"
+      limit="$SKETCHYBAR_TIMER_RECENT_COUNT"
       ;;
   esac
 
@@ -256,7 +256,7 @@ _start_timer() {
   if [ "$#" -gt 0 ]; then
     timew start "$@" >/dev/null
   else
-    timew start "$MAKARON_TIMER_DEFAULT_TAG" >/dev/null
+    timew start "$SKETCHYBAR_TIMER_DEFAULT_TAG" >/dev/null
   fi
 }
 

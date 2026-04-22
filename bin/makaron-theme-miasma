@@ -1,0 +1,4 @@
+#!/bin/bash
+# Switch to Miasma theme
+"$(dirname "$0")/makaron-switch-theme" miasma
+
