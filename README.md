@@ -116,6 +116,7 @@ After installation, you'll have access to these commands:
 - **`makaron-migrate`** - Run pending migrations
 - **`makaron-migration-status`** - Show migration status
 - **`makaron-dev-add-migration`** - Create new migration (development)
+- **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-debug`** - Diagnose system status
 - **`makaron-timer`** - Control the Timewarrior timer backend (`status`, `recent`, `start`, `stop`, `toggle`)
 - **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
@@ -228,6 +229,8 @@ makaron-apply-editor-profile development-php-drupal --vscode-only
 
 If you encounter issues with your installation:
 
+- **Quick health check**: `makaron-doctor` - Short report for common installation issues
+- **Safe automatic repairs**: `makaron-doctor --fix` - Repairs symlinks, missing binaries, config defaults, permissions, Ghostty skip-worktree, stale SketchyBar cache, and reloads UI services when safe
 - **Complete reinstall**: `makaron-reinstall` - Removes everything and reinstalls from scratch
 - **Check migration status**: `makaron-migration-status` - See which migrations have been applied
 - **Manual migration**: `makaron-migrate` - Run pending migrations manually
