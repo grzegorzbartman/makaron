@@ -1,0 +1,514 @@
+#!/bin/bash
+
+set -u
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+MAKARON_CONF="${MAKARON_CONF:-$HOME/.config/makaron/makaron.conf}"
+MAKARON_TEMPLATE="$MAKARON_PATH/templates/makaron.conf.default"
+UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
+SCREEN_CACHE="/tmp/makaron_screen_width"
+
+DO_FIX=false
+OUTPUT_JSON=false
+
+STATUSES=()
+CHECKS=()
+MESSAGES=()
+
+usage() {
+    cat <<EOF
+Usage: makaron-doctor [--fix] [--json] [--help]
+
+Options:
+  --fix    Apply safe, idempotent repairs
+  --json   Emit machine-readable JSON
+  --help   Show this help
+EOF
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        --fix) DO_FIX=true ;;
+        --json) OUTPUT_JSON=true ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
+
+add_result() {
+    STATUSES+=("$1")
+    CHECKS+=("$2")
+    MESSAGES+=("$3")
+}
+
+resolve_path() {
+    local path="$1"
+    if [ -L "$path" ]; then
+        local target
+        target=$(readlink "$path")
+        if [[ "$target" != /* ]]; then
+            target="$(dirname "$path")/$target"
+        fi
+        printf '%s\n' "$target"
+    else
+        printf '%s\n' "$path"
+    fi
+}
+
+backup_path() {
+    local path="$1"
+    local backup="${path}.backup.$(date +%s)"
+    mv "$path" "$backup"
+    printf '%s\n' "$backup"
+}
+
+ensure_symlink() {
+    local link="$1"
+    local target="$2"
+
+    mkdir -p "$(dirname "$link")"
+
+    if [ -L "$link" ]; then
+        rm "$link"
+    elif [ -e "$link" ]; then
+        backup_path "$link" >/dev/null || return 1
+    fi
+
+    ln -s "$target" "$link"
+}
+
+check_symlink() {
+    local name="$1"
+    local link="$2"
+    local target="$3"
+
+    if [ ! -e "$target" ]; then
+        add_result "fail" "$name" "target missing: $target"
+        return
+    fi
+
+    if [ -L "$link" ] && [ "$(resolve_path "$link")" = "$target" ]; then
+        add_result "ok" "$name" "$link"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if ensure_symlink "$link" "$target"; then
+            add_result "fixed" "$name" "$link -> $target"
+        else
+            add_result "fail" "$name" "could not repair $link"
+        fi
+    else
+        add_result "fail" "$name" "expected $link -> $target"
+    fi
+}
+
+check_repo() {
+    if [ -d "$MAKARON_PATH" ]; then
+        add_result "ok" "repo" "$MAKARON_PATH"
+    else
+        add_result "fail" "repo" "missing $MAKARON_PATH"
+    fi
+}
+
+check_current_theme() {
+    local link="$MAKARON_PATH/current-theme"
+    local fallback="$MAKARON_PATH/themes/tokyo-night"
+
+    if [ -L "$link" ] && [ -d "$(resolve_path "$link")" ]; then
+        add_result "ok" "current-theme" "$(basename "$(resolve_path "$link")")"
+        return
+    fi
+
+    if [ ! -d "$fallback" ]; then
+        add_result "fail" "current-theme" "missing fallback theme: $fallback"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if ensure_symlink "$link" "$fallback"; then
+            add_result "fixed" "current-theme" "$link -> $fallback"
+        else
+            add_result "fail" "current-theme" "could not repair theme symlink"
+        fi
+    else
+        add_result "fail" "current-theme" "missing or broken symlink"
+    fi
+}
+
+compile_swift() {
+    local output="$1"
+    local source="$2"
+    shift 2
+
+    mkdir -p "$(dirname "$output")"
+    swiftc -O -o "$output" "$source" "$@" 2>/dev/null
+}
+
+check_swift_binary() {
+    local name="$1"
+    local output="$2"
+    local source="$3"
+    shift 3
+
+    if [ -x "$output" ]; then
+        add_result "ok" "$name" "$output"
+        return
+    fi
+
+    if [ ! -f "$source" ]; then
+        add_result "warn" "$name" "source missing: $source"
+        return
+    fi
+
+    if ! command -v swiftc >/dev/null 2>&1; then
+        add_result "warn" "$name" "swiftc not found"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if compile_swift "$output" "$source" "$@"; then
+            chmod +x "$output" 2>/dev/null || true
+            add_result "fixed" "$name" "compiled $(basename "$output")"
+        else
+            add_result "fail" "$name" "compile failed"
+        fi
+    else
+        add_result "fail" "$name" "missing binary"
+    fi
+}
+
+check_bin_permissions() {
+    if [ ! -d "$MAKARON_PATH/bin" ]; then
+        add_result "fail" "bin-permissions" "missing $MAKARON_PATH/bin"
+        return
+    fi
+
+    local missing
+    missing=$(find "$MAKARON_PATH/bin" -type f ! -perm -111 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$missing" = "0" ]; then
+        add_result "ok" "bin-permissions" "all bin files executable"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if chmod +x "$MAKARON_PATH/bin"/* 2>/dev/null; then
+            add_result "fixed" "bin-permissions" "made $missing files executable"
+        else
+            add_result "fail" "bin-permissions" "chmod failed"
+        fi
+    else
+        add_result "fail" "bin-permissions" "$missing files are not executable"
+    fi
+}
+
+check_ghostty_skip_worktree() {
+    local file="configs/ghostty/config"
+
+    if [ ! -d "$MAKARON_PATH/.git" ]; then
+        add_result "skipped" "ghostty-skip-worktree" "not a git checkout"
+        return
+    fi
+
+    if [ ! -f "$MAKARON_PATH/$file" ]; then
+        add_result "fail" "ghostty-skip-worktree" "missing $file"
+        return
+    fi
+
+    local marker
+    marker=$(git -C "$MAKARON_PATH" ls-files -v "$file" 2>/dev/null | awk '{print substr($1,1,1)}')
+    if [ "$marker" = "S" ]; then
+        add_result "ok" "ghostty-skip-worktree" "$file"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if git -C "$MAKARON_PATH" update-index --skip-worktree "$file" 2>/dev/null; then
+            add_result "fixed" "ghostty-skip-worktree" "$file"
+        else
+            add_result "fail" "ghostty-skip-worktree" "could not set skip-worktree"
+        fi
+    else
+        add_result "warn" "ghostty-skip-worktree" "$file is not protected"
+    fi
+}
+
+missing_config_count() {
+    local count=0
+    local line var_name
+
+    [ -f "$MAKARON_TEMPLATE" ] || {
+        echo 0
+        return
+    }
+
+    while IFS= read -r line; do
+        [[ "$line" =~ ^#.*$ || -z "$line" ]] && continue
+        var_name="${line%%=*}"
+        if ! grep -q "^${var_name}=" "$MAKARON_CONF" 2>/dev/null; then
+            count=$((count + 1))
+        fi
+    done < "$MAKARON_TEMPLATE"
+
+    echo "$count"
+}
+
+check_makaron_conf() {
+    if [ ! -f "$MAKARON_TEMPLATE" ]; then
+        add_result "fail" "makaron-conf" "template missing: $MAKARON_TEMPLATE"
+        return
+    fi
+
+    local missing
+    missing=$(missing_config_count)
+    if [ -f "$MAKARON_CONF" ] && [ "$missing" = "0" ]; then
+        add_result "ok" "makaron-conf" "$MAKARON_CONF"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if [ -f "$MAKARON_PATH/install/makaron-conf.sh" ]; then
+            # shellcheck source=/dev/null
+            if source "$MAKARON_PATH/install/makaron-conf.sh"; then
+                missing=$(missing_config_count)
+                if [ "$missing" = "0" ]; then
+                    add_result "fixed" "makaron-conf" "updated missing variables"
+                else
+                    add_result "fail" "makaron-conf" "$missing variables still missing"
+                fi
+            else
+                add_result "fail" "makaron-conf" "config update failed"
+            fi
+        else
+            add_result "fail" "makaron-conf" "installer helper missing"
+        fi
+    else
+        if [ -f "$MAKARON_CONF" ]; then
+            add_result "warn" "makaron-conf" "$missing variables missing"
+        else
+            add_result "fail" "makaron-conf" "missing $MAKARON_CONF"
+        fi
+    fi
+}
+
+check_screen_cache() {
+    if [ ! -f "$SCREEN_CACHE" ]; then
+        add_result "ok" "screen-cache" "no cached display width"
+        return
+    fi
+
+    local age
+    age=$(( $(date +%s) - $(stat -f %m "$SCREEN_CACHE" 2>/dev/null || echo 0) ))
+
+    if [ "$age" -le 60 ]; then
+        add_result "ok" "screen-cache" "fresh cache"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if rm -f "$SCREEN_CACHE" 2>/dev/null; then
+            add_result "fixed" "screen-cache" "removed stale cache"
+        else
+            add_result "fail" "screen-cache" "could not remove stale cache"
+        fi
+    else
+        add_result "warn" "screen-cache" "stale cache at $SCREEN_CACHE"
+    fi
+}
+
+ui_mode() {
+    if [ -f "$UI_MODE_FILE" ]; then
+        cat "$UI_MODE_FILE"
+    else
+        echo "full"
+    fi
+}
+
+service_health_message() {
+    local mode="$1"
+    local problems=()
+
+    if [ "$mode" = "stop" ]; then
+        echo "ui mode is stop"
+        return
+    fi
+
+    if command -v aerospace >/dev/null 2>&1 && ! pgrep -f "AeroSpace" >/dev/null 2>&1; then
+        problems+=("AeroSpace stopped")
+    fi
+
+    if [ "$mode" = "full" ]; then
+        if command -v sketchybar >/dev/null 2>&1 && ! pgrep -f "sketchybar" >/dev/null 2>&1; then
+            problems+=("SketchyBar stopped")
+        fi
+
+        local borders_enabled="true"
+        if [ -f "$MAKARON_CONF" ]; then
+            # shellcheck source=/dev/null
+            source "$MAKARON_CONF" 2>/dev/null || true
+            borders_enabled="${BORDERS_ENABLED:-true}"
+        fi
+        if [ "$borders_enabled" = "true" ] && command -v borders >/dev/null 2>&1 && ! pgrep -x "borders" >/dev/null 2>&1; then
+            problems+=("Borders stopped")
+        fi
+    fi
+
+    if [ "${#problems[@]}" -eq 0 ]; then
+        echo "services match $mode mode"
+    else
+        local IFS=", "
+        echo "${problems[*]}"
+    fi
+}
+
+check_ui_services() {
+    local mode
+    mode=$(ui_mode)
+
+    if [ "$mode" = "stop" ]; then
+        add_result "skipped" "ui-services" "ui mode is stop"
+        return
+    fi
+
+    local message
+    message=$(service_health_message "$mode")
+    if [[ "$message" != *"stopped"* ]]; then
+        add_result "ok" "ui-services" "$message"
+        return
+    fi
+
+    if [ "$DO_FIX" = true ]; then
+        if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
+            # shellcheck source=/dev/null
+            source "$MAKARON_PATH/bin/makaron-ui-helpers"
+            if reload_current_ui >/dev/null 2>&1; then
+                add_result "fixed" "ui-services" "reloaded $mode mode"
+            else
+                add_result "warn" "ui-services" "reload attempted, verify with makaron-debug"
+            fi
+        else
+            add_result "fail" "ui-services" "missing makaron-ui-helpers"
+        fi
+    else
+        add_result "warn" "ui-services" "$message"
+    fi
+}
+
+run_checks() {
+    check_repo
+
+    if [ -d "$MAKARON_PATH" ]; then
+        check_current_theme
+        check_symlink "sketchybar-symlink" "$HOME/.config/sketchybar" "$MAKARON_PATH/configs/sketchybar"
+        check_symlink "ghostty-symlink" "$HOME/.config/ghostty" "$MAKARON_PATH/configs/ghostty"
+        check_symlink "aerospace-symlink" "$HOME/.aerospace.toml" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
+        check_swift_binary "memory-binary" "$MAKARON_PATH/bin/makaron-memory-stats" "$MAKARON_PATH/src/memory_stats.swift"
+        check_swift_binary "accent-binary" "$MAKARON_PATH/bin/makaron-set-accent-color" "$MAKARON_PATH/src/set_accent_color.swift"
+        check_swift_binary "calendar-binary" "$MAKARON_PATH/bin/makaron-calendar-next" "$MAKARON_PATH/src/calendar_next_event.swift" -framework EventKit
+        check_bin_permissions
+        check_ghostty_skip_worktree
+        check_makaron_conf
+        check_screen_cache
+        check_ui_services
+    fi
+}
+
+json_escape() {
+    local value="$1"
+    value=${value//\\/\\\\}
+    value=${value//\"/\\\"}
+    value=${value//$'\n'/\\n}
+    value=${value//$'\r'/\\r}
+    value=${value//$'\t'/\\t}
+    printf '"%s"' "$value"
+}
+
+print_json() {
+    local fail_count=0 warn_count=0 fixed_count=0 i
+
+    for status in "${STATUSES[@]}"; do
+        case "$status" in
+            fail) fail_count=$((fail_count + 1)) ;;
+            warn) warn_count=$((warn_count + 1)) ;;
+            fixed) fixed_count=$((fixed_count + 1)) ;;
+        esac
+    done
+
+    printf '{'
+    printf '"fix":%s,' "$DO_FIX"
+    printf '"summary":{"ok":%s,"warn":%s,"fail":%s,"fixed":%s},' \
+        "$(count_status ok)" "$warn_count" "$fail_count" "$fixed_count"
+    printf '"checks":['
+    for i in "${!STATUSES[@]}"; do
+        [ "$i" -gt 0 ] && printf ','
+        printf '{"status":%s,"check":%s,"message":%s}' \
+            "$(json_escape "${STATUSES[$i]}")" \
+            "$(json_escape "${CHECKS[$i]}")" \
+            "$(json_escape "${MESSAGES[$i]}")"
+    done
+    printf ']}'
+    printf '\n'
+}
+
+count_status() {
+    local wanted="$1"
+    local count=0 status
+    for status in "${STATUSES[@]}"; do
+        [ "$status" = "$wanted" ] && count=$((count + 1))
+    done
+    echo "$count"
+}
+
+print_text() {
+    local i status label
+
+    echo "Makaron Doctor"
+    echo ""
+
+    for i in "${!STATUSES[@]}"; do
+        status="${STATUSES[$i]}"
+        case "$status" in
+            ok) label="OK" ;;
+            warn) label="WARN" ;;
+            fail) label="FAIL" ;;
+            fixed) label="FIXED" ;;
+            skipped) label="SKIP" ;;
+            *) label="$status" ;;
+        esac
+        printf '%-6s %-24s %s\n' "$label" "${CHECKS[$i]}" "${MESSAGES[$i]}"
+    done
+
+    echo ""
+    if [ "$(count_status fail)" -gt 0 ]; then
+        if [ "$DO_FIX" = true ]; then
+            echo "Some issues could not be fixed. Run makaron-debug for full details."
+        else
+            echo "Run 'makaron-doctor --fix' to repair safe issues."
+        fi
+    elif [ "$(count_status warn)" -gt 0 ]; then
+        if [ "$DO_FIX" = true ]; then
+            echo "Repairs completed with warnings. Run makaron-debug for full details."
+        else
+            echo "Warnings found. Run 'makaron-doctor --fix' for safe repairs."
+        fi
+    else
+        echo "No blocking issues found."
+    fi
+}
+
+run_checks
+
+if [ "$OUTPUT_JSON" = true ]; then
+    print_json
+else
+    print_text
+fi
+
+[ "$(count_status fail)" -eq 0 ]
