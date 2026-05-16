@@ -25,7 +25,7 @@ case "$1" in
 "Discord") echo "󰙯" ;;
 "ChatGPT") echo "󰭹" ;;
 "Claude") echo "󰚩" ;;
-"Telegram") echo "" ;;
+"Telegram"|"Telegram Desktop"|"Telegram Lite") echo "" ;;
 "WhatsApp") echo "" ;;
 "Spotify"|"Music") echo "" ;;
 "Notes") echo "" ;;
