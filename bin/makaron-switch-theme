@@ -146,32 +146,17 @@ set_makaron_conf_value() {
     fi
 }
 
+# Update BORDERS_ENABLED in makaron.conf based on which theme we're switching to.
+# Symmetric: macos-default-* themes force borders off; all other themes restore
+# borders on. Layout (gaps + outer.top + start/stop borders) is then applied
+# uniformly by makaron-reload-aerospace-sketchybar -> apply_desktop_state.
 apply_theme_border_behavior() {
     case "$1" in
         macos-default-dark|macos-default-light)
             set_makaron_conf_value "BORDERS_ENABLED" "false"
-
-            local ui_helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
-            [ ! -f "$ui_helpers" ] && return 0
-
-            # shellcheck source=/dev/null
-            source "$ui_helpers"
-
-            local ui_mode
-            ui_mode=$(get_ui_mode 2>/dev/null || echo "full")
-
-            if [ "$ui_mode" != "stop" ]; then
-                _set_aerospace_gaps 8 || true
-                if [ "$ui_mode" = "minimal" ]; then
-                    switch_aerospace_config "minimal" || true
-                else
-                    switch_aerospace_config "full" || true
-                fi
-
-                if command -v aerospace &> /dev/null; then
-                    aerospace reload-config || true
-                fi
-            fi
+            ;;
+        *)
+            set_makaron_conf_value "BORDERS_ENABLED" "true"
             ;;
     esac
 }

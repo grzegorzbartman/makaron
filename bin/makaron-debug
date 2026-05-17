@@ -623,6 +623,36 @@ fi
 echo ""
 
 # ============================================================================
+# SECTION: Desktop Layout State (apply_desktop_state)
+# ============================================================================
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📐 DESKTOP LAYOUT STATE"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+UI_HELPERS="$MAKARON_PATH/bin/makaron-ui-helpers"
+if [ -f "$UI_HELPERS" ]; then
+    # shellcheck source=/dev/null
+    source "$UI_HELPERS"
+
+    UI_MODE_VALUE=$(get_ui_mode 2>/dev/null || echo "unknown")
+    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
+    BORDERS_VALUE="${BORDERS_ENABLED:-true}"
+
+    echo "  UI mode:         $UI_MODE_VALUE"
+    echo "  BORDERS_ENABLED: $BORDERS_VALUE"
+    echo ""
+
+    if [ "$UI_MODE_VALUE" = "stop" ]; then
+        echo "  UI mode is 'stop' — layout state intentionally not applied"
+    else
+        verify_desktop_state || echo "  → Run 'makaron-reload-aerospace-sketchybar' to heal"
+    fi
+else
+    echo "  ❌ $UI_HELPERS not found"
+fi
+echo ""
+
+# ============================================================================
 # SECTION: Summary
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
