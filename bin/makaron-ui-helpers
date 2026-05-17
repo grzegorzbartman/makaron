@@ -11,6 +11,8 @@ NOTCH_CACHE_FILE="/tmp/makaron_has_builtin_notch"
 # Constants for desktop layout (kept simple; theme BORDER_WIDTH is unified).
 MAKARON_GAPS_WITH_BORDERS=15
 MAKARON_GAPS_WITHOUT_BORDERS=8
+# Must match `height=...` in sketchybarrc — used to derive symmetric outer.top.
+MAKARON_SKETCHYBAR_HEIGHT=40
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps and read back
 # by verify_desktop_state. Single list = no drift between writer and verifier.
@@ -126,20 +128,22 @@ switch_aerospace_config() {
     local has_notch=false
     _has_builtin_notch && has_notch=true
 
-    local borders
+    local borders gap
     borders="$(_get_borders_enabled)"
+    gap="$(_expected_gap_size)"
 
-    # full mode: bar_top reserves space for SketchyBar (+border margin if any),
-    #            notch_top is the smaller reserve under the notch on Built-in.
-    # minimal:   no bar, uniform small gap (notch irrelevant).
+    # full mode:
+    #   bar_top   = SketchyBar height + side gap, so the visual padding above
+    #               the window border matches the padding on the left/right/
+    #               bottom edges (symmetric layout).
+    #   notch_top = side gap, because the notch area "absorbs" SketchyBar
+    #               on Built-in MBP displays — no bar reserve needed there.
+    # minimal: no bar, uniform small gap (notch irrelevant).
     local bar_top notch_top outer_top
     case "$mode" in
         full)
-            if [[ "$borders" == "true" ]]; then
-                bar_top=45; notch_top=15
-            else
-                bar_top=42; notch_top=8
-            fi
+            bar_top=$(( MAKARON_SKETCHYBAR_HEIGHT + gap ))
+            notch_top=$gap
             if $has_notch; then
                 outer_top="    outer.top = [{ monitor.\"Built-in\" = $notch_top }, $bar_top]"
             else
@@ -147,7 +151,7 @@ switch_aerospace_config() {
             fi
             ;;
         minimal)
-            outer_top='    outer.top = 8'
+            outer_top="    outer.top = $MAKARON_GAPS_WITHOUT_BORDERS"
             ;;
         *)
             echo "  ⚠️  Unknown aerospace config mode: $mode"
