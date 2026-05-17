@@ -6,7 +6,6 @@ MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 MAKARON_CONF="${MAKARON_CONF:-$HOME/.config/makaron/makaron.conf}"
 MAKARON_TEMPLATE="$MAKARON_PATH/templates/makaron.conf.default"
 UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
-SCREEN_CACHE="/tmp/makaron_screen_width"
 
 DO_FIX=false
 OUTPUT_JSON=false
@@ -298,31 +297,6 @@ check_makaron_conf() {
     fi
 }
 
-check_screen_cache() {
-    if [ ! -f "$SCREEN_CACHE" ]; then
-        add_result "ok" "screen-cache" "no cached display width"
-        return
-    fi
-
-    local age
-    age=$(( $(date +%s) - $(stat -f %m "$SCREEN_CACHE" 2>/dev/null || echo 0) ))
-
-    if [ "$age" -le 60 ]; then
-        add_result "ok" "screen-cache" "fresh cache"
-        return
-    fi
-
-    if [ "$DO_FIX" = true ]; then
-        if rm -f "$SCREEN_CACHE" 2>/dev/null; then
-            add_result "fixed" "screen-cache" "removed stale cache"
-        else
-            add_result "fail" "screen-cache" "could not remove stale cache"
-        fi
-    else
-        add_result "warn" "screen-cache" "stale cache at $SCREEN_CACHE"
-    fi
-}
-
 ui_mode() {
     if [ -f "$UI_MODE_FILE" ]; then
         cat "$UI_MODE_FILE"
@@ -411,11 +385,9 @@ run_checks() {
         check_symlink "aerospace-symlink" "$HOME/.aerospace.toml" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
         check_swift_binary "memory-binary" "$MAKARON_PATH/bin/makaron-memory-stats" "$MAKARON_PATH/src/memory_stats.swift"
         check_swift_binary "accent-binary" "$MAKARON_PATH/bin/makaron-set-accent-color" "$MAKARON_PATH/src/set_accent_color.swift"
-        check_swift_binary "calendar-binary" "$MAKARON_PATH/bin/makaron-calendar-next" "$MAKARON_PATH/src/calendar_next_event.swift" -framework EventKit
         check_bin_permissions
         check_ghostty_skip_worktree
         check_makaron_conf
-        check_screen_cache
         check_ui_services
     fi
 }

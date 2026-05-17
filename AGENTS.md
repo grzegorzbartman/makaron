@@ -80,7 +80,6 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 ### System Commands
 - `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
-- `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the SketchyBar timer widget
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
@@ -169,12 +168,11 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 ```
 
 ### Key Plugins
-- **aerospace.sh** — Workspace indicator: shows focused state + app icons (Nerd Font). Multi-monitor aware via `$MONITOR` parameter.
+- **aerospace.sh** — Workspace indicator: shows focused state + app icons (Nerd Font). Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes the workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders (focus changes, `front_app_switched`, manual `--update`) fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
 - **battery.sh** — Battery status with low-threshold warning from `makaron.conf`
 - **memory.sh** — Calls compiled Swift binary `makaron-memory-stats`, shows "X/Y GB"
 - **cpu.sh** — Load average from `uptime` divided by core count
 - **volume.sh** — Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons
-- **timer.sh** — Timewarrior timer: left click toggles tracking, right click shows recent log popup
 - **display_change.sh** — Reloads SketchyBar when monitor count changes
 
 ### SketchyBar Plugin Conventions
@@ -182,24 +180,6 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 - `$INFO` — event data (e.g., volume percentage on `volume_change`)
 - Events subscribed via: `--subscribe item_name event_name`
 - Click handlers: `click_script="aerospace workspace $sid"`
-
-### Responsive Labels On Small Screens
-Some SketchyBar items already adapt to limited width on smaller displays such as MacBook Air.
-
-Use `configs/sketchybar/plugins/lib/screen_max_chars.sh` for responsive `label.max_chars` values based on the narrowest active display:
-- `makaron_label_max_chars` — general cap for items like Todoist
-- `makaron_calendar_label_max_chars` — tighter cap for the `e` slot, where Calendar has much less room
-
-Current usage:
-- `configs/sketchybar/plugins/todoist.sh` uses `makaron_label_max_chars`
-- `configs/sketchybar/plugins/calendar.sh` uses `makaron_calendar_label_max_chars`
-
-The helper caches the narrowest display width for 60 seconds and should be invalidated on `display_change` and `system_woke` via `makaron_invalidate_screen_cache`.
-
-For any new text-heavy SketchyBar item, especially in `q`, `e`, or on the right side:
-- do not hardcode long labels
-- prefer a short primary label and move details into popup content
-- reuse the responsive width helper instead of introducing per-plugin fixed limits
 
 ---
 
@@ -235,7 +215,7 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty, Timewarrior.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
@@ -352,8 +332,11 @@ User-specific settings stored outside the repo in `~/.config/makaron/makaron.con
 
 ### Current Variables
 ```bash
-BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
-BORDERS_ENABLED=true      # Window borders (JankyBorders) — false to disable
+BATTERY_LOW_THRESHOLD=20            # Battery warning threshold (%)
+BORDERS_ENABLED=true                # Window borders (JankyBorders) — false to disable
+SKETCHYBAR_COMPACT_MODE=false       # Hide CPU/memory/storage on the right side
+SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
+SKETCHYBAR_NOTES_ENABLED=false      # Apple Notes click-to-create item
 ```
 
 ---
@@ -533,13 +516,35 @@ makaron-apply-editor-profile <profile-name> [--cursor-only|--vscode-only]
 In `configs/aerospace/.aerospace.toml`:
 ```toml
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
 ]
+
+on-focus-changed = ['exec-and-forget sketchybar --trigger aerospace_focus_change']
 ```
-**Required** - without this, empty workspaces won't highlight correctly.
+**Required** — without `exec-on-workspace-change`, empty workspaces won't highlight correctly. `on-focus-changed` keeps the app-icon row up to date when focus moves between windows inside the same workspace.
+
+### SketchyBar Events
+Both events are registered in `sketchybarrc`, and every `space.$sid` item subscribes to them plus `front_app_switched`:
+
+```bash
+sketchybar --add event aerospace_workspace_change
+sketchybar --add event aerospace_focus_change
+# ...
+--subscribe space.$sid aerospace_workspace_change aerospace_focus_change front_app_switched
+```
 
 ### Plugin Logic (`aerospace.sh`)
+The plugin uses a selective-refresh shortcut for `aerospace_workspace_change`: only the workspaces matching `$FOCUSED_WORKSPACE` and `$PREV_WORKSPACE` actually redraw. All other senders fall through to the full refresh path.
+
 ```bash
+# Selective refresh on workspace change: only the prev and current workspaces
+# need to be redrawn, everything else can early-exit.
+if [[ "$SENDER" == "aerospace_workspace_change" ]]; then
+  if [[ "$WORKSPACE" != "$FOCUSED_WORKSPACE" && "$WORKSPACE" != "$PREV_WORKSPACE" ]]; then
+    exit 0
+  fi
+fi
+
 # Multi-monitor: use --monitor --visible
 if [[ -n "$MONITOR" ]]; then
   IS_FOCUSED=$(aerospace list-workspaces --monitor "$MONITOR" --visible 2>/dev/null)
@@ -551,6 +556,9 @@ else
   IS_FOCUSED="$FOCUSED_WORKSPACE"
 fi
 ```
+
+### Hiding Empty Workspaces
+`SKETCHYBAR_HIDE_EMPTY_WORKSPACES` in `makaron.conf` (default `false`) hides empty, non-focused workspaces via `drawing=off`. The focused workspace is always drawn, even when empty, so the bar never "loses" the user's current position.
 
 ### Monitor Detection
 - Single monitor: Show all workspaces on one bar

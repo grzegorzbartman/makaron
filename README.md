@@ -6,6 +6,9 @@
 
 Complete macOS development environment for PHP and Drupal developers with modern window management, terminal, and productivity tools.
 
+> [!IMPORTANT]
+> **Use this as a starting point, not a finished product.** Makaron is a personal, opinionated setup that changes frequently — widgets get added, removed, or rewired, defaults are tweaked, and breaking changes can land between updates. The best way to use it is to **fork the repository**, install from your own fork, and adjust it to fit your own workflow. That way `makaron-update` pulls from a tree you control, not from mine.
+
 ## Perfect for
 
 - **PHP Developers** - Optimized workflow for PHP development
@@ -67,7 +70,6 @@ This will:
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator
-- **Timewarrior** - Local time tracking backend for the SketchyBar timer
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor
@@ -118,7 +120,6 @@ After installation, you'll have access to these commands:
 - **`makaron-dev-add-migration`** - Create new migration (development)
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-debug`** - Diagnose system status
-- **`makaron-timer`** - Control the Timewarrior timer backend (`status`, `recent`, `start`, `stop`, `toggle`)
 - **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
 - **`makaron-ui-minimal`** - Start minimal UI (no SketchyBar, visible menu bar)
 - **`makaron-ui-stop`** - Stop UI components
@@ -230,7 +231,7 @@ makaron-apply-editor-profile development-php-drupal --vscode-only
 If you encounter issues with your installation:
 
 - **Quick health check**: `makaron-doctor` - Short report for common installation issues
-- **Safe automatic repairs**: `makaron-doctor --fix` - Repairs symlinks, missing binaries, config defaults, permissions, Ghostty skip-worktree, stale SketchyBar cache, and reloads UI services when safe
+- **Safe automatic repairs**: `makaron-doctor --fix` - Repairs symlinks, missing binaries, config defaults, permissions, Ghostty skip-worktree, and reloads UI services when safe
 - **Complete reinstall**: `makaron-reinstall` - Removes everything and reinstalls from scratch
 - **Check migration status**: `makaron-migration-status` - See which migrations have been applied
 - **Manual migration**: `makaron-migrate` - Run pending migrations manually
@@ -433,11 +434,15 @@ makaron-migrate
 
 ## User Configuration
 
-Personal settings are stored in `~/.config/makaron/makaron.conf`. This file is created on install and preserved during updates.
+Personal settings are stored in `~/.config/makaron/makaron.conf`. This file is created on install and preserved during updates. New variables added later get appended on update; existing values are never overwritten.
 
 Available settings:
 ```bash
-BATTERY_LOW_THRESHOLD=20  # Battery warning threshold (%)
+BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
+BORDERS_ENABLED=true                    # Window borders (JankyBorders) — false to disable
+SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
+SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
+SKETCHYBAR_NOTES_ENABLED=false          # Apple Notes click-to-create item
 ```
 
 ---

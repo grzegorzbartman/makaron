@@ -242,22 +242,6 @@ stop_borders() {
     fi
 }
 
-# --- Calendar Plugin ---
-compile_calendar_plugin() {
-    local CALENDAR_SOURCE_DIR="$MAKARON_PATH/configs/sketchybar/plugins/calendar"
-    if [ -f "$CALENDAR_SOURCE_DIR/calendar_events.swift" ] && [ ! -f "$CALENDAR_SOURCE_DIR/calendar_events" ]; then
-        echo "  Compiling calendar plugin..."
-        cd "$CALENDAR_SOURCE_DIR"
-        if swiftc -o calendar_events calendar_events.swift 2>/dev/null; then
-            chmod +x calendar_events
-            echo "  ✓ Calendar plugin compiled"
-        else
-            echo "  ⚠️  Failed to compile calendar plugin"
-        fi
-        cd - > /dev/null
-    fi
-}
-
 # --- macOS Settings ---
 
 # Toggle menu bar autohide via AppleScript UI click (toggle trick).

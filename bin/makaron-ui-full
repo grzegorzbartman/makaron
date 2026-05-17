@@ -13,7 +13,6 @@ stop_sketchybar
 switch_aerospace_config "full"
 start_aerospace
 start_sketchybar
-compile_calendar_plugin
 start_borders
 apply_macos_full_settings
 save_ui_mode "full"

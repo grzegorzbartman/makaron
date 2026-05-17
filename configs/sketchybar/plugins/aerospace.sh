@@ -64,16 +64,31 @@ if [ -f "$THEME_DIR/sketchybar.colors" ]; then
   source "$THEME_DIR/sketchybar.colors"
 fi
 
+# Optional user flag: hide empty, non-focused workspaces from the bar.
+# Focused workspace is always drawn so users never "lose" their position.
+if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
+  # shellcheck disable=SC1090
+  source "$HOME/.config/makaron/makaron.conf"
+fi
+SKETCHYBAR_HIDE_EMPTY_WORKSPACES="${SKETCHYBAR_HIDE_EMPTY_WORKSPACES:-false}"
+
+# Selective refresh: when AeroSpace reports a workspace change, only the
+# previous and the newly focused workspaces actually need to be redrawn.
+# All other event senders (focus change inside a workspace, front_app_switched,
+# manual --update, etc.) fall through to the full refresh path.
+if [[ "$SENDER" == "aerospace_workspace_change" ]]; then
+  if [[ "$WORKSPACE" != "$FOCUSED_WORKSPACE" && "$WORKSPACE" != "$PREV_WORKSPACE" ]]; then
+    exit 0
+  fi
+fi
+
 # Multi-monitor support: Check if this workspace is visible on its assigned monitor
 # In multi-monitor setup, we need to check per-monitor visibility, not global focus
 if [[ -n "$MONITOR" ]]; then
-  # Get the visible workspace for this specific monitor
   VISIBLE_ON_MONITOR=$(aerospace list-workspaces --monitor "$MONITOR" --visible 2>/dev/null)
   IS_FOCUSED="$VISIBLE_ON_MONITOR"
 else
-  # Fallback for single monitor or legacy behavior
-  # Get focused workspace from environment variable (set by aerospace exec-on-workspace-change)
-  # If not set (e.g., from front_app_switched event), query aerospace
+  # Single-monitor fallback: prefer event payload, otherwise query aerospace.
   if [[ -z "$FOCUSED_WORKSPACE" ]]; then
     FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused 2>/dev/null)
   fi
@@ -81,44 +96,43 @@ else
 fi
 
 if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
-# Focused workspace - theme colors
-sketchybar --set "$NAME" \
-  background.drawing=on \
-  background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}" \
-  background.border_color="${SPACE_FOCUSED_BORDER_COLOR:-0xff7aa2f7}" \
-  background.border_width=2 \
-  icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}" \
-  label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"
+  sketchybar --set "$NAME" \
+    background.drawing=on \
+    background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}" \
+    background.border_color="${SPACE_FOCUSED_BORDER_COLOR:-0xff7aa2f7}" \
+    background.border_width=2 \
+    icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}" \
+    label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"
 else
-# Inactive workspace - theme colors (no border)
-sketchybar --set "$NAME" \
-  background.drawing=on \
-  background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" \
-  background.border_width=0 \
-  icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
-  label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
+  sketchybar --set "$NAME" \
+    background.drawing=on \
+    background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" \
+    background.border_width=0 \
+    icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
+    label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
 fi
 
-# Get windows in this workspace and extract unique app names
+# Collect unique app names for the workspace and turn them into icons.
 windows=$(aerospace list-windows --workspace "$WORKSPACE" 2>/dev/null | awk -F'|' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u)
 
-# Build icon string
 icons=""
 while IFS= read -r app; do
-if [[ -n "$app" ]]; then
-icon=$(get_app_icon "$app")
-if [[ -n "$icons" ]]; then
-icons="$icons $icon" # Add space between icons
-else
-icons="$icon"
-fi
-fi
+  if [[ -n "$app" ]]; then
+    icon=$(get_app_icon "$app")
+    if [[ -n "$icons" ]]; then
+      icons="$icons $icon"
+    else
+      icons="$icon"
+    fi
+  fi
 done <<< "$windows"
 
-    # Update the label with app icons
-    if [[ -n "$icons" ]]; then
-    sketchybar --set "$NAME" label="$icons" label.drawing=on
-    else
-    # Hide label when workspace is empty but keep workspace visible
-    sketchybar --set "$NAME" label="" label.drawing=off
-    fi
+if [[ -n "$icons" ]]; then
+  sketchybar --set "$NAME" drawing=on label="$icons" label.drawing=on
+else
+  if [[ "$SKETCHYBAR_HIDE_EMPTY_WORKSPACES" == "true" && "$IS_FOCUSED" != "$WORKSPACE" ]]; then
+    sketchybar --set "$NAME" drawing=off
+  else
+    sketchybar --set "$NAME" drawing=on label="" label.drawing=off
+  fi
+fi

@@ -22,7 +22,6 @@ source "$MAKARON_PATH/install/desktop/fonts.sh"
 source "$MAKARON_PATH/install/desktop/sketchybar.sh"
 
 # Terminal
-source "$MAKARON_PATH/install/terminal/timewarrior.sh"
 source "$MAKARON_PATH/install/terminal/ghostty.sh"
 
 # Default theme
