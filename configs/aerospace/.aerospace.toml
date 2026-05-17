@@ -71,11 +71,14 @@ automatically-unhide-macos-hidden-apps = false
     outer.left =       15
     outer.bottom =     15
     # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
-    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers based on notch detection:
-    # Full mode + notch:    [{ monitor."Built-in" = 15 }, 45] (notch area absorbs SketchyBar)
-    # Full mode + no notch: 45 (all monitors same — 40px bar + 5px margin)
-    # Minimal mode:         8 (no SketchyBar, just small gap)
-    outer.top = [{ monitor."Built-in" = 15 }, 45]
+    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers.
+    # Formula: bar_top = SKETCHYBAR_HEIGHT (40) + side_gap. This makes the
+    # visual padding above the window border symmetric with the side padding.
+    # Full mode + notch + borders:    [{ monitor."Built-in" = 15 }, 55]
+    # Full mode + no notch + borders: 55 (40px bar + 15px gap)
+    # Full mode + no borders:         48 (40px bar + 8px gap)
+    # Minimal mode:                   8  (no SketchyBar, just side gap)
+    outer.top = [{ monitor."Built-in" = 15 }, 55]
     outer.right =      15
 
 # Workspace assignment for dual monitor setup
