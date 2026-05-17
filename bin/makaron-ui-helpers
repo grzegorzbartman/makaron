@@ -11,6 +11,8 @@ NOTCH_CACHE_FILE="/tmp/makaron_has_builtin_notch"
 # Constants for desktop layout (kept simple; theme BORDER_WIDTH is unified).
 MAKARON_GAPS_WITH_BORDERS=15
 MAKARON_GAPS_WITHOUT_BORDERS=8
+# Must match `height=...` in sketchybarrc — used to derive symmetric outer.top.
+MAKARON_SKETCHYBAR_HEIGHT=40
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps and read back
 # by verify_desktop_state. Single list = no drift between writer and verifier.
@@ -112,6 +114,34 @@ _resolve_aerospace_config_path() {
     fi
 }
 
+# Compute the canonical `outer.top = ...` line for the given (mode, gap, notch).
+# Single source of truth — used by both writer (switch_aerospace_config) and
+# verifier (verify_desktop_state) so they never drift.
+#
+# full mode:
+#   bar_top   = SketchyBar height + side gap, so visual padding above the
+#               window border matches the padding on left/right/bottom (symmetric).
+#   notch_top = side gap, because the notch area "absorbs" SketchyBar on
+#               Built-in MBP displays — no bar reserve needed there.
+# minimal: no bar, uniform small gap (notch irrelevant).
+_expected_outer_top_line() {
+    local mode="$1" gap="$2" has_notch="$3"
+    case "$mode" in
+        full)
+            local bar_top=$(( MAKARON_SKETCHYBAR_HEIGHT + gap ))
+            local notch_top=$gap
+            if [ "$has_notch" = "true" ]; then
+                echo "    outer.top = [{ monitor.\"Built-in\" = $notch_top }, $bar_top]"
+            else
+                echo "    outer.top = $bar_top"
+            fi
+            ;;
+        minimal)
+            echo "    outer.top = $MAKARON_GAPS_WITHOUT_BORDERS"
+            ;;
+    esac
+}
+
 switch_aerospace_config() {
     local mode="$1"  # "full" or "minimal"
 
@@ -126,36 +156,16 @@ switch_aerospace_config() {
     local has_notch=false
     _has_builtin_notch && has_notch=true
 
-    local borders
-    borders="$(_get_borders_enabled)"
+    local gap outer_top
+    gap="$(_expected_gap_size)"
+    outer_top="$(_expected_outer_top_line "$mode" "$gap" "$has_notch")"
 
-    # full mode: bar_top reserves space for SketchyBar (+border margin if any),
-    #            notch_top is the smaller reserve under the notch on Built-in.
-    # minimal:   no bar, uniform small gap (notch irrelevant).
-    local bar_top notch_top outer_top
-    case "$mode" in
-        full)
-            if [[ "$borders" == "true" ]]; then
-                bar_top=45; notch_top=15
-            else
-                bar_top=42; notch_top=8
-            fi
-            if $has_notch; then
-                outer_top="    outer.top = [{ monitor.\"Built-in\" = $notch_top }, $bar_top]"
-            else
-                outer_top="    outer.top = $bar_top"
-            fi
-            ;;
-        minimal)
-            outer_top='    outer.top = 8'
-            ;;
-        *)
-            echo "  ⚠️  Unknown aerospace config mode: $mode"
-            return 1
-            ;;
-    esac
+    if [ -z "$outer_top" ]; then
+        echo "  ⚠️  Unknown aerospace config mode: $mode"
+        return 1
+    fi
 
-    sed -i '' "s/    outer\.top = .*/$outer_top/" "$config_file"
+    sed -i '' "s|    outer\.top = .*|$outer_top|" "$config_file"
     echo "  ✓ AeroSpace outer.top set for: $mode mode (notch: $has_notch)"
 }
 
@@ -267,10 +277,16 @@ verify_desktop_state() {
         fi
     done
 
-    # outer.top is mode-dependent — full vs minimal produce different shapes,
-    # so just sanity-check that minimal has the small value.
-    if [ "$ui_mode" = "minimal" ] && ! grep -qE '^    outer\.top = 8$' "$config_file"; then
-        echo "  ⚠️  outer.top doesn't match minimal mode (expected: 8)"
+    # outer.top — reuse the writer's formula via _expected_outer_top_line.
+    local has_notch=false
+    _has_builtin_notch && has_notch=true
+    local expected_top actual_top
+    expected_top="$(_expected_outer_top_line "$ui_mode" "$expected_gap" "$has_notch")"
+    actual_top="$(grep -E '^    outer\.top = ' "$config_file" | head -1)"
+    if [ "$actual_top" != "$expected_top" ]; then
+        echo "  ⚠️  outer.top drift (notch=$has_notch, ui-mode=$ui_mode)"
+        echo "       expected: ${expected_top# *}"
+        echo "       actual:   ${actual_top# *}"
         drift=1
     fi
 
