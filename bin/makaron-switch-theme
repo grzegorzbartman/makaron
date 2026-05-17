@@ -14,10 +14,13 @@ if [ -z "$THEME_NAME" ]; then
 fi
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-MAKARON_CONF="${MAKARON_CONF:-$HOME/.config/makaron/makaron.conf}"
 THEME_DIR="$MAKARON_PATH/themes/$THEME_NAME"
 CURRENT_THEME_LINK="$MAKARON_PATH/current-theme"
 GHOSTTY_CONFIG="$MAKARON_PATH/configs/ghostty/config"
+
+# Shared helpers (set_makaron_conf_value, etc.)
+# shellcheck source=/dev/null
+source "$MAKARON_PATH/bin/makaron-ui-helpers"
 
 # Check if theme exists
 if [ ! -d "$THEME_DIR" ]; then
@@ -126,24 +129,6 @@ update_editor_theme() {
                 "$settings"
         fi
     done
-}
-
-ensure_makaron_conf() {
-    mkdir -p "$(dirname "$MAKARON_CONF")"
-    touch "$MAKARON_CONF"
-}
-
-set_makaron_conf_value() {
-    local key="$1"
-    local value="$2"
-
-    ensure_makaron_conf
-
-    if grep -q "^${key}=" "$MAKARON_CONF" 2>/dev/null; then
-        sed -i '' "s/^${key}=.*/${key}=${value}/" "$MAKARON_CONF"
-    else
-        echo "${key}=${value}" >> "$MAKARON_CONF"
-    fi
 }
 
 # Update BORDERS_ENABLED in makaron.conf based on which theme we're switching to.

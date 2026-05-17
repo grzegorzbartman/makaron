@@ -12,6 +12,39 @@ NOTCH_CACHE_FILE="/tmp/makaron_has_builtin_notch"
 MAKARON_GAPS_WITH_BORDERS=15
 MAKARON_GAPS_WITHOUT_BORDERS=8
 
+# Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps and read back
+# by verify_desktop_state. Single list = no drift between writer and verifier.
+MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.right)
+
+MAKARON_CONF_PATH="$HOME/.config/makaron/makaron.conf"
+
+# --- Config readers (subshell isolated to avoid leaking conf vars) ---
+
+_get_borders_enabled() {
+    (source "$MAKARON_CONF_PATH" 2>/dev/null; echo "${BORDERS_ENABLED:-true}")
+}
+
+# Map (ui_mode, borders) -> expected aerospace inner/outer gap in px.
+_expected_gap_size() {
+    if [ "$(_get_borders_enabled)" = "true" ]; then
+        echo "$MAKARON_GAPS_WITH_BORDERS"
+    else
+        echo "$MAKARON_GAPS_WITHOUT_BORDERS"
+    fi
+}
+
+# Set/update a key=value in makaron.conf. Ensures the file exists.
+set_makaron_conf_value() {
+    local key="$1" value="$2"
+    mkdir -p "$(dirname "$MAKARON_CONF_PATH")"
+    touch "$MAKARON_CONF_PATH"
+    if grep -q "^${key}=" "$MAKARON_CONF_PATH" 2>/dev/null; then
+        sed -i '' "s/^${key}=.*/${key}=${value}/" "$MAKARON_CONF_PATH"
+    else
+        echo "${key}=${value}" >> "$MAKARON_CONF_PATH"
+    fi
+}
+
 # --- UI Mode State ---
 save_ui_mode() {
     local mode="$1"
@@ -90,32 +123,31 @@ switch_aerospace_config() {
         return 1
     fi
 
-    local has_notch=true
-    if ! _has_builtin_notch; then
-        has_notch=false
-    fi
+    local has_notch=false
+    _has_builtin_notch && has_notch=true
 
-    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
-    local borders="${BORDERS_ENABLED:-true}"
+    local borders
+    borders="$(_get_borders_enabled)"
 
+    # full mode: bar_top reserves space for SketchyBar (+border margin if any),
+    #            notch_top is the smaller reserve under the notch on Built-in.
+    # minimal:   no bar, uniform small gap (notch irrelevant).
+    local bar_top notch_top outer_top
     case "$mode" in
         full)
             if [[ "$borders" == "true" ]]; then
-                if $has_notch; then
-                    local outer_top='    outer.top = [{ monitor."Built-in" = 15 }, 45]'
-                else
-                    local outer_top='    outer.top = 45'
-                fi
+                bar_top=45; notch_top=15
             else
-                if $has_notch; then
-                    local outer_top='    outer.top = [{ monitor."Built-in" = 8 }, 42]'
-                else
-                    local outer_top='    outer.top = 42'
-                fi
+                bar_top=42; notch_top=8
+            fi
+            if $has_notch; then
+                outer_top="    outer.top = [{ monitor.\"Built-in\" = $notch_top }, $bar_top]"
+            else
+                outer_top="    outer.top = $bar_top"
             fi
             ;;
         minimal)
-            local outer_top='    outer.top = 8'
+            outer_top='    outer.top = 8'
             ;;
         *)
             echo "  ⚠️  Unknown aerospace config mode: $mode"
@@ -127,9 +159,22 @@ switch_aerospace_config() {
     echo "  ✓ AeroSpace outer.top set for: $mode mode (notch: $has_notch)"
 }
 
+# Build the canonical TOML line for a given gap key (matches what we write).
+# Padding mirrors the original template so re-reads are exact-match friendly.
+_aerospace_gap_line() {
+    local key="$1" size="$2"
+    case "$key" in
+        inner.horizontal) printf '    inner.horizontal = %s' "$size" ;;
+        inner.vertical)   printf '    inner.vertical =   %s' "$size" ;;
+        outer.left)       printf '    outer.left =       %s' "$size" ;;
+        outer.bottom)     printf '    outer.bottom =     %s' "$size" ;;
+        outer.right)      printf '    outer.right =      %s' "$size" ;;
+    esac
+}
+
 # Set AeroSpace inner/outer gaps (excluding outer.top which depends on SketchyBar/notch).
-# Warns if any expected line is missing — usually means user hand-edited the file
-# and our sed pattern no longer matches.
+# Iterates MAKARON_GAP_KEYS so writer and verifier never drift.
+# Warns if any expected line is missing — usually a hand-edited config.
 _set_aerospace_gaps() {
     local size="$1"  # gap size in px
 
@@ -137,19 +182,16 @@ _set_aerospace_gaps() {
     config_file="$(_resolve_aerospace_config_path)"
     [ ! -f "$config_file" ] && return 1
 
-    local missing=()
-    for key in 'inner.horizontal' 'inner.vertical' 'outer.left' 'outer.bottom' 'outer.right'; do
-        local pattern="    ${key//./\\.} ="
-        grep -qE "^${pattern}" "$config_file" || missing+=("$key")
+    local missing=() key escaped replacement
+    for key in "${MAKARON_GAP_KEYS[@]}"; do
+        escaped="${key//./\\.}"
+        if grep -qE "^    ${escaped} =" "$config_file"; then
+            replacement="$(_aerospace_gap_line "$key" "$size")"
+            sed -i '' "s|^    ${escaped} =.*|${replacement}|" "$config_file"
+        else
+            missing+=("$key")
+        fi
     done
-
-    sed -i '' \
-        -e "s/    inner\.horizontal = .*/    inner.horizontal = $size/" \
-        -e "s/    inner\.vertical =.*/    inner.vertical =   $size/" \
-        -e "s/    outer\.left =.*/    outer.left =       $size/" \
-        -e "s/    outer\.bottom =.*/    outer.bottom =     $size/" \
-        -e "s/    outer\.right =.*/    outer.right =      $size/" \
-        "$config_file"
 
     echo "  ✓ AeroSpace gaps set to ${size}px"
     if [ ${#missing[@]} -gt 0 ]; then
@@ -176,19 +218,15 @@ apply_desktop_state() {
         # In stop mode the user explicitly wants nothing running. Don't touch
         # the toml or borders. Warn if called from makaron-borders so the
         # user isn't surprised that "borders on" did nothing visible.
-        if [ -n "${MAKARON_APPLY_VERBOSE:-}" ]; then
+        [ -n "${MAKARON_APPLY_VERBOSE:-}" ] && \
             echo "  UI mode is 'stop' — desktop state not applied"
-        fi
         return 0
     fi
 
-    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
-    local borders="${BORDERS_ENABLED:-true}"
+    local borders
+    borders="$(_get_borders_enabled)"
 
-    local gap_size=$MAKARON_GAPS_WITH_BORDERS
-    [ "$borders" != "true" ] && gap_size=$MAKARON_GAPS_WITHOUT_BORDERS
-
-    _set_aerospace_gaps "$gap_size"
+    _set_aerospace_gaps "$(_expected_gap_size)"
     switch_aerospace_config "$ui_mode"
 
     if command -v aerospace &> /dev/null && pgrep -f "AeroSpace" > /dev/null; then
@@ -208,15 +246,10 @@ apply_desktop_state() {
 # Echoes findings. Returns 0 if synced, 1 if drift detected.
 # ============================================================================
 verify_desktop_state() {
-    local ui_mode
+    local ui_mode borders expected_gap config_file
     ui_mode=$(get_ui_mode)
-    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
-    local borders="${BORDERS_ENABLED:-true}"
-
-    local expected_gap=$MAKARON_GAPS_WITH_BORDERS
-    [ "$borders" != "true" ] && expected_gap=$MAKARON_GAPS_WITHOUT_BORDERS
-
-    local config_file
+    borders="$(_get_borders_enabled)"
+    expected_gap="$(_expected_gap_size)"
     config_file="$(_resolve_aerospace_config_path)"
 
     if [ ! -f "$config_file" ]; then
@@ -224,35 +257,25 @@ verify_desktop_state() {
         return 1
     fi
 
-    local drift=0
-
-    local actual_inner_h
-    actual_inner_h=$(grep -E '^    inner\.horizontal' "$config_file" | awk '{print $3}')
-    if [ "$actual_inner_h" != "$expected_gap" ]; then
-        echo "  ⚠️  inner.horizontal=$actual_inner_h, expected $expected_gap"
-        drift=1
-    fi
-
-    local actual_right
-    actual_right=$(grep -E '^    outer\.right' "$config_file" | awk '{print $3}')
-    if [ "$actual_right" != "$expected_gap" ]; then
-        echo "  ⚠️  outer.right=$actual_right, expected $expected_gap"
-        drift=1
-    fi
+    local drift=0 key escaped actual
+    for key in "${MAKARON_GAP_KEYS[@]}"; do
+        escaped="${key//./\\.}"
+        actual=$(grep -E "^    ${escaped} =" "$config_file" | awk '{print $3}')
+        if [ "$actual" != "$expected_gap" ]; then
+            echo "  ⚠️  ${key}=${actual:-<missing>}, expected $expected_gap"
+            drift=1
+        fi
+    done
 
     # outer.top is mode-dependent — full vs minimal produce different shapes,
     # so just sanity-check that minimal has the small value.
-    if [ "$ui_mode" = "minimal" ]; then
-        if ! grep -qE '^    outer\.top = 8$' "$config_file"; then
-            echo "  ⚠️  outer.top doesn't match minimal mode (expected: 8)"
-            drift=1
-        fi
+    if [ "$ui_mode" = "minimal" ] && ! grep -qE '^    outer\.top = 8$' "$config_file"; then
+        echo "  ⚠️  outer.top doesn't match minimal mode (expected: 8)"
+        drift=1
     fi
 
-    # Borders process state
-    local borders_running="false"
+    local borders_running="false" expected_borders="false"
     pgrep -x "borders" > /dev/null 2>&1 && borders_running="true"
-    local expected_borders="false"
     [ "$ui_mode" = "full" ] && [ "$borders" = "true" ] && expected_borders="true"
     if [ "$borders_running" != "$expected_borders" ]; then
         echo "  ⚠️  borders running=$borders_running, expected $expected_borders (ui-mode=$ui_mode, BORDERS_ENABLED=$borders)"
@@ -328,28 +351,28 @@ stop_sketchybar() {
 
 # --- Borders ---
 start_borders() {
-    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
-    if [[ "${BORDERS_ENABLED:-true}" != "true" ]]; then
+    if [[ "$(_get_borders_enabled)" != "true" ]]; then
         echo "  Borders disabled (makaron.conf)"
         return 0
     fi
-    if command -v borders &> /dev/null; then
-        local THEME_DIR="$MAKARON_PATH/current-theme"
-        if [ -f "$THEME_DIR/borders.colors" ]; then
-            source "$THEME_DIR/borders.colors"
-        else
-            export ACTIVE_BORDER_COLOR=0xff7aa2f7
-            export INACTIVE_BORDER_COLOR=0xff292e42
-            export BORDER_WIDTH=2.0
-        fi
-        echo "  Starting Borders with theme colors..."
-        brew services stop borders 2>/dev/null || true
-        sleep 0.5
-        borders active_color=$ACTIVE_BORDER_COLOR inactive_color=$INACTIVE_BORDER_COLOR width=$BORDER_WIDTH &
-        echo "  ✓ Borders started with theme colors"
-    else
+    if ! command -v borders &> /dev/null; then
         echo "  ⚠️  Borders not installed"
+        return 0
     fi
+    local THEME_DIR="$MAKARON_PATH/current-theme"
+    if [ -f "$THEME_DIR/borders.colors" ]; then
+        source "$THEME_DIR/borders.colors"
+    else
+        # Fallback when no theme is set — keep unified BORDER_WIDTH=5.0.
+        export ACTIVE_BORDER_COLOR=0xff7aa2f7
+        export INACTIVE_BORDER_COLOR=0xff292e42
+        export BORDER_WIDTH=5.0
+    fi
+    echo "  Starting Borders with theme colors..."
+    brew services stop borders 2>/dev/null || true
+    sleep 0.5
+    borders active_color=$ACTIVE_BORDER_COLOR inactive_color=$INACTIVE_BORDER_COLOR width=$BORDER_WIDTH &
+    echo "  ✓ Borders started with theme colors"
 }
 
 stop_borders() {

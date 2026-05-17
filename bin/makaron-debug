@@ -635,8 +635,7 @@ if [ -f "$UI_HELPERS" ]; then
     source "$UI_HELPERS"
 
     UI_MODE_VALUE=$(get_ui_mode 2>/dev/null || echo "unknown")
-    source "$HOME/.config/makaron/makaron.conf" 2>/dev/null
-    BORDERS_VALUE="${BORDERS_ENABLED:-true}"
+    BORDERS_VALUE=$(_get_borders_enabled)
 
     echo "  UI mode:         $UI_MODE_VALUE"
     echo "  BORDERS_ENABLED: $BORDERS_VALUE"
