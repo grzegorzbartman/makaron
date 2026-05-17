@@ -80,7 +80,6 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 ### System Commands
 - `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
-- `makaron-timer [status|recent|start|stop|toggle]` — Timewarrior wrapper used by the SketchyBar timer widget
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
@@ -174,7 +173,6 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 - **memory.sh** — Calls compiled Swift binary `makaron-memory-stats`, shows "X/Y GB"
 - **cpu.sh** — Load average from `uptime` divided by core count
 - **volume.sh** — Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons
-- **timer.sh** — Timewarrior timer: left click toggles tracking, right click shows recent log popup
 - **display_change.sh** — Reloads SketchyBar when monitor count changes
 
 ### SketchyBar Plugin Conventions
@@ -235,7 +233,7 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty, Timewarrior.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k

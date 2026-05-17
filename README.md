@@ -67,7 +67,6 @@ This will:
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator
-- **Timewarrior** - Local time tracking backend for the SketchyBar timer
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor
@@ -118,7 +117,6 @@ After installation, you'll have access to these commands:
 - **`makaron-dev-add-migration`** - Create new migration (development)
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-debug`** - Diagnose system status
-- **`makaron-timer`** - Control the Timewarrior timer backend (`status`, `recent`, `start`, `stop`, `toggle`)
 - **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
 - **`makaron-ui-minimal`** - Start minimal UI (no SketchyBar, visible menu bar)
 - **`makaron-ui-stop`** - Stop UI components

@@ -16,18 +16,6 @@ SKETCHYBAR_CALENDAR_ENABLED=true
 # SketchyBar: hide CPU / memory / storage widgets (more room for workspaces + agenda)
 SKETCHYBAR_COMPACT_MODE=false
 
-# SketchyBar: Timewarrior timer widget
-SKETCHYBAR_TIMER_ENABLED=true
-
-# Timewarrior: comma-separated tags shown in timer popup (add your own)
-SKETCHYBAR_TIMER_TAGS="sales,marketing,delivery,hr_recruitment,finance,meeting,other"
-
-# Timewarrior: default tag used by makaron-timer start/toggle (CLI fallback)
-SKETCHYBAR_TIMER_DEFAULT_TAG=other
-
-# SketchyBar: number of recent Timewarrior entries shown in timer popup
-SKETCHYBAR_TIMER_RECENT_COUNT=4
-
 # SketchyBar: Apple Notes — click to create a new note in a new window
 SKETCHYBAR_NOTES_ENABLED=false
 
