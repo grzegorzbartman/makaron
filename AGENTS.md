@@ -181,24 +181,6 @@ ACTIVE_BORDER_COLOR, INACTIVE_BORDER_COLOR, BORDER_WIDTH
 - Events subscribed via: `--subscribe item_name event_name`
 - Click handlers: `click_script="aerospace workspace $sid"`
 
-### Responsive Labels On Small Screens
-Some SketchyBar items already adapt to limited width on smaller displays such as MacBook Air.
-
-Use `configs/sketchybar/plugins/lib/screen_max_chars.sh` for responsive `label.max_chars` values based on the narrowest active display:
-- `makaron_label_max_chars` — general cap for items like Todoist
-- `makaron_calendar_label_max_chars` — tighter cap for the `e` slot, where Calendar has much less room
-
-Current usage:
-- `configs/sketchybar/plugins/todoist.sh` uses `makaron_label_max_chars`
-- `configs/sketchybar/plugins/calendar.sh` uses `makaron_calendar_label_max_chars`
-
-The helper caches the narrowest display width for 60 seconds and should be invalidated on `display_change` and `system_woke` via `makaron_invalidate_screen_cache`.
-
-For any new text-heavy SketchyBar item, especially in `q`, `e`, or on the right side:
-- do not hardcode long labels
-- prefer a short primary label and move details into popup content
-- reuse the responsive width helper instead of introducing per-plugin fixed limits
-
 ---
 
 ## Install Flow
