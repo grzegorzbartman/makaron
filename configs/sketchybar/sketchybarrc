@@ -102,6 +102,7 @@ done
 # https://nikitabobko.github.io/AeroSpace/goodness#show-aerospace-workspaces-in-sketchybar
 
 sketchybar --add event aerospace_workspace_change
+sketchybar --add event aerospace_focus_change
 
 # Detect number of monitors
 MONITOR_COUNT=$(aerospace list-monitors | wc -l | tr -d ' ')
@@ -110,7 +111,7 @@ if [ "$MONITOR_COUNT" -eq 1 ]; then
   # Single monitor: Show all workspaces without display assignment
   for sid in $(aerospace list-workspaces --all); do
     sketchybar --add item space.$sid left \
-      --subscribe space.$sid aerospace_workspace_change front_app_switched \
+      --subscribe space.$sid aerospace_workspace_change aerospace_focus_change front_app_switched \
       --set space.$sid \
       padding_left=2 \
       padding_right=2 \
@@ -137,7 +138,7 @@ else
   for monitor in $(aerospace list-monitors | awk '{print $1}'); do
     for sid in $(aerospace list-workspaces --monitor "$monitor"); do
       sketchybar --add item space.$sid left \
-        --subscribe space.$sid aerospace_workspace_change front_app_switched \
+        --subscribe space.$sid aerospace_workspace_change aerospace_focus_change front_app_switched \
         --set space.$sid \
         display="$monitor" \
         padding_left=2 \

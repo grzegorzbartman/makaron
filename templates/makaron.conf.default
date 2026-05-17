@@ -10,6 +10,10 @@ BORDERS_ENABLED=true
 # SketchyBar: hide CPU / memory / storage widgets (more room for workspaces)
 SKETCHYBAR_COMPACT_MODE=false
 
+# SketchyBar: hide empty AeroSpace workspaces from the bar
+# The focused workspace is always drawn, even if it's empty.
+SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false
+
 # SketchyBar: Apple Notes — click to create a new note in a new window
 SKETCHYBAR_NOTES_ENABLED=false
 
