@@ -131,11 +131,14 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         bash "$MAKARON_PATH/bin/makaron-migrate"
     fi
 
-    # Reload configurations based on current UI mode
+    # Reload configurations based on current UI mode and heal desktop layout
+    # (gaps, outer.top, borders) against any template/script changes shipped
+    # by this update.
     if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
         echo "Reloading configurations..."
         source "$MAKARON_PATH/bin/makaron-ui-helpers"
         reload_current_ui
+        apply_desktop_state
     fi
 
     echo ""

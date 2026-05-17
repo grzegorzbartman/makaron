@@ -1,58 +1,22 @@
 #!/bin/bash
-# Toggle or set window borders (JankyBorders)
-
-MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
-source "$MAKARON_CONF" 2>/dev/null
+# Toggle or set window borders (JankyBorders).
+# Persists BORDERS_ENABLED in makaron.conf and delegates layout to apply_desktop_state.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/makaron-ui-helpers"
 
-_set_borders_enabled() {
-    local value="$1"
-    if grep -q "^BORDERS_ENABLED=" "$MAKARON_CONF" 2>/dev/null; then
-        sed -i '' "s/^BORDERS_ENABLED=.*/BORDERS_ENABLED=$value/" "$MAKARON_CONF"
-    else
-        echo "BORDERS_ENABLED=$value" >> "$MAKARON_CONF"
-    fi
+_toggle_or_set() {
+    case "${1:-}" in
+        on)  echo "true" ;;
+        off) echo "false" ;;
+        *)   [[ "$(_get_borders_enabled)" == "true" ]] && echo "false" || echo "true" ;;
+    esac
 }
 
-GAPS_WITH_BORDERS=15
-GAPS_WITHOUT_BORDERS=8
+new_value="$(_toggle_or_set "${1:-}")"
+set_makaron_conf_value "BORDERS_ENABLED" "$new_value"
+[[ "$new_value" == "true" ]] && echo "Borders enabled" || echo "Borders disabled"
 
-_apply_gaps() {
-    local gaps="$1"
-    _set_aerospace_gaps "$gaps"
-    switch_aerospace_config full
-    aerospace reload-config
-}
-
-case "${1:-}" in
-    on)
-        _set_borders_enabled true
-        BORDERS_ENABLED=true
-        start_borders
-        _apply_gaps $GAPS_WITH_BORDERS
-        echo "Borders enabled"
-        ;;
-    off)
-        _set_borders_enabled false
-        stop_borders
-        _apply_gaps $GAPS_WITHOUT_BORDERS
-        echo "Borders disabled"
-        ;;
-    *)
-        # Toggle
-        if [[ "${BORDERS_ENABLED:-true}" == "true" ]]; then
-            _set_borders_enabled false
-            stop_borders
-            _apply_gaps $GAPS_WITHOUT_BORDERS
-            echo "Borders disabled"
-        else
-            _set_borders_enabled true
-            BORDERS_ENABLED=true
-            start_borders
-            _apply_gaps $GAPS_WITH_BORDERS
-            echo "Borders enabled"
-        fi
-        ;;
-esac
+# Single source of truth: re-derive layout from ui-mode + makaron.conf.
+# Warns when ui-mode=stop (config saved, nothing applied to running system).
+MAKARON_APPLY_VERBOSE=1 apply_desktop_state

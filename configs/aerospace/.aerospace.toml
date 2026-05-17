@@ -76,7 +76,7 @@ automatically-unhide-macos-hidden-apps = false
     # Full mode + no notch: 45 (all monitors same — 40px bar + 5px margin)
     # Minimal mode:         8 (no SketchyBar, just small gap)
     outer.top = [{ monitor."Built-in" = 15 }, 45]
-    outer.right =      10
+    outer.right =      15
 
 # Workspace assignment for dual monitor setup
 # This prevents random workspace creation when connecting/disconnecting monitors
