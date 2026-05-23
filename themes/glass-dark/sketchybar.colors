@@ -1,0 +1,19 @@
+#!/bin/bash
+# Glass Dark - Frosted-glass SketchyBar
+
+export BAR_COLOR=0x4d1d1d1f
+export BAR_BACKGROUND_COLOR=0x00000000
+export BAR_BLUR=30
+
+export ICON_COLOR=0xffffffff
+export LABEL_COLOR=0xffffffff
+
+export SPACE_ICON_COLOR=0xffe0e0e5
+export SPACE_LABEL_COLOR=0xffe0e0e5
+export SPACE_BACKGROUND_COLOR=0x803a3a3c
+export SPACE_BORDER_COLOR=0x00000000
+
+export SPACE_FOCUSED_ICON_COLOR=0xffffffff
+export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0A84FF
+export SPACE_FOCUSED_BORDER_COLOR=0xff0A84FF

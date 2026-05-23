@@ -1,0 +1,6 @@
+#!/bin/bash
+# Glass Dark - Borders
+
+export ACTIVE_BORDER_COLOR=0xb30A84FF
+export INACTIVE_BORDER_COLOR=0x663A3A3C
+export BORDER_WIDTH=5.0
