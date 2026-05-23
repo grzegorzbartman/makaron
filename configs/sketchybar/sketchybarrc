@@ -30,6 +30,7 @@ else
   export SPACE_FOCUSED_LABEL_COLOR=0xffc0caf5
   export SPACE_FOCUSED_BACKGROUND_COLOR=0xff1a1b26
   export SPACE_FOCUSED_BORDER_COLOR=0xff7aa2f7
+  export BAR_BLUR=0
 fi
 
 ##### Bar Appearance #####
@@ -39,7 +40,7 @@ fi
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar position=top height=40 color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=0
+sketchybar --bar position=top height=40 color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####
 # We now change some default values, which are applied to all further items.
