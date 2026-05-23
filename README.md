@@ -70,6 +70,7 @@ This will:
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator
+- **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications (GPL-3.0)
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor

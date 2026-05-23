@@ -218,7 +218,7 @@ curl -sL install.sh | bash
 **Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Borders, Nerd Fonts, Ghostty.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
-- Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
+- Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tmux, tree, Fresh Editor, Powerlevel10k
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
 - AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
 - Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
