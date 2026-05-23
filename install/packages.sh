@@ -20,6 +20,7 @@ PKGS_TERMINAL=(
     "tree|tree|directory listing"
     "fresh|Fresh Editor|terminal editor"
     "p10k|Powerlevel10k|zsh theme"
+    "cmux|cmux|AI agent terminal (Ghostty-based)"
 )
 
 PKGS_EDITORS=(
@@ -93,6 +94,10 @@ install_package() {
             install_formula "fresh-editor" "Fresh Editor" "fresh"
             ;;
         p10k) source "$MAKARON_PATH/install/terminal/p10k.sh" ;;
+        cmux)
+            brew tap manaflow-ai/cmux 2>/dev/null || true
+            install_cask "manaflow-ai/cmux/cmux" "cmux"
+            ;;
         # Editors
         vscode)
             install_cask "visual-studio-code" "Visual Studio Code"
