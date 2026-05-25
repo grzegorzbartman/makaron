@@ -6,11 +6,11 @@ selection-foreground = #1f4547
 
 palette = 0=#56a47b
 palette = 1=#712525
-palette = 2=#257125
-palette = 3=#717125
+palette = 2=#1e651e
+palette = 3=#5a5a19
 palette = 4=#252571
 palette = 5=#712571
-palette = 6=#257171
+palette = 6=#1e6565
 palette = 7=#224b4e
 palette = 8=#b5d4c0
 palette = 9=#602020
