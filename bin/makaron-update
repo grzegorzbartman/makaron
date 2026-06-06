@@ -66,6 +66,13 @@ if [ ! -d "$MAKARON_PATH" ]; then
     exit 1
 fi
 
+UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
+UPDATE_UI_MODE="full"
+if [ -f "$UI_MODE_FILE" ]; then
+    UPDATE_UI_MODE="$(head -n 1 "$UI_MODE_FILE" | tr -d '[:space:]')"
+    UPDATE_UI_MODE="${UPDATE_UI_MODE:-full}"
+fi
+
 # Install gum if needed
 install_gum_if_needed
 
@@ -131,14 +138,27 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         bash "$MAKARON_PATH/bin/makaron-migrate"
     fi
 
-    # Reload configurations based on current UI mode and heal desktop layout
-    # (gaps, outer.top, borders) against any template/script changes shipped
-    # by this update.
+    # Reload configurations based on current UI mode. If the user explicitly
+    # stopped Makaron UI, keep it stopped during update.
     if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
-        echo "Reloading configurations..."
         source "$MAKARON_PATH/bin/makaron-ui-helpers"
-        reload_current_ui
-        apply_desktop_state
+        current_ui_mode="$UPDATE_UI_MODE"
+
+        case "$current_ui_mode" in
+            full|minimal)
+                echo "Reloading configurations for UI mode: $current_ui_mode..."
+                reload_current_ui
+                ;;
+            stop)
+                echo "UI mode is 'stop', ensuring Makaron UI remains stopped..."
+                stop_aerospace || true
+                stop_sketchybar || true
+                stop_borders || true
+                ;;
+            *)
+                echo "Unknown UI mode '$current_ui_mode', skipping UI reload."
+                ;;
+        esac
     fi
 
     echo ""
@@ -149,4 +169,3 @@ else
     echo "curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash"
     exit 1
 fi
-
