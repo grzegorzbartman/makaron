@@ -1,0 +1,19 @@
+#!/bin/bash
+# Golden Gate color scheme for SketchyBar
+
+export BAR_COLOR=0x5907142f
+export BAR_BACKGROUND_COLOR=0x00000000
+export BAR_BLUR=42
+
+export ICON_COLOR=0xfffff4eb
+export LABEL_COLOR=0xfffff4eb
+
+export SPACE_ICON_COLOR=0xffc8d8ff
+export SPACE_LABEL_COLOR=0xffc8d8ff
+export SPACE_BACKGROUND_COLOR=0x6631527f
+export SPACE_BORDER_COLOR=0x334d6fa8
+
+export SPACE_FOCUSED_ICON_COLOR=0xffffffff
+export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
+export SPACE_FOCUSED_BACKGROUND_COLOR=0xccff3b30
+export SPACE_FOCUSED_BORDER_COLOR=0x99ffb36b
