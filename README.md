@@ -130,7 +130,7 @@ After installation, you'll have access to these commands:
 
 ### Themes
 
-Makaron includes twenty-seven beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic), and Ubuntu themes with official Ubuntu 25.10 wallpapers):
+Makaron includes twenty-eight beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic), and Ubuntu themes with official Ubuntu 25.10 wallpapers):
 
 <p align="center">
   <img src="docs/makaron-02.png" alt="Catppuccin Latte" width="49%" />
@@ -170,6 +170,7 @@ Makaron includes twenty-seven beautiful themes that change the colors of your UI
 25. **Glass Dark** - Frosted-glass dark theme (macOS-inspired translucent bar)
 26. **Glass Light** - Frosted-glass light theme
 27. **Miasma** - Dark organic theme with olive green accents
+28. **Golden Gate** - Vivid San Francisco dark theme with bridge-red accents
 
 Switch themes instantly with:
 
@@ -201,6 +202,7 @@ makaron-theme-ubuntu-light          # Ubuntu light
 makaron-theme-glass-dark            # Frosted-glass dark
 makaron-theme-glass-light           # Frosted-glass light
 makaron-theme-miasma                # Dark organic olive
+makaron-theme-golden-gate           # Bridge red and ocean blue
 ```
 
 Each theme includes:
