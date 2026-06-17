@@ -78,6 +78,7 @@ automatically-unhide-macos-hidden-apps = false
     # Full mode + no notch + borders: 55 (40px bar + 15px gap)
     # Full mode + no borders:         48 (40px bar + 8px gap)
     # Minimal mode:                   8  (no SketchyBar, just side gap)
+    # Gaps zero:                      40 in full mode, 0 in minimal mode
     outer.top = [{ monitor."Built-in" = 15 }, 55]
     outer.right =      15
 

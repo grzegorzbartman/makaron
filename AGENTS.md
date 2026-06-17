@@ -80,6 +80,7 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 ### System Commands
 - `makaron-borders [on|off]` — Toggle or set window borders; persists in `makaron.conf`
+- `makaron-gaps-zero` — Disable borders and force AeroSpace gaps to zero; `makaron-borders on` restores normal gaps
 - `makaron-update` — Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI
 - `makaron-reinstall` — Removes `~/.local/share/makaron/`, re-clones, re-installs
 - `makaron-select-packages` — Re-run optional package selection UI (gum-based)
@@ -121,9 +122,11 @@ Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ### AeroSpace Gaps Switching
 `switch_aerospace_config()` in `makaron-ui-helpers` uses `sed` to update `outer.top` in `~/.aerospace.toml`.
 It auto-detects whether the built-in display has a notch via `_has_builtin_notch()` (Swift `NSScreen.safeAreaInsets.top > 0`):
-- **Full mode + notch**: `outer.top = [{ monitor."Built-in" = 15 }, 45]` — 45px for SketchyBar, 15px for built-in (notch area absorbs the bar)
-- **Full mode + no notch**: `outer.top = 45` — same for all monitors (40px bar + 5px margin)
+- **Full mode + notch + borders**: `outer.top = [{ monitor."Built-in" = 15 }, 55]` — 55px for SketchyBar + gap, 15px for built-in (notch area absorbs the bar)
+- **Full mode + no notch + borders**: `outer.top = 55` — same for all monitors (40px bar + 15px gap)
+- **Full mode + no borders**: `outer.top = 48` — same for all monitors (40px bar + 8px gap)
 - **Minimal mode**: `outer.top = 8` — no SketchyBar, just small margin (same for all monitors)
+- **Gaps zero**: `GAPS_ZERO_ENABLED=true` forces inner/outer gaps to `0`; in full mode `outer.top` keeps only the SketchyBar height, and in minimal mode it becomes `0`.
 
 The function resolves the symlink target before editing to modify the actual config file.
 
@@ -334,6 +337,7 @@ User-specific settings stored outside the repo in `~/.config/makaron/makaron.con
 ```bash
 BATTERY_LOW_THRESHOLD=20            # Battery warning threshold (%)
 BORDERS_ENABLED=true                # Window borders (JankyBorders) — false to disable
+GAPS_ZERO_ENABLED=false             # Force AeroSpace window gaps to zero
 SKETCHYBAR_COMPACT_MODE=false       # Hide CPU/memory/storage on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 SKETCHYBAR_NOTES_ENABLED=false      # Apple Notes click-to-create item
