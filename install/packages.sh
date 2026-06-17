@@ -60,6 +60,7 @@ PKGS_DEV=(
 
 PKGS_DESKTOP=(
     "command-x|Command X|cut files in Finder"
+    "ice|Ice|menu bar manager"
     "stats|Stats|system monitor menubar"
 )
 
@@ -143,6 +144,7 @@ install_package() {
         rbenv)      source "$MAKARON_PATH/install/development/rbenv.sh" ;;
         # Desktop extras
         command-x)  install_cask "command-x" "Command X" ;;
+        ice)        install_cask "jordanbaird-ice" "Ice" ;;
         stats)      install_cask "stats" "Stats" ;;
         # Apps
         flameshot)  install_cask "flameshot" "Flameshot" ;;

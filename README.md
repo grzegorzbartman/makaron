@@ -73,10 +73,14 @@ This will:
 - **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications (GPL-3.0)
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
+- **Ice** - Optional menu bar icon manager for hiding and organizing status items
 - **btop** - System resource monitor
 - **Neovim** - Modern Vim-based text editor
 - **Upsun CLI** - Upsun (Platform.sh) command-line tool
 - **tmux** - Terminal multiplexer
+
+> [!NOTE]
+> Ice is a Dozer-style Desktop Extra. Fresh installs can select it in the package picker; existing installs get it automatically via migration during `makaron-update`. Avoid hiding or disabling AeroSpace's own menu bar item with Ice or macOS **Allow in the Menu Bar** settings, because AeroSpace can quit or malfunction when its status item is removed.
 
 ### System Configuration
 - **macOS Settings** - Optimized system preferences for development workflow

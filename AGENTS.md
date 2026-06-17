@@ -225,10 +225,12 @@ curl -sL install.sh | bash
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
 - AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
 - Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
-- Desktop Extras: AltTab, Command X, Stats
+- Desktop Extras: AltTab, Command X, Ice, Stats
 - Apps: Flameshot, Slack, Spotify, VLC
 
 Selections stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
+
+Ice is the Dozer-style menu bar icon manager. Fresh installs can select it as an optional Desktop Extra; existing installs get it automatically via migration `1781678358.sh`. Do not use Ice (or macOS "Allow in the Menu Bar") to hide AeroSpace's own status item; AeroSpace may quit or malfunction if its menu bar item is removed.
 
 ---
 
