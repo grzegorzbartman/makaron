@@ -7,6 +7,9 @@ BATTERY_LOW_THRESHOLD=20
 # Window borders (JankyBorders) — set to false to disable
 BORDERS_ENABLED=true
 
+# AeroSpace gaps — set to true to force all window gaps to zero
+GAPS_ZERO_ENABLED=false
+
 # SketchyBar: hide CPU / memory / storage widgets (more room for workspaces)
 SKETCHYBAR_COMPACT_MODE=false
 

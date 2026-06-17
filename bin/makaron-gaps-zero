@@ -1,0 +1,14 @@
+#!/bin/bash
+# Disable borders and force AeroSpace gaps to zero.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+set_makaron_conf_value "GAPS_ZERO_ENABLED" "true"
+set_makaron_conf_value "BORDERS_ENABLED" "false"
+
+echo "Gaps set to zero; borders disabled"
+
+# Single source of truth: re-derive layout from ui-mode + makaron.conf.
+# Warns when ui-mode=stop (config saved, nothing applied to running system).
+MAKARON_APPLY_VERBOSE=1 apply_desktop_state

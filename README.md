@@ -124,6 +124,8 @@ After installation, you'll have access to these commands:
 - **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
 - **`makaron-ui-minimal`** - Start minimal UI (no SketchyBar, visible menu bar)
 - **`makaron-ui-stop`** - Stop UI components
+- **`makaron-borders [on|off]`** - Toggle window borders and restore normal AeroSpace gaps when enabling borders
+- **`makaron-gaps-zero`** - Disable borders and force AeroSpace gaps to zero in full or minimal UI mode
 - **`makaron-macos-config-reload`** - Apply macOS settings
 - **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
 - **`makaron-theme-*`** - Switch themes (see Themes section below)
@@ -447,6 +449,7 @@ Available settings:
 ```bash
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 BORDERS_ENABLED=true                    # Window borders (JankyBorders) — false to disable
+GAPS_ZERO_ENABLED=false                 # Force AeroSpace window gaps to zero
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 SKETCHYBAR_NOTES_ENABLED=false          # Apple Notes click-to-create item

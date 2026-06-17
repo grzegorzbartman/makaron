@@ -9,12 +9,16 @@ _toggle_or_set() {
     case "${1:-}" in
         on)  echo "true" ;;
         off) echo "false" ;;
-        *)   [[ "$(_get_borders_enabled)" == "true" ]] && echo "false" || echo "true" ;;
+        *)
+            [[ "$(_get_gaps_zero_enabled)" == "true" ]] && echo "true" && return
+            [[ "$(_get_borders_enabled)" == "true" ]] && echo "false" || echo "true"
+            ;;
     esac
 }
 
 new_value="$(_toggle_or_set "${1:-}")"
 set_makaron_conf_value "BORDERS_ENABLED" "$new_value"
+[[ "$new_value" == "true" ]] && set_makaron_conf_value "GAPS_ZERO_ENABLED" "false"
 [[ "$new_value" == "true" ]] && echo "Borders enabled" || echo "Borders disabled"
 
 # Single source of truth: re-derive layout from ui-mode + makaron.conf.
