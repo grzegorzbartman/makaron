@@ -225,7 +225,7 @@ curl -sL install.sh | bash
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
 - AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
 - Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
-- Desktop Extras: AltTab, Command X, Ice, Stats
+- Desktop Extras: Command X, Ice, Stats
 - Apps: Flameshot, Slack, Spotify, VLC
 
 Selections stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
