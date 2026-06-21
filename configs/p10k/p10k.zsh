@@ -356,6 +356,11 @@
   typeset -g POWERLEVEL9K_VCS_UNTRACKED_BACKGROUND=2
   typeset -g POWERLEVEL9K_VCS_CONFLICTED_BACKGROUND=3
   typeset -g POWERLEVEL9K_VCS_LOADING_BACKGROUND=8
+  # Dark text on colored VCS backgrounds (palette 0 is grey on light Ghostty themes)
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=232
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=232
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=232
+  typeset -g POWERLEVEL9K_VCS_CONFLICTED_FOREGROUND=196
 
   # Branch icon. Set this parameter to '\uF126 ' for the popular Powerline branch icon.
   typeset -g POWERLEVEL9K_VCS_BRANCH_ICON='\uF126 '
@@ -383,11 +388,11 @@
     fi
 
     # Styling for different parts of Git status.
-    local       meta='%7F' # white foreground
-    local      clean='%0F' # black foreground
-    local   modified='%0F' # black foreground
-    local  untracked='%0F' # black foreground
-    local conflicted='%1F' # red foreground
+    local       meta='%244F'
+    local      clean="%${POWERLEVEL9K_VCS_CLEAN_FOREGROUND}F"
+    local   modified="%${POWERLEVEL9K_VCS_MODIFIED_FOREGROUND}F"
+    local  untracked="%${POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND}F"
+    local conflicted="%${POWERLEVEL9K_VCS_CONFLICTED_FOREGROUND}F"
 
     local res
 
