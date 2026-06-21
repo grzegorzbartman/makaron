@@ -199,18 +199,9 @@ Selections are stored in `~/.config/makaron/packages.conf` (survives update/rein
 
 ---
 
-## Ghostty Config Protection
+## Ghostty Configuration
 
-`configs/ghostty/config` is protected by `git update-index --skip-worktree` so user-specific Ghostty settings survive `makaron-update` (which does `git reset --hard`). Users can edit the Ghostty `theme = ...` line manually.
-
-If `makaron-update` fails with "Entry not uptodate":
-
-```bash
-cd ~/.local/share/makaron
-git update-index --no-skip-worktree configs/ghostty/config
-git add configs/ghostty/config
-makaron-update -y
-```
+Makaron installs Ghostty but does not manage `~/.config/ghostty`. Terminal appearance and Ghostty preferences are user-owned and stay outside the Makaron repository.
 
 ---
 
@@ -226,7 +217,6 @@ makaron/
 │   │   ├── colors.sh
 │   │   ├── sketchybarrc
 │   │   └── plugins/
-│   └── ghostty/
 ├── install/                # Installation scripts
 │   ├── all.sh              # Orchestrator: mandatory -> packages -> settings
 │   ├── mandatory.sh        # Core components (always installed)
@@ -236,10 +226,9 @@ makaron/
 │   ├── brew.sh             # Homebrew + CLT setup
 │   ├── desktop/            # AeroSpace, SketchyBar, fonts
 │   ├── development/        # Dev tools
-│   ├── editors/            # Text editors and IDEs
+│   ├── editors/            # Text editor installers
 │   └── terminal/           # Terminal tools
 ├── migrations/             # Timestamped migration scripts
-├── profiles/               # Editor profiles
 ├── src/                    # Swift source files (compiled to bin/)
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
@@ -254,7 +243,6 @@ $HOME/
 │   ├── makaron.conf                 # User settings
 │   └── packages.conf                # Optional package selections
 ├── .config/sketchybar -> ...        # Symlink
-├── .config/ghostty -> ...           # Symlink
 └── .aerospace.toml -> ...           # Symlink
 ```
 
@@ -372,47 +360,6 @@ killall ServiceName 2>/dev/null || true
 1. Syntax: `bash -n migrations/TIMESTAMP.sh`
 2. Run manually, verify idempotency (run twice)
 3. Test with missing dependencies
-
----
-
-## Editor Profiles
-
-### Overview
-Pre-configured profiles for VSCode and Cursor with settings, extensions, and keybindings.
-
-### Structure
-```text
-profiles/
-└── <profile-name>/
-    ├── settings.json      # Editor settings
-    ├── extensions.txt     # Extension IDs (one per line, # for comments)
-    └── keybindings.json   # Custom keybindings (optional)
-```
-
-### Paths
-```bash
-# VSCode
-~/Library/Application Support/Code/User/settings.json
-~/Library/Application Support/Code/User/keybindings.json
-
-# Cursor
-~/Library/Application Support/Cursor/User/settings.json
-~/Library/Application Support/Cursor/User/keybindings.json
-```
-
-### Usage
-```bash
-makaron-apply-editor-profile <profile-name> [--cursor-only|--vscode-only]
-```
-
-### Creating New Profile
-1. Create `profiles/<name>/` directory
-2. Add `settings.json` with editor settings
-3. Add `extensions.txt` with Extension IDs
-4. Optionally add `keybindings.json`
-5. Update `README.md`
-
----
 
 ## AeroSpace + SketchyBar Integration
 

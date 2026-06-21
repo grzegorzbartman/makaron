@@ -17,7 +17,7 @@ fi
 
 mkdir -p "$(dirname "$PACKAGES_CONF")"
 
-ALL_PACKAGES="btop ffmpeg fzf htop ncdu tree p10k vscode cursor sublime neovim chatgpt claude-app gemini-cli codex claude-code opencode composer ddev gh lazydocker lazygit node yarn pnpm fnm upsun bruno docker sequel-ace pipx rbenv alttab command-x stats flameshot slack spotify vlc"
+ALL_PACKAGES="btop ffmpeg fzf htop ncdu tmux tree fresh p10k vscode cursor sublime neovim chatgpt claude-app gemini-cli codex claude-code opencode composer ddev gh lazydocker lazygit node yarn pnpm fnm upsun bruno docker sequel-ace pipx rbenv alttab command-x stats flameshot slack spotify vlc"
 
 cat > "$PACKAGES_CONF" << EOF
 # Makaron package selections

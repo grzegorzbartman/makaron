@@ -183,37 +183,6 @@ check_bin_permissions() {
     fi
 }
 
-check_ghostty_skip_worktree() {
-    local file="configs/ghostty/config"
-
-    if [ ! -d "$MAKARON_PATH/.git" ]; then
-        add_result "skipped" "ghostty-skip-worktree" "not a git checkout"
-        return
-    fi
-
-    if [ ! -f "$MAKARON_PATH/$file" ]; then
-        add_result "fail" "ghostty-skip-worktree" "missing $file"
-        return
-    fi
-
-    local marker
-    marker=$(git -C "$MAKARON_PATH" ls-files -v "$file" 2>/dev/null | awk '{print substr($1,1,1)}')
-    if [ "$marker" = "S" ]; then
-        add_result "ok" "ghostty-skip-worktree" "$file"
-        return
-    fi
-
-    if [ "$DO_FIX" = true ]; then
-        if git -C "$MAKARON_PATH" update-index --skip-worktree "$file" 2>/dev/null; then
-            add_result "fixed" "ghostty-skip-worktree" "$file"
-        else
-            add_result "fail" "ghostty-skip-worktree" "could not set skip-worktree"
-        fi
-    else
-        add_result "warn" "ghostty-skip-worktree" "$file is not protected"
-    fi
-}
-
 missing_config_count() {
     local count=0
     local line var_name
@@ -345,11 +314,9 @@ run_checks() {
 
     if [ -d "$MAKARON_PATH" ]; then
         check_symlink "sketchybar-symlink" "$HOME/.config/sketchybar" "$MAKARON_PATH/configs/sketchybar"
-        check_symlink "ghostty-symlink" "$HOME/.config/ghostty" "$MAKARON_PATH/configs/ghostty"
         check_symlink "aerospace-symlink" "$HOME/.aerospace.toml" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
         check_swift_binary "memory-binary" "$MAKARON_PATH/bin/makaron-memory-stats" "$MAKARON_PATH/src/memory_stats.swift"
         check_bin_permissions
-        check_ghostty_skip_worktree
         check_makaron_conf
         check_ui_services
     fi

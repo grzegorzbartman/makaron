@@ -38,7 +38,7 @@ After installation, reload your shell or open a new terminal.
 - **Nerd Fonts** - Developer-friendly fonts with icon support
 
 ### Productivity Tools
-- **Ghostty** - Fast, modern terminal emulator
+- **Ghostty** - Fast, modern terminal emulator (configuration stays user-managed)
 - **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications
 - **Slack** - Team communication
 - **Stats** - System monitor in menu bar
@@ -121,7 +121,6 @@ git checkout -b restore-pre-simplification 2026.06.21
 - **`makaron-ui-minimal`** - Start minimal UI (AeroSpace only, visible Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
 - **`makaron-macos-config-reload`** - Apply macOS settings
-- **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
 
 ### UI Modes
 
@@ -132,24 +131,6 @@ git checkout -b restore-pre-simplification 2026.06.21
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
 The SketchyBar height is `40px`. AeroSpace windows are edge-to-edge except for that top reserve in full mode.
-
-### Editor Profiles
-
-Preconfigured profiles for Cursor and VSCode live in `profiles/`.
-
-```bash
-# Apply to both Cursor and VSCode
-makaron-apply-editor-profile development-php-drupal
-
-# Apply to Cursor only
-makaron-apply-editor-profile development-php-drupal --cursor-only
-
-# Apply to VSCode only
-makaron-apply-editor-profile development-php-drupal --vscode-only
-```
-
-Available profiles:
-- **`development-php-drupal`** - PHP/Drupal development with PHP Intelephense, Xdebug, DDEV Manager, Twig support, and Drupal file associations
 
 ### Manual Commands
 
@@ -236,7 +217,7 @@ install/
 ├── brew.sh             # Homebrew setup
 ├── desktop/            # AeroSpace, SketchyBar, fonts
 ├── terminal/           # Ghostty and terminal helpers
-├── editors/            # Editors and profiles
+├── editors/            # Editor application installers
 ├── development/        # Languages, frameworks, dev tools
 ├── apps/               # GUI applications
 └── macos_settings.sh
@@ -245,11 +226,9 @@ install/
 ## Files
 
 - `configs/aerospace/.aerospace.toml` - AeroSpace config
-- `configs/ghostty/config` - Ghostty terminal config
 - `configs/sketchybar/colors.sh` - Static SketchyBar colors
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `configs/sketchybar/plugins/` - SketchyBar plugin scripts
-- `profiles/` - Editor profiles for VSCode/Cursor
 - `install/` - Modular installation scripts
 - `migrations/` - Database-style migrations for configuration updates
 - `templates/makaron.conf.default` - Default user configuration template

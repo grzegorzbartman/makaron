@@ -70,12 +70,6 @@ PKGS_APPS=(
 
 # ── Package Installer ────────────────────────────────────────────
 
-_apply_editor_profile() {
-    if [ -x "$MAKARON_PATH/bin/makaron-apply-editor-profile" ]; then
-        "$MAKARON_PATH/bin/makaron-apply-editor-profile" development-php-drupal 2>/dev/null || true
-    fi
-}
-
 install_package() {
     local id="$1"
     case "$id" in
@@ -92,14 +86,8 @@ install_package() {
             install_cask "manaflow-ai/cmux/cmux" "cmux"
             ;;
         # Editors
-        vscode)
-            install_cask "visual-studio-code" "Visual Studio Code"
-            _apply_editor_profile
-            ;;
-        cursor)
-            install_cask "cursor" "Cursor"
-            _apply_editor_profile
-            ;;
+        vscode)     install_cask "visual-studio-code" "Visual Studio Code" ;;
+        cursor)     install_cask "cursor" "Cursor" ;;
         sublime)    install_cask "sublime-text" "Sublime Text" ;;
         neovim)     source "$MAKARON_PATH/install/editors/neovim_lazyvim.sh" ;;
         # AI
