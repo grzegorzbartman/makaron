@@ -1,7 +1,5 @@
 # Makaron - macOS Developer Configuration
 
-![Makaron Screenshot](docs/makaron-01.png)
-
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
 
 Complete macOS development environment for PHP and Drupal developers with AeroSpace window management, a SketchyBar top status bar, Ghostty, and optional productivity tools.
