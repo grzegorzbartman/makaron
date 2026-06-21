@@ -119,11 +119,8 @@ if [ -d "$MAKARON_PATH/.git" ]; then
     echo ""
 
     echo "Fetching latest changes..."
-    git update-index --no-skip-worktree configs/ghostty/config 2>/dev/null || true
-    git add configs/ghostty/config 2>/dev/null || true
     git fetch origin main
     git reset --hard origin/main
-    git update-index --skip-worktree configs/ghostty/config 2>/dev/null || true
     echo "Configuration updated successfully!"
 
     # Update user config with new variables
@@ -153,7 +150,6 @@ if [ -d "$MAKARON_PATH/.git" ]; then
                 echo "UI mode is 'stop', ensuring Makaron UI remains stopped..."
                 stop_aerospace || true
                 stop_sketchybar || true
-                stop_borders || true
                 ;;
             *)
                 echo "Unknown UI mode '$current_ui_mode', skipping UI reload."

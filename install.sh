@@ -53,9 +53,7 @@ echo ""
 if [ -d "$MAKARON_PATH/.git" ]; then
     echo "📥 Updating existing installation..."
     cd "$MAKARON_PATH"
-    git update-index --no-skip-worktree configs/ghostty/config 2>/dev/null || true
     git pull origin main || { echo "   ✗ Update failed"; exit 1; }
-    git update-index --skip-worktree configs/ghostty/config 2>/dev/null || true
     echo "   ✓ Updated"
 else
     echo "📥 Cloning fresh installation..."

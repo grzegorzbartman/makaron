@@ -117,31 +117,6 @@ check_repo() {
     fi
 }
 
-check_current_theme() {
-    local link="$MAKARON_PATH/current-theme"
-    local fallback="$MAKARON_PATH/themes/tokyo-night"
-
-    if [ -L "$link" ] && [ -d "$(resolve_path "$link")" ]; then
-        add_result "ok" "current-theme" "$(basename "$(resolve_path "$link")")"
-        return
-    fi
-
-    if [ ! -d "$fallback" ]; then
-        add_result "fail" "current-theme" "missing fallback theme: $fallback"
-        return
-    fi
-
-    if [ "$DO_FIX" = true ]; then
-        if ensure_symlink "$link" "$fallback"; then
-            add_result "fixed" "current-theme" "$link -> $fallback"
-        else
-            add_result "fail" "current-theme" "could not repair theme symlink"
-        fi
-    else
-        add_result "fail" "current-theme" "missing or broken symlink"
-    fi
-}
-
 compile_swift() {
     local output="$1"
     local source="$2"
@@ -205,37 +180,6 @@ check_bin_permissions() {
         fi
     else
         add_result "fail" "bin-permissions" "$missing files are not executable"
-    fi
-}
-
-check_ghostty_skip_worktree() {
-    local file="configs/ghostty/config"
-
-    if [ ! -d "$MAKARON_PATH/.git" ]; then
-        add_result "skipped" "ghostty-skip-worktree" "not a git checkout"
-        return
-    fi
-
-    if [ ! -f "$MAKARON_PATH/$file" ]; then
-        add_result "fail" "ghostty-skip-worktree" "missing $file"
-        return
-    fi
-
-    local marker
-    marker=$(git -C "$MAKARON_PATH" ls-files -v "$file" 2>/dev/null | awk '{print substr($1,1,1)}')
-    if [ "$marker" = "S" ]; then
-        add_result "ok" "ghostty-skip-worktree" "$file"
-        return
-    fi
-
-    if [ "$DO_FIX" = true ]; then
-        if git -C "$MAKARON_PATH" update-index --skip-worktree "$file" 2>/dev/null; then
-            add_result "fixed" "ghostty-skip-worktree" "$file"
-        else
-            add_result "fail" "ghostty-skip-worktree" "could not set skip-worktree"
-        fi
-    else
-        add_result "warn" "ghostty-skip-worktree" "$file is not protected"
     fi
 }
 
@@ -322,16 +266,6 @@ service_health_message() {
         if command -v sketchybar >/dev/null 2>&1 && ! pgrep -f "sketchybar" >/dev/null 2>&1; then
             problems+=("SketchyBar stopped")
         fi
-
-        local borders_enabled="true"
-        if [ -f "$MAKARON_CONF" ]; then
-            # shellcheck source=/dev/null
-            source "$MAKARON_CONF" 2>/dev/null || true
-            borders_enabled="${BORDERS_ENABLED:-true}"
-        fi
-        if [ "$borders_enabled" = "true" ] && command -v borders >/dev/null 2>&1 && ! pgrep -x "borders" >/dev/null 2>&1; then
-            problems+=("Borders stopped")
-        fi
     fi
 
     if [ "${#problems[@]}" -eq 0 ]; then
@@ -379,14 +313,10 @@ run_checks() {
     check_repo
 
     if [ -d "$MAKARON_PATH" ]; then
-        check_current_theme
         check_symlink "sketchybar-symlink" "$HOME/.config/sketchybar" "$MAKARON_PATH/configs/sketchybar"
-        check_symlink "ghostty-symlink" "$HOME/.config/ghostty" "$MAKARON_PATH/configs/ghostty"
         check_symlink "aerospace-symlink" "$HOME/.aerospace.toml" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
         check_swift_binary "memory-binary" "$MAKARON_PATH/bin/makaron-memory-stats" "$MAKARON_PATH/src/memory_stats.swift"
-        check_swift_binary "accent-binary" "$MAKARON_PATH/bin/makaron-set-accent-color" "$MAKARON_PATH/src/set_accent_color.swift"
         check_bin_permissions
-        check_ghostty_skip_worktree
         check_makaron_conf
         check_ui_services
     fi

@@ -1,3 +1,0 @@
-#!/bin/bash
-# Switch to COSMIC Dark theme
-"$(dirname "$0")/makaron-switch-theme" cosmic-dark

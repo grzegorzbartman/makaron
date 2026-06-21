@@ -16,9 +16,7 @@ PKGS_TERMINAL=(
     "fzf|fzf|fuzzy finder"
     "htop|htop|process viewer"
     "ncdu|ncdu|disk usage analyzer"
-    "tmux|tmux|terminal multiplexer"
     "tree|tree|directory listing"
-    "fresh|Fresh Editor|terminal editor"
     "p10k|Powerlevel10k|zsh theme"
     "cmux|cmux|AI agent terminal (Ghostty-based)"
 )
@@ -60,7 +58,6 @@ PKGS_DEV=(
 
 PKGS_DESKTOP=(
     "command-x|Command X|cut files in Finder"
-    "ice|Ice|menu bar manager"
     "stats|Stats|system monitor menubar"
 )
 
@@ -73,12 +70,6 @@ PKGS_APPS=(
 
 # ── Package Installer ────────────────────────────────────────────
 
-_apply_editor_profile() {
-    if [ -x "$MAKARON_PATH/bin/makaron-apply-editor-profile" ]; then
-        "$MAKARON_PATH/bin/makaron-apply-editor-profile" development-php-drupal 2>/dev/null || true
-    fi
-}
-
 install_package() {
     local id="$1"
     case "$id" in
@@ -88,26 +79,15 @@ install_package() {
         fzf)        install_formula "fzf" "fzf" "fzf" ;;
         htop)       install_formula "htop" "htop" "htop" ;;
         ncdu)       install_formula "ncdu" "ncdu" "ncdu" ;;
-        tmux)       install_formula "tmux" "tmux" "tmux" ;;
         tree)       install_formula "tree" "tree" "tree" ;;
-        fresh)
-            brew tap sinelaw/fresh 2>/dev/null || true
-            install_formula "fresh-editor" "Fresh Editor" "fresh"
-            ;;
         p10k) source "$MAKARON_PATH/install/terminal/p10k.sh" ;;
         cmux)
             brew tap manaflow-ai/cmux 2>/dev/null || true
             install_cask "manaflow-ai/cmux/cmux" "cmux"
             ;;
         # Editors
-        vscode)
-            install_cask "visual-studio-code" "Visual Studio Code"
-            _apply_editor_profile
-            ;;
-        cursor)
-            install_cask "cursor" "Cursor"
-            _apply_editor_profile
-            ;;
+        vscode)     install_cask "visual-studio-code" "Visual Studio Code" ;;
+        cursor)     install_cask "cursor" "Cursor" ;;
         sublime)    install_cask "sublime-text" "Sublime Text" ;;
         neovim)     source "$MAKARON_PATH/install/editors/neovim_lazyvim.sh" ;;
         # AI
@@ -144,7 +124,6 @@ install_package() {
         rbenv)      source "$MAKARON_PATH/install/development/rbenv.sh" ;;
         # Desktop extras
         command-x)  install_cask "command-x" "Command X" ;;
-        ice)        install_cask "jordanbaird-ice" "Ice" ;;
         stats)      install_cask "stats" "Stats" ;;
         # Apps
         flameshot)  install_cask "flameshot" "Flameshot" ;;
@@ -284,7 +263,7 @@ show_package_selector() {
         --foreground 245 \
         --italic \
         --margin "0 2" \
-        "Core installed: AeroSpace, SketchyBar, Borders, Ghostty, Fonts." \
+        "Core installed: AeroSpace, SketchyBar, Ghostty, Fonts." \
         "Select additional packages below."
 
     local total=6

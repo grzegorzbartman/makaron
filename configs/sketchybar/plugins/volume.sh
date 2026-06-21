@@ -3,12 +3,7 @@
 # The volume_change event supplies a $INFO variable in which the current volume
 # percentage is passed to the script.
 
-# Load theme colors
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 CACHE_FILE="/tmp/sketchybar_audio_device"
 CACHE_DURATION=5  # seconds

@@ -57,12 +57,7 @@ case "$1" in
 esac
 }
 
-# Load theme colors
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 # Optional user flag: hide empty, non-focused workspaces from the bar.
 # Focused workspace is always drawn so users never "lose" their position.

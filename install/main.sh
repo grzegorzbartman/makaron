@@ -95,7 +95,6 @@ check_app() {
 echo "Core Components:"
 check_installed "aerospace" "AeroSpace" || true
 check_installed "sketchybar" "SketchyBar" || true
-check_installed "borders" "Borders" || true
 check_app "Ghostty" || true
 
 if [ -f "$HOME/.config/makaron/packages.conf" ]; then

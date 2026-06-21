@@ -5,12 +5,7 @@
 # focused application in the $INFO variable:
 # https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
 
-# Load theme colors
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 if [ "$SENDER" = "front_app_switched" ]; then
   sketchybar --set "$NAME" label="$INFO" \

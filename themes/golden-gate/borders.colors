@@ -1,6 +1,0 @@
-#!/bin/bash
-# Golden Gate color scheme for Borders
-
-export ACTIVE_BORDER_COLOR=0xffff5a36
-export INACTIVE_BORDER_COLOR=0xff31527f
-export BORDER_WIDTH=5.0

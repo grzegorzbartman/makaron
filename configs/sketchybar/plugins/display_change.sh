@@ -17,11 +17,14 @@ fi
 
 echo "$CURRENT_MONITOR_COUNT" > "$MONITOR_COUNT_FILE"
 
-# If monitor count changed, re-derive desktop layout (notch presence may have flipped).
-if [ "$CURRENT_MONITOR_COUNT" != "$PREVIOUS_MONITOR_COUNT" ] && [ "$PREVIOUS_MONITOR_COUNT" != "0" ]; then
-  # Let macOS/AeroSpace finish detecting the new topology before we read it.
+# Re-apply desktop state on every display change: notch presence can change even
+# when monitor count stays the same (external-only ↔ built-in display).
+if [ "$PREVIOUS_MONITOR_COUNT" != "0" ]; then
   sleep 0.5
-  sketchybar --reload
+
+  if [ "$CURRENT_MONITOR_COUNT" != "$PREVIOUS_MONITOR_COUNT" ]; then
+    sketchybar --reload
+  fi
 
   # Re-apply desktop state: outer.top depends on notch presence which may have
   # changed (clamshell open/close, dock attach/detach with notched MBP).

@@ -8,10 +8,9 @@ UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
 # Invalidate from display_change.sh on monitor hotplug.
 NOTCH_CACHE_FILE="/tmp/makaron_has_builtin_notch"
 
-# Constants for desktop layout (kept simple; theme BORDER_WIDTH is unified).
-MAKARON_GAPS_WITH_BORDERS=15
-MAKARON_GAPS_WITHOUT_BORDERS=8
-# Must match `height=...` in sketchybarrc — used to derive symmetric outer.top.
+# Constants for desktop layout.
+MAKARON_GAP_SIZE=0
+# Must match `height=...` in sketchybarrc.
 MAKARON_SKETCHYBAR_HEIGHT=40
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps and read back
@@ -19,30 +18,6 @@ MAKARON_SKETCHYBAR_HEIGHT=40
 MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.right)
 
 MAKARON_CONF_PATH="$HOME/.config/makaron/makaron.conf"
-
-# --- Config readers (subshell isolated to avoid leaking conf vars) ---
-
-_get_borders_enabled() {
-    (source "$MAKARON_CONF_PATH" 2>/dev/null; echo "${BORDERS_ENABLED:-true}")
-}
-
-_get_gaps_zero_enabled() {
-    (source "$MAKARON_CONF_PATH" 2>/dev/null; echo "${GAPS_ZERO_ENABLED:-false}")
-}
-
-# Map (ui_mode, borders) -> expected aerospace inner/outer gap in px.
-_expected_gap_size() {
-    if [ "$(_get_gaps_zero_enabled)" = "true" ]; then
-        echo "0"
-        return
-    fi
-
-    if [ "$(_get_borders_enabled)" = "true" ]; then
-        echo "$MAKARON_GAPS_WITH_BORDERS"
-    else
-        echo "$MAKARON_GAPS_WITHOUT_BORDERS"
-    fi
-}
 
 # Set/update a key=value in makaron.conf. Ensures the file exists.
 set_makaron_conf_value() {
@@ -123,34 +98,25 @@ _resolve_aerospace_config_path() {
     fi
 }
 
-# Compute the canonical `outer.top = ...` line for the given (mode, gap, notch).
+# Compute the canonical `outer.top = ...` line for the given mode/notch state.
 # Single source of truth — used by both writer (switch_aerospace_config) and
 # verifier (verify_desktop_state) so they never drift.
 #
-# full mode:
-#   bar_top   = SketchyBar height + side gap, so visual padding above the
-#               window border matches the padding on left/right/bottom (symmetric).
-#   notch_top = side gap, because the notch area "absorbs" SketchyBar on
-#               Built-in MBP displays — no bar reserve needed there.
-# minimal: no bar, uniform small gap (notch irrelevant).
+# full mode: reserve only SketchyBar height; built-in notched displays need no
+#            extra top reserve because the notch/menu-bar area absorbs the bar.
+# minimal: no SketchyBar reserve and no gaps.
 _expected_outer_top_line() {
-    local mode="$1" gap="$2" has_notch="$3"
+    local mode="$1" has_notch="$2"
     case "$mode" in
         full)
-            local bar_top=$(( MAKARON_SKETCHYBAR_HEIGHT + gap ))
-            local notch_top=$gap
             if [ "$has_notch" = "true" ]; then
-                echo "    outer.top = [{ monitor.\"Built-in\" = $notch_top }, $bar_top]"
+                echo "    outer.top = [{ monitor.\"Built-in\" = 0 }, $MAKARON_SKETCHYBAR_HEIGHT]"
             else
-                echo "    outer.top = $bar_top"
+                echo "    outer.top = $MAKARON_SKETCHYBAR_HEIGHT"
             fi
             ;;
         minimal)
-            if [ "$gap" = "0" ]; then
-                echo "    outer.top = 0"
-            else
-                echo "    outer.top = $MAKARON_GAPS_WITHOUT_BORDERS"
-            fi
+            echo "    outer.top = 0"
             ;;
     esac
 }
@@ -169,9 +135,8 @@ switch_aerospace_config() {
     local has_notch=false
     _has_builtin_notch && has_notch=true
 
-    local gap outer_top
-    gap="$(_expected_gap_size)"
-    outer_top="$(_expected_outer_top_line "$mode" "$gap" "$has_notch")"
+    local outer_top
+    outer_top="$(_expected_outer_top_line "$mode" "$has_notch")"
 
     if [ -z "$outer_top" ]; then
         echo "  ⚠️  Unknown aerospace config mode: $mode"
@@ -223,15 +188,13 @@ _set_aerospace_gaps() {
 }
 
 # ============================================================================
-# apply_desktop_state — single source of truth for layout (gaps + borders + top).
+# apply_desktop_state — single source of truth for layout (gaps + top).
 #
 # Scope: layout only. Does NOT start/stop AeroSpace, SketchyBar, or apply macOS
 # settings. Callers (makaron-ui-full / makaron-ui-minimal) handle bootstrap.
 #
-# Inputs read: ui-mode state file, BORDERS_ENABLED/GAPS_ZERO_ENABLED from makaron.conf,
-#              current-theme/borders.colors (via start_borders).
-# Outputs:     ~/.aerospace.toml (inner/outer gaps + outer.top),
-#              borders process state (start/stop matching ui-mode+config).
+# Inputs read: ui-mode state file.
+# Outputs:     ~/.aerospace.toml (inner/outer gaps + outer.top).
 # ============================================================================
 apply_desktop_state() {
     local ui_mode
@@ -239,42 +202,29 @@ apply_desktop_state() {
 
     if [ "$ui_mode" = "stop" ]; then
         # In stop mode the user explicitly wants nothing running. Don't touch
-        # the toml or borders. Warn if called from makaron-borders so the
-        # user isn't surprised that "borders on" did nothing visible.
+        # the toml.
         [ -n "${MAKARON_APPLY_VERBOSE:-}" ] && \
             echo "  UI mode is 'stop' — desktop state not applied"
         return 0
     fi
 
-    local borders gaps_zero
-    borders="$(_get_borders_enabled)"
-    gaps_zero="$(_get_gaps_zero_enabled)"
-
-    _set_aerospace_gaps "$(_expected_gap_size)"
+    _set_aerospace_gaps "$MAKARON_GAP_SIZE"
     switch_aerospace_config "$ui_mode"
 
     if command -v aerospace &> /dev/null && pgrep -f "AeroSpace" > /dev/null; then
         aerospace reload-config 2>/dev/null || true
     fi
-
-    if [ "$ui_mode" = "full" ] && [ "$borders" = "true" ] && [ "$gaps_zero" != "true" ]; then
-        start_borders
-    else
-        stop_borders
-    fi
 }
 
 # ============================================================================
-# verify_desktop_state — compare ~/.aerospace.toml + borders process to the
+# verify_desktop_state — compare ~/.aerospace.toml to the
 # state that apply_desktop_state would produce. Used by makaron-debug.
 # Echoes findings. Returns 0 if synced, 1 if drift detected.
 # ============================================================================
 verify_desktop_state() {
-    local ui_mode borders gaps_zero expected_gap config_file
+    local ui_mode expected_gap config_file
     ui_mode=$(get_ui_mode)
-    borders="$(_get_borders_enabled)"
-    gaps_zero="$(_get_gaps_zero_enabled)"
-    expected_gap="$(_expected_gap_size)"
+    expected_gap="$MAKARON_GAP_SIZE"
     config_file="$(_resolve_aerospace_config_path)"
 
     if [ ! -f "$config_file" ]; then
@@ -296,7 +246,7 @@ verify_desktop_state() {
     local has_notch=false
     _has_builtin_notch && has_notch=true
     local expected_top actual_top
-    expected_top="$(_expected_outer_top_line "$ui_mode" "$expected_gap" "$has_notch")"
+    expected_top="$(_expected_outer_top_line "$ui_mode" "$has_notch")"
     actual_top="$(grep -E '^    outer\.top = ' "$config_file" | head -1)"
     if [ "$actual_top" != "$expected_top" ]; then
         echo "  ⚠️  outer.top drift (notch=$has_notch, ui-mode=$ui_mode)"
@@ -305,16 +255,8 @@ verify_desktop_state() {
         drift=1
     fi
 
-    local borders_running="false" expected_borders="false"
-    pgrep -x "borders" > /dev/null 2>&1 && borders_running="true"
-    [ "$ui_mode" = "full" ] && [ "$borders" = "true" ] && [ "$gaps_zero" != "true" ] && expected_borders="true"
-    if [ "$borders_running" != "$expected_borders" ]; then
-        echo "  ⚠️  borders running=$borders_running, expected $expected_borders (ui-mode=$ui_mode, BORDERS_ENABLED=$borders, GAPS_ZERO_ENABLED=$gaps_zero)"
-        drift=1
-    fi
-
     if [ $drift -eq 0 ]; then
-        echo "  ✓ Desktop layout state is in sync (ui-mode=$ui_mode, borders=$borders, gaps-zero=$gaps_zero, gap=${expected_gap}px)"
+        echo "  ✓ Desktop layout state is in sync (ui-mode=$ui_mode, gap=${expected_gap}px)"
     fi
     return $drift
 }
@@ -377,57 +319,6 @@ stop_sketchybar() {
         fi
     else
         echo "  ⚠️  SketchyBar not installed"
-    fi
-}
-
-# --- Borders ---
-start_borders() {
-    if [[ "$(_get_gaps_zero_enabled)" == "true" ]]; then
-        echo "  Borders disabled (gaps zero)"
-        return 0
-    fi
-    if [[ "$(_get_borders_enabled)" != "true" ]]; then
-        echo "  Borders disabled (makaron.conf)"
-        return 0
-    fi
-    if ! command -v borders &> /dev/null; then
-        echo "  ⚠️  Borders not installed"
-        return 0
-    fi
-    local THEME_DIR="$MAKARON_PATH/current-theme"
-    if [ -f "$THEME_DIR/borders.colors" ]; then
-        source "$THEME_DIR/borders.colors"
-    else
-        # Fallback when no theme is set — keep unified BORDER_WIDTH=5.0.
-        export ACTIVE_BORDER_COLOR=0xff7aa2f7
-        export INACTIVE_BORDER_COLOR=0xff292e42
-        export BORDER_WIDTH=5.0
-    fi
-    echo "  Starting Borders with theme colors..."
-    brew services stop borders 2>/dev/null || true
-    sleep 0.5
-    borders active_color=$ACTIVE_BORDER_COLOR inactive_color=$INACTIVE_BORDER_COLOR width=$BORDER_WIDTH &
-    echo "  ✓ Borders started with theme colors"
-}
-
-stop_borders() {
-    if command -v borders &> /dev/null; then
-        if pgrep -x "borders" > /dev/null; then
-            echo "  Stopping Borders..."
-            killall borders 2>/dev/null || true
-            brew services stop borders 2>/dev/null || true
-            sleep 0.5
-            if pgrep -x "borders" > /dev/null; then
-                echo "  ⚠️  Borders still running, forcing..."
-                killall -9 borders 2>/dev/null || true
-                sleep 0.5
-            fi
-            echo "  ✓ Borders stopped"
-        else
-            echo "  ⚠️  Borders not running"
-        fi
-    else
-        echo "  ⚠️  Borders not installed"
     fi
 }
 

@@ -1,7 +1,0 @@
-#!/bin/bash
-# Ristretto color scheme for Borders
-
-export ACTIVE_BORDER_COLOR=0xffe6d9db
-export INACTIVE_BORDER_COLOR=0xff72696a
-export BORDER_WIDTH=5.0
-

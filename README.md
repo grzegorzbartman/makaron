@@ -2,49 +2,50 @@
 
 ![Makaron Screenshot](docs/makaron-01.png)
 
-> **Why "Makaron"?** The name comes from the Polish word for "pasta" 🍝, which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
+> **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
 
-Complete macOS development environment for PHP and Drupal developers with modern window management, terminal, and productivity tools.
+Complete macOS development environment for PHP and Drupal developers with AeroSpace window management, a SketchyBar top status bar, Ghostty, and optional productivity tools.
 
 > [!IMPORTANT]
-> **Use this as a starting point, not a finished product.** Makaron is a personal, opinionated setup that changes frequently — widgets get added, removed, or rewired, defaults are tweaked, and breaking changes can land between updates. The best way to use it is to **fork the repository**, install from your own fork, and adjust it to fit your own workflow. That way `makaron-update` pulls from a tree you control, not from mine.
+> **Use this as a starting point, not a finished product.** Makaron is a personal, opinionated setup that changes frequently - widgets get added, removed, or rewired, defaults are tweaked, and breaking changes can land between updates. The best way to use it is to **fork the repository**, install from your own fork, and adjust it to fit your own workflow.
 
-## Perfect for
+## Perfect For
 
 - **PHP Developers** - Optimized workflow for PHP development
 - **Drupal Developers** - Tailored environment for Drupal projects
-- **Web Developers** - Modern tools and efficient window management
-- **Terminal Users** - Enhanced terminal experience with Ghostty
-- **Productivity Enthusiasts** - Clean, distraction-free development setup
+- **macOS Power Users** - Tiling window management with a compact custom top bar
+- **Terminal Users** - Ghostty, shell tools, and optional AI CLIs
 
 ## Requirements
 
-- macOS (tested on macOS 26)
-- Homebrew installed
-- Git
+- macOS
+- Internet connection
+- Admin access for Homebrew packages and system settings
 
 ## Quick Installation
-
-Install everything with one command:
 
 ```bash
 curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash
 ```
 
-This will:
-- Clone the repository to `~/.local/share/makaron`
-- Install Homebrew package manager
-- Set up modern development environment (AeroSpace, SketchyBar, Ghostty)
-- Configure system settings for optimal development workflow
-- Install developer fonts and tools
+After installation, reload your shell or open a new terminal.
 
 ## What Gets Installed
 
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
-- **SketchyBar** - Custom status bar
-- **Borders** - Visual window borders
+- **SketchyBar** - Custom top status bar
 - **Nerd Fonts** - Developer-friendly fonts with icon support
+
+### Productivity Tools
+- **Ghostty** - Fast, modern terminal emulator (configuration stays user-managed)
+- **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications
+- **Slack** - Team communication
+- **Stats** - System monitor in menu bar
+- **btop** - System resource monitor
+- **Neovim** - Modern Vim-based text editor
+- **Upsun CLI** - Upsun command-line tool
+
 ### AI Tools
 - **Claude** - AI assistant desktop app
 - **Claude Code** - AI coding assistant
@@ -55,7 +56,7 @@ This will:
 - **OpenCode** - AI coding assistant CLI
 
 ### Development Tools
-- **Bruno** - Open-source API client (Postman alternative)
+- **Bruno** - Open-source API client
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
 - **PhpStorm** - Professional PHP IDE
@@ -64,23 +65,9 @@ This will:
 - **Composer** - PHP dependency manager
 - **LazyDocker** - Terminal UI for Docker
 - **LazyGit** - Terminal UI for Git
-- **Node.js** - JavaScript runtime (includes Yarn)
+- **Node.js** - JavaScript runtime
 - **pipx** - Python application installer
 - **rbenv** - Ruby version manager
-
-### Productivity Tools
-- **Ghostty** - Fast, modern terminal emulator
-- **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications (GPL-3.0)
-- **Slack** - Team communication
-- **Stats** - System monitor in menu bar
-- **Ice** - Optional menu bar icon manager for hiding and organizing status items
-- **btop** - System resource monitor
-- **Neovim** - Modern Vim-based text editor
-- **Upsun CLI** - Upsun (Platform.sh) command-line tool
-- **tmux** - Terminal multiplexer
-
-> [!NOTE]
-> Ice is a Dozer-style Desktop Extra. Fresh installs can select it in the package picker; existing installs get it automatically via migration during `makaron-update`. Avoid hiding or disabling AeroSpace's own menu bar item with Ice or macOS **Allow in the Menu Bar** settings, because AeroSpace can quit or malfunction when its status item is removed.
 
 ### System Configuration
 - **macOS Settings** - Optimized system preferences for development workflow
@@ -88,8 +75,6 @@ This will:
 - **User Config** - Personal settings in `~/.config/makaron/makaron.conf`
 
 ## Manual Installation
-
-If you prefer manual installation:
 
 ```bash
 cd ~/projects
@@ -109,337 +94,172 @@ makaron-update
 This command will:
 - Pull the latest changes from GitHub
 - Run any pending migrations
-- Reload all configurations
+- Reload configurations for the current UI mode
+
+### Rollback Tag
+
+The tag `2026.06.21` marks the repository state before the SketchyBar-only simplification. To inspect or branch from that state:
+
+```bash
+git checkout 2026.06.21
+# or
+git checkout -b restore-pre-simplification 2026.06.21
+```
 
 ## Usage
 
 ### Available Commands
 
-After installation, you'll have access to these commands:
-
 - **`makaron-update`** - Update configuration to latest version
-- **`makaron-reload-aerospace-sketchybar`** - Reload all configurations (AeroSpace, SketchyBar)
+- **`makaron-reload-aerospace-sketchybar`** - Reload AeroSpace + SketchyBar and re-apply layout
 - **`makaron-reinstall`** - Complete reinstall from scratch
 - **`makaron-migrate`** - Run pending migrations
 - **`makaron-migration-status`** - Show migration status
-- **`makaron-dev-add-migration`** - Create new migration (development)
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-debug`** - Diagnose system status
-- **`makaron-ui-full`** - Start full UI (SketchyBar + hidden menu bar)
-- **`makaron-ui-minimal`** - Start minimal UI (no SketchyBar, visible menu bar)
+- **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
+- **`makaron-ui-minimal`** - Start minimal UI (AeroSpace only, visible Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
-- **`makaron-borders [on|off]`** - Toggle window borders and restore normal AeroSpace gaps when enabling borders
-- **`makaron-gaps-zero`** - Disable borders and force AeroSpace gaps to zero in full or minimal UI mode
 - **`makaron-macos-config-reload`** - Apply macOS settings
-- **`makaron-apply-editor-profile`** - Apply VSCode/Cursor profile
-- **`makaron-theme-*`** - Switch themes (see Themes section below)
 
-### Themes
+### UI Modes
 
-Makaron includes twenty-eight beautiful themes that change the colors of your UI and wallpaper (some inspired by [Omarchy](https://github.com/basecamp/omarchy), some featuring wallpapers from [Basic Apple Guy](https://basicappleguy.com), COSMIC themes inspired by [System76 COSMIC](https://system76.com/cosmic), and Ubuntu themes with official Ubuntu 25.10 wallpapers):
+| Command | Components | Dock | Menu Bar | Layout |
+|---|---|---|---|---|
+| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | gaps `0`, top reserve `40` |
+| `makaron-ui-minimal` | AeroSpace only | Visible | Visible | gaps `0`, top reserve `0` |
+| `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-<p align="center">
-  <img src="docs/makaron-02.png" alt="Catppuccin Latte" width="49%" />
-  <img src="docs/makaron-05.png" alt="Flexoki Light" width="49%" />
-</p>
-
-<p align="center">
-  <img src="docs/makaron-03.png" alt="Matte Black" width="32%" />
-  <img src="docs/makaron-04.png" alt="Everforest" width="32%" />
-  <img src="docs/makaron-01.png" alt="Tokyo Night" width="32%" />
-</p>
-
-1. **Tokyo Night** (default) - Dark theme with purple/blue accents
-2. **Catppuccin** - Dark theme with pastel colors
-3. **Catppuccin Latte** - Light theme for daytime use
-4. **Catppuccin Mocha Dark** - Dark theme with mocha colors
-5. **Droptica Dark** - Dark theme with Droptica branding
-6. **Ethereal** - Dreamy, soft dark theme
-7. **Everforest** - Dark theme with green forest colors
-8. **Flexoki Light** - Light theme with modern colors
-9. **Gruvbox** - Dark theme with warm retro colors
-10. **Hackerman** - Cyberpunk/Matrix inspired theme
-11. **Kanagawa** - Dark theme inspired by Japanese art
-12. **Matte Black** - Minimalist dark theme
-13. **Nord** - Cool arctic-inspired color palette
-14. **Osaka Jade** - Dark theme with jade green accents
-15. **Ristretto** - Warm dark theme with coffee tones
-16. **Rose Pine** - Dark theme with rose and pine colors
-17. **Underwater Dark** - Deep ocean dark theme
-18. **Underwater Light** - Ocean-inspired light theme
-19. **Verdant Dark** - Lush green dark theme
-20. **Verdant Light** - Fresh green light theme
-21. **COSMIC Dark** - Pop!_OS COSMIC-inspired dark theme with teal accents
-22. **COSMIC Light** - Pop!_OS COSMIC-inspired light theme with teal accents
-23. **Ubuntu Dark** - Official Ubuntu dark theme with aubergine colors
-24. **Ubuntu Light** - Official Ubuntu light theme
-25. **Glass Dark** - Frosted-glass dark theme (macOS-inspired translucent bar)
-26. **Glass Light** - Frosted-glass light theme
-27. **Miasma** - Dark organic theme with olive green accents
-28. **Golden Gate** - Vivid San Francisco dark theme with bridge-red accents
-
-Switch themes instantly with:
-
-```bash
-makaron-theme-tokyo-night           # Dark purple/blue
-makaron-theme-catppuccin            # Dark pastel
-makaron-theme-catppuccin-latte      # Light pastel
-makaron-theme-catppuccin-mocha-dark # Dark mocha
-makaron-theme-droptica-dark         # Dark Droptica
-makaron-theme-ethereal              # Dreamy dark
-makaron-theme-everforest            # Dark forest green
-makaron-theme-flexoki-light         # Light modern
-makaron-theme-gruvbox               # Dark retro warm
-makaron-theme-hackerman             # Cyberpunk/Matrix
-makaron-theme-kanagawa              # Dark Japanese art
-makaron-theme-matte-black           # Minimalist dark
-makaron-theme-nord                  # Cool arctic
-makaron-theme-osaka-jade            # Dark jade green
-makaron-theme-ristretto             # Dark coffee warm
-makaron-theme-rose-pine             # Dark rose/pine
-makaron-theme-underwater-dark       # Deep ocean dark
-makaron-theme-underwater-light      # Ocean light
-makaron-theme-verdant-dark          # Lush green dark
-makaron-theme-verdant-light         # Fresh green light
-makaron-theme-cosmic-dark           # COSMIC teal dark
-makaron-theme-cosmic-light          # COSMIC teal light
-makaron-theme-ubuntu-dark           # Ubuntu aubergine dark
-makaron-theme-ubuntu-light          # Ubuntu light
-makaron-theme-glass-dark            # Frosted-glass dark
-makaron-theme-glass-light           # Frosted-glass light
-makaron-theme-miasma                # Dark organic olive
-makaron-theme-golden-gate           # Bridge red and ocean blue
-```
-
-Each theme includes:
-- Custom color scheme for SketchyBar
-- Matching window border colors
-- Coordinated desktop wallpaper
-
-### Editor Profiles
-
-Makaron includes pre-configured profiles for VSCode and Cursor:
-
-```bash
-# Apply to both Cursor and VSCode
-makaron-apply-editor-profile development-php-drupal
-
-# Apply to Cursor only
-makaron-apply-editor-profile development-php-drupal --cursor-only
-
-# Apply to VSCode only
-makaron-apply-editor-profile development-php-drupal --vscode-only
-```
-
-**Available profiles:**
-- **`development-php-drupal`** - PHP/Drupal development with auto dark/light theme, PHP Intelephense, Xdebug, DDEV Manager, Twig support, Drupal file associations
+The SketchyBar height is `40px`. AeroSpace windows are edge-to-edge except for that top reserve in full mode.
 
 ### Manual Commands
 
 - **Reload config**: `makaron-reload-aerospace-sketchybar`
 - **macOS settings**: `makaron-macos-config-reload`
 
-### Troubleshooting
+## Troubleshooting
 
 If you encounter issues with your installation:
 
-- **Quick health check**: `makaron-doctor` - Short report for common installation issues
-- **Safe automatic repairs**: `makaron-doctor --fix` - Repairs symlinks, missing binaries, config defaults, permissions, Ghostty skip-worktree, and reloads UI services when safe
-- **Complete reinstall**: `makaron-reinstall` - Removes everything and reinstalls from scratch
-- **Check migration status**: `makaron-migration-status` - See which migrations have been applied
-- **Manual migration**: `makaron-migrate` - Run pending migrations manually
+- **Quick health check**: `makaron-doctor`
+- **Safe automatic repairs**: `makaron-doctor --fix`
+- **Complete reinstall**: `makaron-reinstall`
+- **Check migration status**: `makaron-migration-status`
+- **Manual migration**: `makaron-migrate`
 
-#### Common Issues After Fresh Installation
+### Common Issues After Fresh Installation
 
 **Problem: Commands `makaron-*` are not available in terminal**
 
-After installation, you need to reload your shell to make the commands available:
+After installation, reload your shell:
 
 ```bash
-# Option 1: Reload your shell configuration
 source ~/.zshrc
-
-# Option 2: Restart your terminal completely
-# Close and reopen your terminal application
 ```
 
-The install script adds `~/.local/share/makaron/bin` to your PATH in `~/.zshrc` and `~/.bashrc`. If commands still don't work after reloading:
+Or restart your terminal completely. If commands still do not work:
 
 ```bash
-# Verify PATH is correct
 echo $PATH | grep makaron
-
-# If not found, manually add to your shell config
 echo 'export PATH="$HOME/.local/share/makaron/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-**Problem: Top bar (menu bar) is not auto-hiding**
+**Problem: Top bar or menu bar settings are wrong**
 
-Makaron switches the menu bar through the UI mode helpers. To re-apply it:
+Makaron switches the menu bar through UI mode helpers:
 
 ```bash
-# Full mode hides the menu bar ("Always")
 makaron-ui-full
-
-# Minimal and stop modes keep it visible on desktop ("In Full Screen Only")
-makaron-ui-minimal
-# or
-makaron-ui-stop
-```
-
-Alternatively, enable it manually:
-1. Open **System Settings**
-2. Go to **Control Center** -> **Menu Bar**
-3. Set **Automatically hide and show the menu bar** to **Always**
-
-**Note**: On macOS Sequoia, `defaults write` may update the preference without moving the menu bar. The UI click in System Settings is the reliable path.
-
-**Problem: `makaron-update` fails with "configs/ghostty/config not uptodate, cannot merge"**
-
-This happens after switching themes — ghostty config gets modified locally and goes out of sync with git index. Run this once to fix:
-
-```bash
-cd ~/.local/share/makaron && git update-index --no-skip-worktree configs/ghostty/config && git add configs/ghostty/config && makaron-update -y
-```
-
----
-
-**Problem: SketchyBar or AeroSpace not working properly**
-
-Try reloading the configuration:
-
-```bash
 makaron-reload-aerospace-sketchybar
 ```
 
-If that doesn't help, check if the services are running:
+If macOS blocks the menu bar UI automation, open **System Settings > Control Center > Menu Bar** and set it manually.
+
+**Problem: AeroSpace workspaces are not highlighted correctly**
+
+Reload AeroSpace and SketchyBar:
 
 ```bash
-# Check if AeroSpace is running
-pgrep -x "AeroSpace" || open -a AeroSpace
+aerospace reload-config
+makaron-reload-aerospace-sketchybar
+```
 
-# Check if SketchyBar is running
-pgrep -x "sketchybar" || brew services restart sketchybar
+**Problem: Wrong workspaces after monitor changes**
+
+```bash
+sketchybar --reload
+makaron-reload-aerospace-sketchybar
 ```
 
 ## Keyboard Shortcuts
 
-**Window Management:**
-- `Ctrl+Alt+Left/Down/Up/Right` - Focus window (left/down/up/right)
-- `Alt+Shift+Left/Down/Up/Right` - Move window (left/down/up/right)
-- `Alt+Minus/Equal` - Resize window (decrease/increase)
-- `Alt+Slash` - Toggle horizontal/vertical tiles layout
-- `Alt+Comma` - Toggle horizontal/vertical accordion layout
-- `Alt+F` - Toggle floating/tiling mode
-- `Alt+Shift+Semicolon` - Enter service mode
+Keyboard shortcuts are configured in `configs/aerospace/.aerospace.toml`.
 
-**Workspaces:**
-- `Alt+1-9/0` - Switch to workspace 1-10
-- `Alt+Q/W` - Switch to workspace Q/W
-- `Alt+Shift+1-9/0` - Move window to workspace 1-10
-- `Alt+Shift+Q/W` - Move window to workspace Q/W
-- `Alt+Left/Right` - Switch to previous/next workspace
-- `Cmd+Alt+Left/Right` - Move window to previous/next workspace
+Common defaults include:
+- `alt-h/j/k/l` - Focus windows
+- `alt-shift-h/j/k/l` - Move windows
+- `alt-1..9` - Switch workspaces
+- `alt-shift-1..9` - Move window to workspace
+- `alt-f` - Toggle fullscreen
 
-**Multi-Monitor:**
-- `Ctrl+Tab` - Focus next monitor
-- `Ctrl+Shift+Tab` - Focus previous monitor
-- `Ctrl+Alt+Shift+Left/Right` - Move window to left/right monitor
-- `Ctrl+Alt+Shift+1/2` - Move window to monitor 1/2
-
-**Service Mode:**
-- `Alt+Shift+Semicolon` - Enter service mode
-- `Esc` - Exit service mode and reload config
-- `R` - Reset layout (flatten workspace tree)
-- `F` - Toggle floating/tiling mode
-- `Backspace` - Close all windows except current
-- `Alt+Shift+H/J/K/L` - Join with adjacent window (left/down/up/right)
-- `Up/Down` - Volume up/down
-- `Shift+Down` - Mute volume (set to 0)
-
-**Quick Apps:**
-- `Ctrl+Alt+B` - Safari
-- `Ctrl+Alt+C` - Cursor
-- `Ctrl+Alt+T` - Ghostty
-- `Ctrl+Alt+P` - PhpStorm
-- `Ctrl+Alt+Z` - Todoist
-- `Ctrl+Alt+N` - Notes (new note)
-- `Ctrl+Alt+M` - Mimestream
+Review the AeroSpace config for the full list.
 
 ## Modular Installation
 
-All installation scripts are modular and organized in the `install/` directory:
+The installation is modular. Core install flow:
 
-```
+```text
 install/
-├── ai/           # AI tools (Claude Code, ChatGPT, Cursor)
-├── desktop/      # Window manager, status bar, system UI
-├── terminal/     # Terminal emulators and CLI utilities
-├── editors/      # IDEs and text editors
-├── development/  # Languages, frameworks, dev tools
-├── apps/         # GUI applications
+├── all.sh              # Main orchestrator
+├── mandatory.sh        # Core requirements
+├── packages.sh         # Optional package selector
+├── brew.sh             # Homebrew setup
+├── desktop/            # AeroSpace, SketchyBar, fonts
+├── terminal/           # Ghostty and terminal helpers
+├── editors/            # Editor application installers
+├── development/        # Languages, frameworks, dev tools
+├── apps/               # GUI applications
 └── macos_settings.sh
 ```
-
-You can customize your installation by modifying which scripts run in `install/all.sh`, or run individual installation scripts directly.
 
 ## Files
 
 - `configs/aerospace/.aerospace.toml` - AeroSpace config
-- `configs/ghostty/config` - Ghostty terminal config
+- `configs/sketchybar/colors.sh` - Static SketchyBar colors
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
-- `profiles/` - Editor profiles for VSCode/Cursor
-  - `development-php-drupal/` - PHP/Drupal development profile
+- `configs/sketchybar/plugins/` - SketchyBar plugin scripts
 - `install/` - Modular installation scripts
-  - `brew.sh` - Homebrew package manager installation
-  - `ai/` - AI tools (Claude Code, ChatGPT, Cursor)
-  - `desktop/` - Desktop environment (AeroSpace, SketchyBar, fonts)
-  - `terminal/` - Terminal tools (Ghostty, tmux, CLI utils)
-  - `editors/` - Text editors and IDEs
-  - `development/` - Development tools (Languages, Docker)
-  - `apps/` - GUI applications
-  - `macos_settings.sh` - macOS system settings
-  - `migrations.sh` - Migration system initialization
 - `migrations/` - Database-style migrations for configuration updates
 - `templates/makaron.conf.default` - Default user configuration template
 - `bin/` - Executable scripts
-  - `makaron-migrate` - Run pending migrations
-  - `makaron-migration-status` - Show migration status
-  - `makaron-dev-add-migration` - Create new migration (development)
 
 ## Migration System
 
-Makaron includes a migration system similar to database migrations (like Rails or Drupal). This allows for safe, incremental updates to your configuration.
+Makaron includes a migration system similar to database migrations. This allows safe, incremental updates to your configuration.
 
-### How it works
+### How It Works
 
-- Migrations are timestamped shell scripts in the `migrations/` directory
+- Migrations are timestamped shell scripts in `migrations/`
 - Each migration runs only once per installation
 - State is tracked in `~/.local/state/makaron/migrations/`
 - Migrations run automatically during `makaron-update`
 
 ### Creating Migrations
 
-For development, use the helper script:
+Create a new timestamped shell script in `migrations/` and make it executable:
 
 ```bash
-makaron-dev-add-migration
+chmod +x migrations/TIMESTAMP.sh
 ```
 
-This creates a new migration file with the current timestamp and opens it in your editor.
-
 ### Migration Status
-
-Check which migrations have been applied:
 
 ```bash
 makaron-migration-status
 ```
 
 ### Manual Migration
-
-Run pending migrations manually:
 
 ```bash
 makaron-migrate
@@ -450,42 +270,26 @@ makaron-migrate
 Personal settings are stored in `~/.config/makaron/makaron.conf`. This file is created on install and preserved during updates. New variables added later get appended on update; existing values are never overwritten.
 
 Available settings:
+
 ```bash
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
-BORDERS_ENABLED=true                    # Window borders (JankyBorders) — false to disable
-GAPS_ZERO_ENABLED=false                 # Force AeroSpace window gaps to zero
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 SKETCHYBAR_NOTES_ENABLED=false          # Apple Notes click-to-create item
 ```
 
----
-
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute:
+Contributions are welcome:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a pull request
 
 Please read [AGENTS.md](AGENTS.md) for development guidelines and code style.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## ⚠️ Experimental Project
-
-**Please note:** Makaron is an experimental project under active development. Some features may not work perfectly yet, and you might encounter bugs or unexpected behavior. We welcome feedback and contributions to help improve the project!
-
-If you encounter any issues, please:
-- Check existing [GitHub Issues](https://github.com/grzegorzbartman/makaron/issues)
-- Try running `makaron-reinstall` for a clean setup
-- Report new issues with details about your system and the problem
-
-Your patience and feedback are appreciated as we continue to improve Makaron! 🙏

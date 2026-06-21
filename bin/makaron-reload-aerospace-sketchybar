@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reload AeroSpace + SketchyBar and re-derive layout state (gaps, outer.top, borders).
+# Reload AeroSpace + SketchyBar and re-derive layout state (gaps, outer.top).
 # All layout decisions live in apply_desktop_state (single source of truth).
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
@@ -15,8 +15,8 @@ if ! pgrep -f "AeroSpace" > /dev/null; then
     sleep 2
 fi
 
-# Restart SketchyBar so it picks up theme colors / config changes.
+# Restart SketchyBar so it picks up config changes.
 brew services restart sketchybar 2>/dev/null || true
 
-# Layout + borders — apply_desktop_state reads current theme via start_borders.
+# Layout state.
 apply_desktop_state

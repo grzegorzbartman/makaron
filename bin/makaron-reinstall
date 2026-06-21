@@ -38,11 +38,13 @@ if [ -d "$MAKARON_PATH" ]; then
     rm -rf "$MAKARON_PATH"
 fi
 
-# Remove symlinks
+# Remove Makaron-managed symlinks
 echo "Removing symlinks..."
 rm -f "$HOME/.aerospace.toml"
 rm -f "$HOME/.config/sketchybar"
-rm -f "$HOME/.config/ghostty"
+if [ -L "$HOME/.config/ghostty" ] && [ "$(readlink "$HOME/.config/ghostty")" = "$MAKARON_PATH/configs/ghostty" ]; then
+    rm -f "$HOME/.config/ghostty"
+fi
 
 echo "✅ Cleanup completed!"
 echo ""
