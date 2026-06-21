@@ -153,7 +153,6 @@ if [ -d "$MAKARON_PATH/.git" ]; then
                 echo "UI mode is 'stop', ensuring Makaron UI remains stopped..."
                 stop_aerospace || true
                 stop_sketchybar || true
-                stop_borders || true
                 ;;
             *)
                 echo "Unknown UI mode '$current_ui_mode', skipping UI reload."

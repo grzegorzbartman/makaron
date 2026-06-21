@@ -6,8 +6,7 @@ clipboard-write = allow
 mouse-shift-capture = true
 cursor-click-to-move = true
 
-# Theme is dynamically managed by makaron-switch-theme
-# Default theme if no other is set
+# Static Ghostty theme. User-specific edits are protected by skip-worktree.
 theme = dark:TokyoNight Storm, light:TokyoNight Day
 
 font-family = "SF Mono"

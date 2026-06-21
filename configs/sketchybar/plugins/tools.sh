@@ -1,15 +1,10 @@
 #!/bin/bash
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
+source "$CONFIG_DIR/colors.sh"
 
 if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
   # shellcheck disable=SC1090
   . "$HOME/.config/makaron/makaron.conf"
-fi
-
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  # shellcheck disable=SC1090
-  . "$THEME_DIR/sketchybar.colors"
 fi
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"

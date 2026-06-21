@@ -1,3 +1,0 @@
-#!/bin/bash
-# Switch to Golden Gate theme
-"$(dirname "$0")/makaron-switch-theme" golden-gate

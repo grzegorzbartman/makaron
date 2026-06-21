@@ -1,6 +1,0 @@
-#!/bin/bash
-# Glass Light - Borders
-
-export ACTIVE_BORDER_COLOR=0xb3007AFF
-export INACTIVE_BORDER_COLOR=0x66d2d2d7
-export BORDER_WIDTH=5.0

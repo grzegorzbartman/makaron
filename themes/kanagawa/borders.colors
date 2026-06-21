@@ -1,7 +1,0 @@
-#!/bin/bash
-# Kanagawa color scheme for Borders
-
-export ACTIVE_BORDER_COLOR=0xffdcd7ba
-export INACTIVE_BORDER_COLOR=0xff090618
-export BORDER_WIDTH=5.0
-

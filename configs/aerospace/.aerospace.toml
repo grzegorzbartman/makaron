@@ -66,21 +66,17 @@ automatically-unhide-macos-hidden-apps = false
 #                 See:
 #                 https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-    inner.horizontal = 15
-    inner.vertical =   15
-    outer.left =       15
-    outer.bottom =     15
+    inner.horizontal = 0
+    inner.vertical =   0
+    outer.left =       0
+    outer.bottom =     0
     # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
     # Dynamically set by switch_aerospace_config() in makaron-ui-helpers.
-    # Formula: bar_top = SKETCHYBAR_HEIGHT (40) + side_gap. This makes the
-    # visual padding above the window border symmetric with the side padding.
-    # Full mode + notch + borders:    [{ monitor."Built-in" = 15 }, 55]
-    # Full mode + no notch + borders: 55 (40px bar + 15px gap)
-    # Full mode + no borders:         48 (40px bar + 8px gap)
-    # Minimal mode:                   8  (no SketchyBar, just side gap)
-    # Gaps zero:                      40 in full mode, 0 in minimal mode
-    outer.top = [{ monitor."Built-in" = 15 }, 55]
-    outer.right =      15
+    # Full mode:    40 (SketchyBar height)
+    # Full + notch: [{ monitor."Built-in" = 0 }, 40]
+    # Minimal mode: 0
+    outer.top = 40
+    outer.right =      0
 
 # Workspace assignment for dual monitor setup
 # This prevents random workspace creation when connecting/disconnecting monitors

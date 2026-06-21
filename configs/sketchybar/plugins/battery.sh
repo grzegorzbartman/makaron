@@ -1,13 +1,8 @@
 #!/bin/sh
 
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 
-# Load theme colors
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 # Load user config
 BATTERY_LOW_THRESHOLD=20

@@ -454,34 +454,6 @@ fi
 echo ""
 
 # ============================================================================
-# SECTION: Borders
-# ============================================================================
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🔲 BORDERS"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-if command -v borders &> /dev/null; then
-    echo "  ✓ Borders installed"
-
-    # Check if running
-    if pgrep -f "borders" > /dev/null; then
-        echo "  ✓ Borders is running"
-    else
-        echo "  ⚠️  Borders is NOT running"
-    fi
-
-    # Check brew service
-    if brew services list | grep -q "borders.*started"; then
-        echo "  ✓ Brew service: started"
-    else
-        echo "  ○ Brew service: stopped"
-    fi
-else
-    echo "  ❌ Borders is NOT installed"
-fi
-echo ""
-
-# ============================================================================
 # SECTION: Ghostty Terminal
 # ============================================================================
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -526,13 +498,6 @@ else
     echo "  Config symlink: ❌ Not found or not a symlink"
 fi
 
-# Check GHOSTTY_THEME env var
-if [ -n "$GHOSTTY_THEME" ]; then
-    echo "  GHOSTTY_THEME env: $GHOSTTY_THEME"
-else
-    echo "  GHOSTTY_THEME env: (not set)"
-fi
-
 # Check actual config file content
 echo ""
 echo "  Ghostty Config File Content:"
@@ -555,71 +520,6 @@ if [ -f "$HOME/.config/ghostty/config" ]; then
 else
     echo "  ❌ Config file not found at $HOME/.config/ghostty/config"
 fi
-
-# Check shell config files for GHOSTTY_THEME
-echo ""
-echo "  Shell Config Files:"
-echo "  ────────────────────────────────────────────────────────────────"
-for config_file in "$HOME/.zshrc" "$HOME/.bashrc"; do
-    if [ -f "$config_file" ]; then
-        echo "  $(basename $config_file):"
-        if grep -q "GHOSTTY_THEME" "$config_file"; then
-            GHOSTTY_LINE=$(grep "GHOSTTY_THEME" "$config_file" | tail -1)
-            echo "    Found: $GHOSTTY_LINE"
-            if echo "$GHOSTTY_LINE" | grep -qi "One Dark"; then
-                echo "    ❌ ERROR: Contains 'One Dark' theme reference!"
-            else
-                echo "    ✓ No 'One Dark' references"
-            fi
-        else
-            echo "    No GHOSTTY_THEME variable found"
-        fi
-    fi
-done
-
-# Check migration status
-echo ""
-echo "  Migration Status (1764134080 - Fix One Dark):"
-echo "  ────────────────────────────────────────────────────────────────"
-MIGRATION_STATE_DIR="$HOME/.local/state/makaron/migrations"
-if [ -f "$MIGRATION_STATE_DIR/1764134080.sh" ]; then
-    echo "  ✓ Migration completed"
-    echo "    Completed at: $(stat -f "%Sm" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null || stat -c "%y" "$MIGRATION_STATE_DIR/1764134080.sh" 2>/dev/null)"
-elif [ -f "$MIGRATION_STATE_DIR/skipped/1764134080.sh" ]; then
-    echo "  ⚠️  Migration was skipped"
-else
-    echo "  ⚠️  Migration NOT run yet (run: makaron-migrate)"
-fi
-echo ""
-
-# ============================================================================
-# SECTION: Current Theme
-# ============================================================================
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎨 CURRENT THEME"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -L "$THEME_DIR" ]; then
-    TARGET=$(readlink "$THEME_DIR")
-    THEME_NAME=$(basename "$TARGET")
-    echo "  ✓ Current theme: $THEME_NAME"
-    echo "    Path: $TARGET"
-
-    # Check mode
-    if [ -f "$THEME_DIR/mode" ]; then
-        MODE=$(cat "$THEME_DIR/mode")
-        echo "    Mode: $MODE"
-    fi
-
-    # Check if theme files exist
-    echo ""
-    echo "  Theme files:"
-    [ -f "$THEME_DIR/borders.colors" ] && echo "    ✓ borders.colors" || echo "    ⚠️  borders.colors missing"
-    [ -f "$THEME_DIR/sketchybar.colors" ] && echo "    ✓ sketchybar.colors" || echo "    ⚠️  sketchybar.colors missing"
-else
-    echo "  ⚠️  No theme symlink found"
-fi
 echo ""
 
 # ============================================================================
@@ -635,10 +535,8 @@ if [ -f "$UI_HELPERS" ]; then
     source "$UI_HELPERS"
 
     UI_MODE_VALUE=$(get_ui_mode 2>/dev/null || echo "unknown")
-    BORDERS_VALUE=$(_get_borders_enabled)
 
-    echo "  UI mode:         $UI_MODE_VALUE"
-    echo "  BORDERS_ENABLED: $BORDERS_VALUE"
+    echo "  UI mode: $UI_MODE_VALUE"
     echo ""
 
     if [ "$UI_MODE_VALUE" = "stop" ]; then
@@ -666,7 +564,6 @@ WARNINGS=0
 [ ! -d "$MAKARON_PATH" ] && ((ERRORS++))
 ! command -v aerospace &> /dev/null && ((WARNINGS++))
 ! command -v sketchybar &> /dev/null && ((WARNINGS++))
-! command -v borders &> /dev/null && ((WARNINGS++))
 
 if [ $ERRORS -eq 0 ] && [ $WARNINGS -eq 0 ]; then
     echo "  ✅ All systems operational"

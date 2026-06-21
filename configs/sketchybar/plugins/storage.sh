@@ -1,12 +1,7 @@
 #!/bin/sh
 # Storage usage for SketchyBar (APFS-aware)
 
-# Load theme colors
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 # Get disk usage for Data volume (actual user data on APFS)
 DISK_INFO=$(df -H /System/Volumes/Data 2>/dev/null | tail -1 | awk '{print $3, $2}')

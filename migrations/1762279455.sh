@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Migration: Install new development tools, system tools, and UI applications
-# Adds installation scripts for node/yarn, pipx, rbenv, neovim, tmux, btop,
+# Adds installation scripts for node/yarn, pipx, rbenv, neovim, btop,
 # platformsh-cli, codex, sublime-text, chatgpt for existing users
 
 set -e
@@ -46,13 +46,6 @@ if [ -f "$MAKARON_PATH/install/tools/neovim.sh" ]; then
     source "$MAKARON_PATH/install/tools/neovim.sh"
 else
     echo "Neovim installation script not found, skipping"
-fi
-
-if [ -f "$MAKARON_PATH/install/tools/tmux.sh" ]; then
-    echo "Installing tmux..."
-    source "$MAKARON_PATH/install/tools/tmux.sh"
-else
-    echo "tmux installation script not found, skipping"
 fi
 
 if [ -f "$MAKARON_PATH/install/tools/btop.sh" ]; then

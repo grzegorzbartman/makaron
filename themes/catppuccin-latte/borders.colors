@@ -1,7 +1,0 @@
-#!/bin/bash
-# Catppuccin Latte color scheme for Borders (Light Theme)
-
-export ACTIVE_BORDER_COLOR=0xff1e66f5
-export INACTIVE_BORDER_COLOR=0xffccd0da
-export BORDER_WIDTH=5.0
-

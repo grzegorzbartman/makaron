@@ -1,11 +1,6 @@
 #!/bin/sh
 
-# Load theme colors
-MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-THEME_DIR="$MAKARON_PATH/current-theme"
-if [ -f "$THEME_DIR/sketchybar.colors" ]; then
-  source "$THEME_DIR/sketchybar.colors"
-fi
+source "$CONFIG_DIR/colors.sh"
 
 # Get WiFi SSID using system_profiler (works on macOS 15+)
 SSID=$(system_profiler SPAirPortDataType 2>/dev/null | awk '/Current Network Information:/{getline; if ($0 ~ /^            [^ ]/) {gsub(/^ +| *:$/, ""); print; exit}}')

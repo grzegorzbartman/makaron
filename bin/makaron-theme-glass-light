@@ -1,3 +1,0 @@
-#!/bin/bash
-# Switch to Glass Light theme
-"$(dirname "$0")/makaron-switch-theme" glass-light
