@@ -54,10 +54,6 @@ reload_current_ui() {
             start_sketchybar
             apply_desktop_state
             ;;
-        minimal)
-            echo "Reloading minimal UI..."
-            apply_desktop_state
-            ;;
         stop)
             echo "UI is stopped, skipping reload."
             ;;
@@ -104,7 +100,6 @@ _resolve_aerospace_config_path() {
 #
 # full mode: reserve only SketchyBar height; built-in notched displays need no
 #            extra top reserve because the notch/menu-bar area absorbs the bar.
-# minimal: no SketchyBar reserve and no gaps.
 _expected_outer_top_line() {
     local mode="$1" has_notch="$2"
     case "$mode" in
@@ -115,14 +110,11 @@ _expected_outer_top_line() {
                 echo "    outer.top = $MAKARON_SKETCHYBAR_HEIGHT"
             fi
             ;;
-        minimal)
-            echo "    outer.top = 0"
-            ;;
     esac
 }
 
 switch_aerospace_config() {
-    local mode="$1"  # "full" or "minimal"
+    local mode="$1"  # "full"
 
     local config_file
     config_file="$(_resolve_aerospace_config_path)"
@@ -191,7 +183,7 @@ _set_aerospace_gaps() {
 # apply_desktop_state — single source of truth for layout (gaps + top).
 #
 # Scope: layout only. Does NOT start/stop AeroSpace, SketchyBar, or apply macOS
-# settings. Callers (makaron-ui-full / makaron-ui-minimal) handle bootstrap.
+# settings. Callers (makaron-ui-full) handle bootstrap.
 #
 # Inputs read: ui-mode state file.
 # Outputs:     ~/.aerospace.toml (inner/outer gaps + outer.top).
@@ -433,29 +425,6 @@ apply_macos_full_settings() {
         echo "  ✓ Menu bar set to auto-hide (Always)"
     else
         echo "  ⚠️  Menu bar autohide was not applied"
-    fi
-}
-
-apply_macos_minimal_settings() {
-    echo "  Showing macOS Dock..."
-    defaults write com.apple.dock autohide -bool false
-    echo "  ✓ Dock visible (always shown)"
-
-    echo "  Enabling window grouping by application..."
-    defaults write com.apple.dock expose-group-apps -bool true
-    killall Dock
-    echo "  ✓ Window grouping enabled (required for AeroSpace)"
-
-    echo "  Disabling Three Finger Drag (enabling Mission Control gesture)..."
-    defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
-    defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool false 2>/dev/null
-    echo "  ✓ Three Finger Swipe Up for Mission Control enabled"
-
-    echo "  Showing menu bar on desktop (auto-hide in fullscreen)..."
-    if _set_menubar_autohide "In Full Screen Only"; then
-        echo "  ✓ Menu bar visible on desktop (In Full Screen Only)"
-    else
-        echo "  ⚠️  Menu bar visibility was not applied"
     fi
 }
 

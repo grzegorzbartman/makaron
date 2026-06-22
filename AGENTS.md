@@ -69,15 +69,14 @@ swiftc -O -o bin/makaron-memory-stats src/memory_stats.swift
 All commands are in `bin/` and added to `$PATH` during install.
 
 ### UI Mode Commands
-Three mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
+Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 | Command | Components | Dock | Menu Bar |
 |---|---|---|---|
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden (autohide) | Hidden (autohide) |
-| `makaron-ui-minimal` | AeroSpace only | Visible | Visible |
 | `makaron-ui-stop` | Nothing | Visible | Visible |
 
-- `makaron-ui-helpers` is a shared library, not a user command. It contains `start/stop_aerospace()`, `start/stop_sketchybar()`, `switch_aerospace_config()`, `apply_macos_full/minimal_settings()`, `restore_macos_defaults()`, `save/get_ui_mode()`, and `reload_current_ui()`.
+- `makaron-ui-helpers` is a shared library, not a user command. It contains `start/stop_aerospace()`, `start/stop_sketchybar()`, `switch_aerospace_config()`, `apply_macos_full_settings()`, `restore_macos_defaults()`, `save/get_ui_mode()`, and `reload_current_ui()`.
 
 ### System Commands
 - `makaron-update` - Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI.
@@ -108,13 +107,11 @@ The layout is always gapless:
 Top reserve:
 - **Full mode + no notch:** `outer.top = 40`
 - **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = 0 }, 40]`
-- **Minimal mode:** `outer.top = 0`
 
 The function resolves the symlink target before editing to modify the actual config file.
 
 ### macOS Settings Per Mode
 - **Full**: dock autohide, window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar autohide.
-- **Minimal**: dock visible, window grouping on, Three Finger Drag off, menu bar visible.
 - **Stop**: dock visible, window grouping off, Three Finger Drag on (restored).
 
 ### Menu Bar Autohide
