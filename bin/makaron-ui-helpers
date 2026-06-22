@@ -13,8 +13,7 @@ MAKARON_GAP_SIZE=0
 # Must match `height=...` in sketchybarrc.
 MAKARON_SKETCHYBAR_HEIGHT=40
 
-# Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps and read back
-# by verify_desktop_state. Single list = no drift between writer and verifier.
+# Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
 MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.right)
 
 MAKARON_CONF_PATH="$HOME/.config/makaron/makaron.conf"
@@ -95,8 +94,7 @@ _resolve_aerospace_config_path() {
 }
 
 # Compute the canonical `outer.top = ...` line for the given mode/notch state.
-# Single source of truth — used by both writer (switch_aerospace_config) and
-# verifier (verify_desktop_state) so they never drift.
+# Single source of truth for switch_aerospace_config.
 #
 # full mode: reserve only SketchyBar height; built-in notched displays need no
 #            extra top reserve because the notch/menu-bar area absorbs the bar.
@@ -206,51 +204,6 @@ apply_desktop_state() {
     if command -v aerospace &> /dev/null && pgrep -f "AeroSpace" > /dev/null; then
         aerospace reload-config 2>/dev/null || true
     fi
-}
-
-# ============================================================================
-# verify_desktop_state — compare ~/.aerospace.toml to the
-# state that apply_desktop_state would produce. Used by makaron-debug.
-# Echoes findings. Returns 0 if synced, 1 if drift detected.
-# ============================================================================
-verify_desktop_state() {
-    local ui_mode expected_gap config_file
-    ui_mode=$(get_ui_mode)
-    expected_gap="$MAKARON_GAP_SIZE"
-    config_file="$(_resolve_aerospace_config_path)"
-
-    if [ ! -f "$config_file" ]; then
-        echo "  ❌ aerospace config not found: $config_file"
-        return 1
-    fi
-
-    local drift=0 key escaped actual
-    for key in "${MAKARON_GAP_KEYS[@]}"; do
-        escaped="${key//./\\.}"
-        actual=$(grep -E "^    ${escaped} =" "$config_file" | awk '{print $3}')
-        if [ "$actual" != "$expected_gap" ]; then
-            echo "  ⚠️  ${key}=${actual:-<missing>}, expected $expected_gap"
-            drift=1
-        fi
-    done
-
-    # outer.top — reuse the writer's formula via _expected_outer_top_line.
-    local has_notch=false
-    _has_builtin_notch && has_notch=true
-    local expected_top actual_top
-    expected_top="$(_expected_outer_top_line "$ui_mode" "$has_notch")"
-    actual_top="$(grep -E '^    outer\.top = ' "$config_file" | head -1)"
-    if [ "$actual_top" != "$expected_top" ]; then
-        echo "  ⚠️  outer.top drift (notch=$has_notch, ui-mode=$ui_mode)"
-        echo "       expected: ${expected_top# *}"
-        echo "       actual:   ${actual_top# *}"
-        drift=1
-    fi
-
-    if [ $drift -eq 0 ]; then
-        echo "  ✓ Desktop layout state is in sync (ui-mode=$ui_mode, gap=${expected_gap}px)"
-    fi
-    return $drift
 }
 
 # --- AeroSpace ---

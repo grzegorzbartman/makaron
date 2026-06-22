@@ -125,7 +125,7 @@ else
     echo "  makaron-ui-full     - Start UI (full mode: SketchyBar + hidden menu bar)"
     echo "  makaron-ui-stop     - Stop UI"
     echo "  makaron-update      - Update"
-    echo "  makaron-debug       - Diagnostics"
+    echo "  makaron-doctor      - Diagnostics"
     echo ""
     echo "To start: makaron-ui-full"
 fi
