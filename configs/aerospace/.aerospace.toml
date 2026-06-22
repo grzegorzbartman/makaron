@@ -329,3 +329,11 @@ run = ["layout floating"]
 if.app-id = "com.apple.Preview"
 run = ["layout floating"]
 
+[[on-window-detected]]
+if.app-id = "com.anthropic.claudefordesktop"
+run = ["layout floating"]
+
+[[on-window-detected]]
+if.app-id = "com.openai.chat"
+run = ["layout floating"]
+
