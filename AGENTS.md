@@ -11,6 +11,15 @@ The desktop layout is intentionally simple: AeroSpace uses zero window gaps, whi
 - Ask 2-6 clarifying questions before implementing changes when requirements are unclear.
 - If something doesn't work after 2-3 iterations, search Google using MCP Playwright.
 
+## Contribution Workflow (Default)
+Unless the user says otherwise, every change follows this flow:
+- Never commit directly to `main`. Create a feature branch first (e.g. `feat/...`, `fix/...`).
+- Before committing, run the pre-commit review (`.cursor/skills/pre-commit-review/SKILL.md`):
+  - Read this file, then `git status` and `git diff`.
+  - Check for breakage risk for both new and existing users (the `makaron-update` path and `migrations/` folder).
+  - Check that new keyboard shortcuts don't conflict with Polish characters (lowercase and uppercase: ą, ć, ę, ł, ń, ó, ś, ź, ż, Ą, Ć, Ę, Ł, Ń, Ó, Ś, Ź, Ż).
+- Push the branch and open a Pull Request, then return the PR link to the user.
+
 ## Code Style
 - Short, concise shell scripts - no verbose comments.
 - DRY and SOLID principles.
