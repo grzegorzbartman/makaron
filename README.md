@@ -116,7 +116,6 @@ git checkout -b restore-pre-simplification 2026.06.21
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-debug`** - Diagnose system status
 - **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
-- **`makaron-ui-minimal`** - Start minimal UI (AeroSpace only, visible Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
 - **`makaron-macos-config-reload`** - Apply macOS settings
 
@@ -125,7 +124,6 @@ git checkout -b restore-pre-simplification 2026.06.21
 | Command | Components | Dock | Menu Bar | Layout |
 |---|---|---|---|---|
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | gaps `0`, top reserve `40` |
-| `makaron-ui-minimal` | AeroSpace only | Visible | Visible | gaps `0`, top reserve `0` |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
 The SketchyBar height is `40px`. AeroSpace windows are edge-to-edge except for that top reserve in full mode.

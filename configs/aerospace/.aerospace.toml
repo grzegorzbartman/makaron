@@ -74,7 +74,6 @@ automatically-unhide-macos-hidden-apps = false
     # Dynamically set by switch_aerospace_config() in makaron-ui-helpers.
     # Full mode:    40 (SketchyBar height)
     # Full + notch: [{ monitor."Built-in" = 0 }, 40]
-    # Minimal mode: 0
     outer.top = 40
     outer.right =      0
 

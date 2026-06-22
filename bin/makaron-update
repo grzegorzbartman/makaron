@@ -142,7 +142,7 @@ if [ -d "$MAKARON_PATH/.git" ]; then
         current_ui_mode="$UPDATE_UI_MODE"
 
         case "$current_ui_mode" in
-            full|minimal)
+            full)
                 echo "Reloading configurations for UI mode: $current_ui_mode..."
                 reload_current_ui
                 ;;
