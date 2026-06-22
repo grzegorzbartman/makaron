@@ -84,7 +84,6 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-select-packages` - Re-run optional package selection UI (gum-based).
 - `makaron-reload-aerospace-sketchybar` - Reloads AeroSpace + SketchyBar and re-applies layout state.
 - `makaron-macos-config-reload` - Re-applies macOS settings from `install/macos_settings.sh`.
-- `makaron-debug` - Diagnostic tool: checks components, symlinks, configs, migrations.
 - `makaron-doctor` - Concise health check with optional safe repairs.
 
 ### Development Commands
@@ -318,7 +317,6 @@ Database-style migrations provide safe, incremental config updates.
 ### Commands
 ```bash
 makaron-migrate           # Run pending migrations
-makaron-migration-status  # Show status
 ```
 
 ### Migration Template
@@ -428,11 +426,10 @@ fi
 ## Troubleshooting
 
 ### Diagnostics Tool
-Use `makaron-debug` to check system status:
-- Shows component status for AeroSpace, SketchyBar, Ghostty, and install state
-- Verifies symlinks and configs
-- Checks migration status
-- Useful when debugging issues or verifying installation
+Use `makaron-doctor` to check system status:
+- Reports component/service health for AeroSpace and SketchyBar
+- Verifies symlinks, configs, and UI mode state
+- Supports `--fix` for safe repairs and `--json` for machine-readable output
 
 ### Migration Not Running
 ```bash

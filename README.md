@@ -112,9 +112,7 @@ git checkout -b restore-pre-simplification 2026.06.21
 - **`makaron-reload-aerospace-sketchybar`** - Reload AeroSpace + SketchyBar and re-apply layout
 - **`makaron-reinstall`** - Complete reinstall from scratch
 - **`makaron-migrate`** - Run pending migrations
-- **`makaron-migration-status`** - Show migration status
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
-- **`makaron-debug`** - Diagnose system status
 - **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
 - **`makaron-macos-config-reload`** - Apply macOS settings
@@ -140,7 +138,6 @@ If you encounter issues with your installation:
 - **Quick health check**: `makaron-doctor`
 - **Safe automatic repairs**: `makaron-doctor --fix`
 - **Complete reinstall**: `makaron-reinstall`
-- **Check migration status**: `makaron-migration-status`
 - **Manual migration**: `makaron-migrate`
 
 ### Common Issues After Fresh Installation
@@ -247,12 +244,6 @@ Create a new timestamped shell script in `migrations/` and make it executable:
 
 ```bash
 chmod +x migrations/TIMESTAMP.sh
-```
-
-### Migration Status
-
-```bash
-makaron-migration-status
 ```
 
 ### Manual Migration

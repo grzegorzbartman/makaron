@@ -299,7 +299,7 @@ check_ui_services() {
             if reload_current_ui >/dev/null 2>&1; then
                 add_result "fixed" "ui-services" "reloaded $mode mode"
             else
-                add_result "warn" "ui-services" "reload attempted, verify with makaron-debug"
+                add_result "warn" "ui-services" "reload attempted, re-run makaron-doctor to verify"
             fi
         else
             add_result "fail" "ui-services" "missing makaron-ui-helpers"
@@ -390,13 +390,13 @@ print_text() {
     echo ""
     if [ "$(count_status fail)" -gt 0 ]; then
         if [ "$DO_FIX" = true ]; then
-            echo "Some issues could not be fixed. Run makaron-debug for full details."
+            echo "Some issues could not be fixed. Run 'makaron-reinstall' if problems persist."
         else
             echo "Run 'makaron-doctor --fix' to repair safe issues."
         fi
     elif [ "$(count_status warn)" -gt 0 ]; then
         if [ "$DO_FIX" = true ]; then
-            echo "Repairs completed with warnings. Run makaron-debug for full details."
+            echo "Repairs completed with warnings."
         else
             echo "Warnings found. Run 'makaron-doctor --fix' for safe repairs."
         fi
