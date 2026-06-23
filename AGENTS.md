@@ -193,7 +193,7 @@ curl -sL install.sh | bash
 **Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Nerd Fonts, Ghostty.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
-- Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tree, Powerlevel10k
+- Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tree
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
 - AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
 - Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
@@ -288,7 +288,6 @@ User-specific settings are stored outside the repo in `~/.config/makaron/makaron
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
-SKETCHYBAR_NOTES_ENABLED=false          # Apple Notes click-to-create item
 ```
 
 ---

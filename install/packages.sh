@@ -17,7 +17,6 @@ PKGS_TERMINAL=(
     "htop|htop|process viewer"
     "ncdu|ncdu|disk usage analyzer"
     "tree|tree|directory listing"
-    "p10k|Powerlevel10k|zsh theme"
     "cmux|cmux|AI agent terminal (Ghostty-based)"
 )
 
@@ -80,7 +79,6 @@ install_package() {
         htop)       install_formula "htop" "htop" "htop" ;;
         ncdu)       install_formula "ncdu" "ncdu" "ncdu" ;;
         tree)       install_formula "tree" "tree" "tree" ;;
-        p10k) source "$MAKARON_PATH/install/terminal/p10k.sh" ;;
         cmux)
             brew tap manaflow-ai/cmux 2>/dev/null || true
             install_cask "manaflow-ai/cmux/cmux" "cmux"
