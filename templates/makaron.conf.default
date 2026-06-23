@@ -11,6 +11,3 @@ SKETCHYBAR_COMPACT_MODE=false
 # The focused workspace is always drawn, even if it's empty.
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=true
 
-# SketchyBar: Apple Notes — click to create a new note in a new window
-SKETCHYBAR_NOTES_ENABLED=false
-

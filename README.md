@@ -94,16 +94,6 @@ This command will:
 - Run any pending migrations
 - Reload configurations for the current UI mode
 
-### Rollback Tag
-
-The tag `2026.06.21` marks the repository state before the SketchyBar-only simplification. To inspect or branch from that state:
-
-```bash
-git checkout 2026.06.21
-# or
-git checkout -b restore-pre-simplification 2026.06.21
-```
-
 ## Usage
 
 ### Available Commands
@@ -262,7 +252,6 @@ Available settings:
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
-SKETCHYBAR_NOTES_ENABLED=false          # Apple Notes click-to-create item
 ```
 
 ## Contributing
