@@ -79,7 +79,7 @@ automatically-unhide-macos-hidden-apps = false
 
 # Workspace assignment for dual monitor setup
 # This prevents random workspace creation when connecting/disconnecting monitors
-# Monitor 1: workspace 1-5 (always available, even with single monitor)
+# Monitor 1: workspace 1-5,D,R (always available, even with single monitor)
 # Monitor 2: workspace 6-10,Q,W (auto-move to monitor 1 when disconnected)
 [workspace-to-monitor-force-assignment]
     1 = 1
@@ -87,6 +87,8 @@ automatically-unhide-macos-hidden-apps = false
     3 = 1
     4 = 1
     5 = 1
+    D = 1
+    R = 1
     6 = 2
     7 = 2
     8 = 2
@@ -164,6 +166,8 @@ automatically-unhide-macos-hidden-apps = false
     alt-0 = 'workspace 10'
     alt-q = 'workspace Q'
     alt-w = 'workspace W'
+    alt-d = 'workspace D'
+    alt-r = 'workspace R'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     alt-shift-1 = 'move-node-to-workspace 1'
@@ -178,6 +182,8 @@ automatically-unhide-macos-hidden-apps = false
     alt-shift-0 = 'move-node-to-workspace 10'
     alt-shift-q = 'move-node-to-workspace Q'
     alt-shift-w = 'move-node-to-workspace W'
+    alt-shift-d = 'move-node-to-workspace D'
+    alt-shift-r = 'move-node-to-workspace R'
 
     # Go to next workspace
     alt-right = 'workspace next'
