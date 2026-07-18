@@ -112,7 +112,7 @@ This command will:
 | Command | Components | Dock | Menu Bar | Layout |
 |---|---|---|---|---|
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | gaps `0`, top reserve `40` |
-| `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
+| `makaron-ui-stop` | Nothing | Hidden | Visible | UI state not applied |
 
 The SketchyBar height is `40px`. AeroSpace windows are edge-to-edge except for that top reserve in full mode.
 

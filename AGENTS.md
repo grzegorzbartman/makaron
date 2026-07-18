@@ -74,7 +74,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 | Command | Components | Dock | Menu Bar |
 |---|---|---|---|
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden (autohide) | Hidden (autohide) |
-| `makaron-ui-stop` | Nothing | Visible | Visible |
+| `makaron-ui-stop` | Nothing | Hidden (autohide) | Visible |
 
 - `makaron-ui-helpers` is a shared library, not a user command. It contains `start/stop_aerospace()`, `start/stop_sketchybar()`, `switch_aerospace_config()`, `apply_macos_full_settings()`, `restore_macos_defaults()`, `save/get_ui_mode()`, and `reload_current_ui()`.
 
@@ -111,7 +111,7 @@ The function resolves the symlink target before editing to modify the actual con
 
 ### macOS Settings Per Mode
 - **Full**: dock autohide, window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar autohide.
-- **Stop**: dock visible, window grouping off, Three Finger Drag on (restored).
+- **Stop**: dock autohide, window grouping off, Three Finger Drag on (restored).
 
 ### Menu Bar Autohide
 `_set_menubar_autohide()` uses AppleScript to quit and reopen System Settings on the Menu Bar pane, find the dropdown by its current value, then apply a toggle trick (opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting - UI click is the only reliable method.

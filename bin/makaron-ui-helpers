@@ -382,9 +382,9 @@ apply_macos_full_settings() {
 }
 
 restore_macos_defaults() {
-    echo "  Showing macOS Dock..."
-    defaults write com.apple.dock autohide -bool false
-    echo "  ✓ Dock visible"
+    echo "  Keeping macOS Dock in auto-hide mode..."
+    defaults write com.apple.dock autohide -bool true
+    echo "  ✓ Dock auto-hide enabled"
 
     echo "  Restoring default window grouping..."
     defaults write com.apple.dock expose-group-apps -bool false
@@ -403,4 +403,3 @@ restore_macos_defaults() {
         echo "  ⚠️  Menu bar visibility was not applied"
     fi
 }
-
