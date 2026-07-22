@@ -11,3 +11,6 @@ SKETCHYBAR_COMPACT_MODE=false
 # The focused workspace is always drawn, even if it's empty.
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=true
 
+# AeroSpace trackpad swipe: number of fingers to switch workspaces
+AEROSPACE_SWIPE_FINGERS=4
+
