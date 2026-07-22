@@ -175,7 +175,7 @@ curl -sL install.sh | bash
        |     |-- makaron-conf.sh
        |     |-- brew.sh
        |     |-- gum, jq
-       |     |-- desktop/ (aerospace, sketchybar, fonts)
+       |     |-- desktop/ (aerospace, aerospace-swipe, sketchybar, fonts)
        |     |-- terminal/ghostty.sh
        |
        |-- install/packages.sh       # Optional packages:
@@ -190,7 +190,7 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Nerd Fonts, Ghostty.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, aerospace-swipe, SketchyBar, Nerd Fonts, Ghostty.
 
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tree
@@ -288,6 +288,7 @@ User-specific settings are stored outside the repo in `~/.config/makaron/makaron
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
+AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
 ```
 
 ---

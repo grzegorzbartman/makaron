@@ -17,6 +17,7 @@ install_formula "jq" "jq" "jq"
 
 # Core desktop components
 source "$MAKARON_PATH/install/desktop/aerospace.sh"
+source "$MAKARON_PATH/install/desktop/aerospace_swipe.sh"
 source "$MAKARON_PATH/install/desktop/fonts.sh"
 source "$MAKARON_PATH/install/desktop/sketchybar.sh"
 
