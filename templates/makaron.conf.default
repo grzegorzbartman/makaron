@@ -14,3 +14,7 @@ SKETCHYBAR_HIDE_EMPTY_WORKSPACES=true
 # AeroSpace trackpad swipe: number of fingers to switch workspaces
 AEROSPACE_SWIPE_FINGERS=4
 
+# AeroSpace trackpad swipe direction. true = match macOS (swipe left -> next
+# workspace); false = reversed.
+AEROSPACE_SWIPE_NATURAL=true
+

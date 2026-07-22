@@ -291,6 +291,7 @@ BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
+AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 ```
 
 ---
