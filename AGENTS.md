@@ -192,6 +192,8 @@ curl -sL install.sh | bash
 
 **Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, aerospace-swipe, SketchyBar, Nerd Fonts, Ghostty.
 
+> aerospace-swipe talks to AeroSpace over the v0.21 socket protocol, so AeroSpace **>= 0.21** is required. `install/desktop/aerospace.sh` upgrades older installs in place (`install_cask` alone skips already-installed apps).
+
 **Optional** (user selects per-app via gum UI, grouped into 6 categories):
 - Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tree
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
