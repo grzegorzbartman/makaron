@@ -34,8 +34,19 @@ else
 EOF
 fi
 
-# Build and (re)load the launch agent
-[ -f "$SWIPE_PLIST" ] && launchctl unload "$SWIPE_PLIST" 2>/dev/null
+# Build the app and install the launch agent
+{ [ -f "$SWIPE_PLIST" ] && launchctl unload "$SWIPE_PLIST" 2>/dev/null; } || true
 (cd "$SWIPE_DIR" && make install) || echo "Warning: aerospace-swipe build failed (continuing...)"
+
+# aerospace-swipe falls back to the `aerospace` CLI, which isn't on launchd's
+# minimal PATH. Inject Homebrew's bin so the fallback works, then reload.
+if [ -f "$SWIPE_PLIST" ]; then
+    BREW_BIN="$(brew --prefix)/bin"
+    /usr/libexec/PlistBuddy -c "Add :EnvironmentVariables dict" "$SWIPE_PLIST" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Add :EnvironmentVariables:PATH string $BREW_BIN:/usr/bin:/bin:/usr/sbin:/sbin" "$SWIPE_PLIST" 2>/dev/null \
+        || /usr/libexec/PlistBuddy -c "Set :EnvironmentVariables:PATH $BREW_BIN:/usr/bin:/bin:/usr/sbin:/sbin" "$SWIPE_PLIST" || true
+    launchctl unload "$SWIPE_PLIST" 2>/dev/null || true
+    launchctl load "$SWIPE_PLIST" 2>/dev/null || true
+fi
 
 echo "aerospace-swipe: grant Accessibility permission when macOS prompts (System Settings > Privacy & Security > Accessibility)."
