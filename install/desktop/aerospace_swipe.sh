@@ -10,6 +10,8 @@ SWIPE_PLIST="$HOME/Library/LaunchAgents/com.acsandmann.swipe.plist"
 
 [ -f "$HOME/.config/makaron/makaron.conf" ] && source "$HOME/.config/makaron/makaron.conf"
 FINGERS="${AEROSPACE_SWIPE_FINGERS:-4}"
+NATURAL="${AEROSPACE_SWIPE_NATURAL:-true}"
+case "$NATURAL" in true|false) ;; *) NATURAL=true ;; esac
 
 # Fetch / update source
 if [ -d "$SWIPE_DIR/.git" ]; then
@@ -18,15 +20,17 @@ else
     git clone "$SWIPE_REPO" "$SWIPE_DIR" || { echo "Warning: aerospace-swipe clone failed (skipping)"; return 0; }
 fi
 
-# Apply finger count from makaron.conf (preserve any other user tweaks)
+# Apply settings from makaron.conf (preserve any other user tweaks).
+# natural_swipe=true matches macOS trackpad direction (swipe left -> next space).
 mkdir -p "$SWIPE_CONF_DIR"
 if [ -f "$SWIPE_CONF" ] && command -v jq &>/dev/null; then
-    tmp="$(jq --argjson f "$FINGERS" '.fingers = $f' "$SWIPE_CONF")" && printf '%s\n' "$tmp" > "$SWIPE_CONF"
+    tmp="$(jq --argjson f "$FINGERS" --argjson n "$NATURAL" '.fingers = $f | .natural_swipe = $n' "$SWIPE_CONF")" \
+        && printf '%s\n' "$tmp" > "$SWIPE_CONF"
 else
     cat > "$SWIPE_CONF" <<EOF
 {
   "haptic": false,
-  "natural_swipe": false,
+  "natural_swipe": $NATURAL,
   "wrap_around": true,
   "skip_empty": true,
   "fingers": $FINGERS
