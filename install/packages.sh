@@ -17,7 +17,6 @@ PKGS_TERMINAL=(
     "htop|htop|process viewer"
     "ncdu|ncdu|disk usage analyzer"
     "tree|tree|directory listing"
-    "cmux|cmux|AI agent terminal (Ghostty-based)"
 )
 
 PKGS_EDITORS=(
@@ -28,13 +27,8 @@ PKGS_EDITORS=(
 )
 
 PKGS_AI=(
-    "chatgpt|ChatGPT|AI assistant"
-    "claude-app|Claude|AI assistant"
-    "gemini-cli|Gemini CLI|AI CLI tool"
     "codex|Codex|AI coding tool"
-    "cursor|Cursor|AI code editor"
     "claude-code|Claude Code|AI coding CLI"
-    "opencode|OpenCode|AI coding tool"
 )
 
 PKGS_DEV=(
@@ -48,22 +42,13 @@ PKGS_DEV=(
     "pnpm|pnpm|JS packages"
     "fnm|fnm|node version manager"
     "upsun|Upsun CLI|Platform.sh CLI"
-    "bruno|Bruno|API client"
     "docker|Docker|containers"
     "sequel-ace|Sequel Ace|database GUI"
     "pipx|pipx|Python CLI tools"
-    "rbenv|rbenv|Ruby versions"
 )
 
 PKGS_DESKTOP=(
     "stats|Stats|system monitor menubar"
-)
-
-PKGS_APPS=(
-    "flameshot|Flameshot|screenshots"
-    "slack|Slack|team chat"
-    "spotify|Spotify|music"
-    "vlc|VLC|media player"
 )
 
 # ── Package Installer ────────────────────────────────────────────
@@ -78,19 +63,12 @@ install_package() {
         htop)       install_formula "htop" "htop" "htop" ;;
         ncdu)       install_formula "ncdu" "ncdu" "ncdu" ;;
         tree)       install_formula "tree" "tree" "tree" ;;
-        cmux)
-            brew tap manaflow-ai/cmux 2>/dev/null || true
-            install_cask "manaflow-ai/cmux/cmux" "cmux"
-            ;;
         # Editors
         vscode)     install_cask "visual-studio-code" "Visual Studio Code" ;;
         cursor)     install_cask "cursor" "Cursor" ;;
         sublime)    install_cask "sublime-text" "Sublime Text" ;;
         neovim)     source "$MAKARON_PATH/install/editors/neovim_lazyvim.sh" ;;
         # AI
-        chatgpt)    install_cask "chatgpt" "ChatGPT" ;;
-        claude-app) install_cask "claude" "Claude" ;;
-        gemini-cli) install_formula "gemini-cli" "Gemini CLI" "gemini" ;;
         codex)      install_cask "codex" "Codex" ;;
         claude-code)
             if command -v claude &>/dev/null; then
@@ -98,10 +76,6 @@ install_package() {
             else
                 install_cask "claude-code" "Claude Code"
             fi
-            ;;
-        opencode)
-            install_formula "anomalyco/tap/opencode" "OpenCode" "opencode"
-            install_cask "opencode-desktop" "OpenCode"
             ;;
         # Development
         composer)   install_formula "composer" "Composer" "composer" ;;
@@ -114,18 +88,11 @@ install_package() {
         pnpm)       install_formula "pnpm" "pnpm" "pnpm" ;;
         fnm)        source "$MAKARON_PATH/install/development/fnm.sh" ;;
         upsun)      install_formula "platformsh/tap/upsun-cli" "Upsun CLI" "upsun" ;;
-        bruno)      install_cask "bruno" "Bruno" ;;
         docker)     install_cask "docker-desktop" "Docker" ;;
         sequel-ace) install_cask "sequel-ace" "Sequel Ace" ;;
         pipx)       source "$MAKARON_PATH/install/development/pipx.sh" ;;
-        rbenv)      source "$MAKARON_PATH/install/development/rbenv.sh" ;;
         # Desktop extras
         stats)      install_cask "stats" "Stats" ;;
-        # Apps
-        flameshot)  install_cask "flameshot" "Flameshot" ;;
-        slack)      install_cask "slack" "Slack" ;;
-        spotify)    install_cask "spotify" "Spotify" ;;
-        vlc)        install_cask "vlc" "VLC" ;;
     esac
 }
 
@@ -225,7 +192,7 @@ _show_group_selector() {
 _select_all_packages() {
     local all_pkgs=""
     for entry in "${PKGS_TERMINAL[@]}" "${PKGS_EDITORS[@]}" "${PKGS_AI[@]}" \
-                 "${PKGS_DEV[@]}" "${PKGS_DESKTOP[@]}" "${PKGS_APPS[@]}"; do
+                 "${PKGS_DEV[@]}" "${PKGS_DESKTOP[@]}"; do
         all_pkgs="$all_pkgs ${entry%%|*}"
     done
     SELECTED_PACKAGES=$(echo "$all_pkgs" | xargs)
@@ -262,13 +229,12 @@ show_package_selector() {
         "Core installed: AeroSpace, SketchyBar, Ghostty, Fonts." \
         "Select additional packages below."
 
-    local total=6
+    local total=5
     _show_group_selector "Terminal Tools" 1 "$total" "${PKGS_TERMINAL[@]}"
     _show_group_selector "Code Editors" 2 "$total" "${PKGS_EDITORS[@]}"
     _show_group_selector "AI Tools" 3 "$total" "${PKGS_AI[@]}"
     _show_group_selector "Development" 4 "$total" "${PKGS_DEV[@]}"
     _show_group_selector "Desktop Extras" 5 "$total" "${PKGS_DESKTOP[@]}"
-    _show_group_selector "Apps" 6 "$total" "${PKGS_APPS[@]}"
 
     SELECTED_PACKAGES=$(echo "$SELECTED_PACKAGES" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
 

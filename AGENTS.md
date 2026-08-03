@@ -179,7 +179,7 @@ curl -sL install.sh | bash
        |     |-- terminal/ghostty.sh
        |
        |-- install/packages.sh       # Optional packages:
-       |     |-- Fresh install: gum UI per-app selection (6 groups)
+       |     |-- Fresh install: gum UI per-app selection (5 groups)
        |     └── Update/reinstall: installs from ~/.config/makaron/packages.conf
        |
        |-- macos_settings.sh
@@ -194,13 +194,12 @@ curl -sL install.sh | bash
 
 > aerospace-swipe talks to AeroSpace over the v0.21 socket protocol, so AeroSpace **>= 0.21** is required. `install/desktop/aerospace.sh` upgrades older installs in place (`install_cask` alone skips already-installed apps).
 
-**Optional** (user selects per-app via gum UI, grouped into 6 categories):
-- Terminal Tools: btop, cmux, ffmpeg, fzf, htop, ncdu, tree
+**Optional** (user selects per-app via gum UI, grouped into 5 categories):
+- Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tree
 - Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
-- AI Tools: ChatGPT, Claude, Gemini CLI, Codex, Claude Code, OpenCode
-- Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Bruno, Docker, Sequel Ace, pipx, rbenv
+- AI Tools: Codex, Claude Code
+- Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Docker, Sequel Ace, pipx
 - Desktop Extras: Stats
-- Apps: Flameshot, Slack, Spotify, VLC
 
 Selections are stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
 
