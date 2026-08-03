@@ -46,6 +46,8 @@ install_formula_critical "formula" "Display Name" "command-to-check"
 
 **Important:** Never use `exit` in sourced scripts - use `return` instead, or the entire installation will stop.
 
+**Tap trust:** Homebrew >= 6.0 will not load a non-official tap until it is trusted. Always pass the tap-qualified name (`user/tap/name`) to the install helpers - they call `brew_trust` for you, and Homebrew also self-trusts a qualified install. Short names from a third-party tap silently fail. External tap commands (e.g. `brew autoupdate`) cannot self-trust and need an explicit `brew trust --command user/tap/command`.
+
 **Homebrew paths:** Always use `$(brew --prefix)` instead of hardcoded paths like `/opt/homebrew` - supports Apple Silicon, Intel, and local installs.
 
 ### Swift Binaries (`src/`)

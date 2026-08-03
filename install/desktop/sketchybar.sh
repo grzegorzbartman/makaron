@@ -3,8 +3,10 @@
 source "$MAKARON_PATH/install/helpers.sh"
 
 # Install SketchyBar (CRITICAL component)
+# Tap-qualified name is required: Homebrew >= 6.0 ignores the short name until
+# the tap or formula is trusted.
 brew tap FelixKratz/formulae 2>/dev/null || true
-install_formula_critical "sketchybar" "SketchyBar"
+install_formula_critical "felixkratz/formulae/sketchybar" "SketchyBar" "sketchybar"
 
 # Compile memory stats binary (uses Mach API for accurate Activity Monitor values)
 if [ -f "$MAKARON_PATH/src/memory_stats.swift" ]; then

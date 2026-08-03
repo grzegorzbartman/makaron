@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Homebrew >= 6.0 refuses to load non-official taps until they are trusted.
+# Only tap-qualified names (user/tap/name) need it; no-op on older Homebrew.
+brew_trust() {
+    local kind="$1" name="$2"
+    [[ "$name" == */*/* ]] && brew trust "$kind" "$name" &>/dev/null
+    return 0
+}
+
 # Helper function to install cask with graceful handling of existing apps
 install_cask() {
     local cask_name="$1"
@@ -18,6 +26,7 @@ install_cask() {
     fi
     
     echo "Installing $app_name..."
+    brew_trust --cask "$cask_name"
     brew install --cask "$cask_name" || {
         echo "Warning: Failed to install $app_name (continuing...)"
         return 1
@@ -37,6 +46,7 @@ install_formula_critical() {
     fi
     
     echo "Installing $name..."
+    brew_trust --formula "$formula"
     if ! brew install "$formula"; then
         echo ""
         echo "═══════════════════════════════════════════════════════════════════"
@@ -65,6 +75,7 @@ install_formula() {
     fi
     
     echo "Installing $name..."
+    brew_trust --formula "$formula"
     brew install "$formula" || {
         echo "Warning: Failed to install $name (continuing...)"
         return 1
