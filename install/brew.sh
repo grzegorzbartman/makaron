@@ -47,8 +47,12 @@ setup_brew_autoupdate() {
 
     # Add tap if not present
     if ! brew tap | grep -q "domt4/autoupdate"; then
-        brew tap domt4/autoupdate
+        brew tap domt4/autoupdate || { echo "Warning: Failed to tap domt4/autoupdate (skipping autoupdate)"; return 0; }
     fi
+
+    # External commands from non-official taps stay unloadable on Homebrew >= 6.0
+    # until trusted, and cannot self-trust the way a qualified install does.
+    brew trust --command domt4/autoupdate/autoupdate &>/dev/null || true
 
     # Check if already running
     if brew autoupdate status 2>/dev/null | grep -q "installed and running"; then
@@ -57,8 +61,11 @@ setup_brew_autoupdate() {
     fi
 
     # Start autoupdate with upgrade and cleanup (24h interval)
-    brew autoupdate start --upgrade --cleanup
-    echo "Brew autoupdate configured (24h interval with upgrade & cleanup)"
+    if brew autoupdate start --upgrade --cleanup; then
+        echo "Brew autoupdate configured (24h interval with upgrade & cleanup)"
+    else
+        echo "Warning: Failed to configure brew autoupdate (continuing...)"
+    fi
 }
 
 install_local_brew() {

@@ -37,27 +37,19 @@ After installation, reload your shell or open a new terminal.
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator (configuration stays user-managed)
-- **cmux** - Optional Ghostty-based terminal with vertical tabs and AI agent notifications
-- **Slack** - Team communication
 - **Stats** - System monitor in menu bar
 - **btop** - System resource monitor
 - **Neovim** - Modern Vim-based text editor
 - **Upsun CLI** - Upsun command-line tool
 
 ### AI Tools
-- **Claude** - AI assistant desktop app
 - **Claude Code** - AI coding assistant
-- **Gemini CLI** - AI assistant command-line tool
 - **Cursor** - AI-powered code editor
-- **ChatGPT** - AI assistant desktop app
 - **Codex** - AI code assistant
-- **OpenCode** - AI coding assistant CLI
 
 ### Development Tools
-- **Bruno** - Open-source API client
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
-- **PhpStorm** - Professional PHP IDE
 - **Sequel Ace** - MySQL/MariaDB database management
 - **VSCode** - Popular code editor
 - **Composer** - PHP dependency manager
@@ -65,7 +57,6 @@ After installation, reload your shell or open a new terminal.
 - **LazyGit** - Terminal UI for Git
 - **Node.js** - JavaScript runtime
 - **pipx** - Python application installer
-- **rbenv** - Ruby version manager
 
 ### System Configuration
 - **macOS Settings** - Optimized system preferences for development workflow
@@ -202,7 +193,6 @@ install/
 ├── terminal/           # Ghostty and terminal helpers
 ├── editors/            # Editor application installers
 ├── development/        # Languages, frameworks, dev tools
-├── apps/               # GUI applications
 └── macos_settings.sh
 ```
 
