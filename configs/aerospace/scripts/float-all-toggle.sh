@@ -8,7 +8,7 @@ WS=$(aerospace list-workspaces --focused 2>/dev/null)
 IDS=$(aerospace list-windows --workspace focused --format '%{window-id}|%{app-name}' 2>/dev/null)
 [ -z "$IDS" ] && exit 0
 
-STATE_FILE="/tmp/makaron-float-all-ws-$WS"
+STATE_FILE="/tmp/makaron-$(id -u)-float-all-ws-$WS"
 
 if [ -f "$STATE_FILE" ]; then
     while IFS='|' read -r id app; do
