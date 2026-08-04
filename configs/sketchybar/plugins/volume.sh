@@ -5,7 +5,7 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-CACHE_FILE="/tmp/sketchybar_audio_device"
+CACHE_FILE="/tmp/sketchybar_$(id -u)_audio_device"
 CACHE_DURATION=5  # seconds
 
 if [ "$SENDER" = "volume_change" ]; then

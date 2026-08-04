@@ -3,6 +3,23 @@
 # Install AeroSpace
 install_cask "nikitabobko/tap/aerospace" "AeroSpace"
 
+# The app can exist from a manual install while the separate CLI binary is
+# missing. Adopt it into Homebrew so all cask artifacts are linked.
+if [ -d "/Applications/AeroSpace.app" ] && ! command -v aerospace &>/dev/null; then
+    echo "AeroSpace CLI missing - adopting the existing app into Homebrew..."
+    brew_trust --cask "nikitabobko/tap/aerospace" || true
+    if brew install --cask --adopt "nikitabobko/tap/aerospace" \
+        && command -v aerospace &>/dev/null; then
+        echo "AeroSpace CLI installed"
+    elif { brew reinstall --cask --force "nikitabobko/tap/aerospace" \
+        || brew install --cask --force "nikitabobko/tap/aerospace"; } \
+        && command -v aerospace &>/dev/null; then
+        echo "AeroSpace reinstalled with CLI"
+    else
+        echo "Warning: Failed to install AeroSpace CLI (continuing...)"
+    fi
+fi
+
 # aerospace-swipe requires AeroSpace >= 0.21 (socket protocol v1). install_cask
 # skips already-installed apps, so existing users can be stuck on an older
 # build where trackpad swiping silently no-ops. Upgrade in place when needed.

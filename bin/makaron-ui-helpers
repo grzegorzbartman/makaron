@@ -6,7 +6,7 @@ UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
 
 # Notch detection cache — Swift cold-start (~1s) is too expensive to repeat.
 # Invalidate from display_change.sh on monitor hotplug.
-NOTCH_CACHE_FILE="/tmp/makaron_has_builtin_notch"
+NOTCH_CACHE_FILE="/tmp/makaron_$(id -u)_has_builtin_notch"
 
 # Constants for desktop layout.
 MAKARON_GAP_SIZE=0
@@ -238,24 +238,41 @@ stop_aerospace() {
 }
 
 # --- SketchyBar ---
+sketchybar_service_started() {
+    brew services list 2>/dev/null | awk '$1 == "sketchybar" && $2 == "started" { found=1 } END { exit !found }'
+}
+
 start_sketchybar() {
     if command -v sketchybar &> /dev/null; then
-        if ! pgrep -f "sketchybar" > /dev/null; then
+        if ! sketchybar_service_started; then
             echo "  Starting SketchyBar..."
-            brew services start sketchybar
+            if ! brew services start sketchybar; then
+                echo "  ⚠️  Failed to start SketchyBar service"
+                return 1
+            fi
             sleep 2
         fi
+
+        if ! sketchybar_service_started; then
+            echo "  ⚠️  SketchyBar service is not running"
+            return 1
+        fi
+
         echo "  Reloading SketchyBar config..."
-        sketchybar --reload
+        if ! sketchybar --reload; then
+            echo "  ⚠️  Failed to reload SketchyBar config"
+            return 1
+        fi
         echo "  ✓ SketchyBar started and config reloaded"
     else
         echo "  ⚠️  SketchyBar not installed"
+        return 1
     fi
 }
 
 stop_sketchybar() {
     if command -v sketchybar &> /dev/null; then
-        if brew services list | grep -q "sketchybar.*started"; then
+        if sketchybar_service_started; then
             echo "  Stopping SketchyBar..."
             brew services stop sketchybar 2>/dev/null
             echo "  ✓ SketchyBar stopped"
