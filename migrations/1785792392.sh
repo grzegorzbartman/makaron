@@ -25,8 +25,8 @@ if command -v ddev &>/dev/null; then
     trust --formula ddev/ddev/ddev
 fi
 
-if command -v upsun &>/dev/null; then
-    trust --formula platformsh/tap/upsun-cli
+if command -v platform &>/dev/null; then
+    trust --formula upsun/tap/platformsh-cli
 fi
 
 echo "Migration completed successfully"

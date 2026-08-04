@@ -87,7 +87,7 @@ install_package() {
         yarn)       install_formula "yarn" "Yarn" "yarn" ;;
         pnpm)       install_formula "pnpm" "pnpm" "pnpm" ;;
         fnm)        source "$MAKARON_PATH/install/development/fnm.sh" ;;
-        upsun)      install_formula "platformsh/tap/upsun-cli" "Upsun CLI" "upsun" ;;
+        upsun)      install_formula "upsun/tap/platformsh-cli" "Upsun CLI" "platform" ;;
         docker)     install_cask "docker-desktop" "Docker" ;;
         sequel-ace) install_cask "sequel-ace" "Sequel Ace" ;;
         pipx)       source "$MAKARON_PATH/install/development/pipx.sh" ;;
@@ -271,6 +271,6 @@ install_selected_packages() {
     echo ""
 
     for id in $selections; do
-        install_package "$id"
+        install_package "$id" || true
     done
 }
