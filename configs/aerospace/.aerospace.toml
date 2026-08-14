@@ -291,6 +291,10 @@ run = ["move-node-to-workspace 1"]
 if.app-id = "com.apple.iCal"
 run = ["move-node-to-workspace Q"]
 
+[[on-window-detected]]
+if.app-id = "com.flexibits.fantastical2.mac"
+run = ["move-node-to-workspace Q"]
+
 # Floating by default
 [[on-window-detected]]
 if.app-id = "com.apple.finder"
@@ -319,4 +323,3 @@ run = ["layout floating"]
 [[on-window-detected]]
 if.app-id = "com.apple.findmy"
 run = ["layout floating"]
-
