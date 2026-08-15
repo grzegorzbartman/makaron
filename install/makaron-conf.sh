@@ -1,8 +1,8 @@
 #!/bin/bash
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-MAKARON_CONF_DIR="$HOME/.config/makaron"
-MAKARON_CONF="$MAKARON_CONF_DIR/makaron.conf"
+MAKARON_CONF_DIR="${MAKARON_CONF_DIR:-$HOME/.config/makaron}"
+MAKARON_CONF="${MAKARON_CONF:-$MAKARON_CONF_DIR/makaron.conf}"
 MAKARON_TEMPLATE="$MAKARON_PATH/templates/makaron.conf.default"
 
 mkdir -p "$MAKARON_CONF_DIR"

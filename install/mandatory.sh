@@ -20,6 +20,7 @@ source "$MAKARON_PATH/install/desktop/aerospace.sh"
 source "$MAKARON_PATH/install/desktop/aerospace_swipe.sh"
 source "$MAKARON_PATH/install/desktop/fonts.sh"
 source "$MAKARON_PATH/install/desktop/sketchybar.sh"
+source "$MAKARON_PATH/install/desktop/borders.sh"
 
 # Terminal
 source "$MAKARON_PATH/install/terminal/ghostty.sh"

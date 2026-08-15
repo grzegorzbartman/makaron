@@ -18,3 +18,14 @@ AEROSPACE_SWIPE_FINGERS=4
 # workspace); false = reversed.
 AEROSPACE_SWIPE_NATURAL=true
 
+# Desktop theme. Run `makaron-theme list` to see the seven available themes.
+MAKARON_THEME=glass-light
+
+# Theme side effects. Ghostty and editor themes remain user-owned.
+THEME_SET_WALLPAPER=true
+THEME_SET_MACOS_APPEARANCE=true
+
+# Window layout. A gap applies independently of window borders.
+BORDERS_ENABLED=false
+BORDER_WIDTH=5
+AEROSPACE_GAP_SIZE=0

@@ -33,6 +33,8 @@ After installation, reload your shell or open a new terminal.
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
 - **SketchyBar** - Custom top status bar
+- **JankyBorders** - Optional theme-aware window borders
+- **Themes v2** - Seven coordinated SketchyBar, border, wallpaper, and appearance presets
 - **Nerd Fonts** - Developer-friendly fonts with icon support
 
 ### Productivity Tools
@@ -96,16 +98,28 @@ This command will:
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
+- **`makaron-theme list|current|set <name>`** - List, inspect, or switch desktop themes
+- **`makaron-borders on|off|toggle`** - Control theme-aware window borders
+- **`makaron-gaps <0-40>`** - Set persistent AeroSpace window gaps
+- **`makaron-gaps-zero`** - Set window gaps to zero
 - **`makaron-macos-config-reload`** - Apply macOS settings
+
+Available themes: `glass-light`, `everforest`, `tokyo-night`, `catppuccin`, `kanagawa`, `matte-black`, and `retro-82`. The seven compatibility wrappers, such as `makaron-theme-everforest`, call the same central theme command.
 
 ### UI Modes
 
 | Command | Components | Dock | Menu Bar | Layout |
 |---|---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | gaps `0`, top reserve `40` |
+| `makaron-ui-full` | AeroSpace + SketchyBar, optional Borders | Hidden | Hidden | configured gaps, theme-aware borders |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-The SketchyBar height is `40px`. AeroSpace windows are edge-to-edge except for that top reserve in full mode.
+The default remains gapless with borders disabled. If the configured gap is `g`, a screen without a notch reserves `40 + g` pixels above windows for SketchyBar, while a notched built-in display uses `g`; external monitors always use `40 + g`. For example:
+
+```bash
+makaron-theme set everforest
+makaron-borders on
+makaron-gaps 12
+```
 
 ### Manual Commands
 
@@ -189,7 +203,7 @@ install/
 ├── mandatory.sh        # Core requirements
 ├── packages.sh         # Optional package selector
 ├── brew.sh             # Homebrew setup
-├── desktop/            # AeroSpace, SketchyBar, fonts
+├── desktop/            # AeroSpace, SketchyBar, Borders, fonts
 ├── terminal/           # Ghostty and terminal helpers
 ├── editors/            # Editor application installers
 ├── development/        # Languages, frameworks, dev tools
@@ -199,9 +213,10 @@ install/
 ## Files
 
 - `configs/aerospace/.aerospace.toml` - AeroSpace config
-- `configs/sketchybar/colors.sh` - Static SketchyBar colors
+- `configs/sketchybar/colors.sh` - Resolves the selected theme for SketchyBar
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `configs/sketchybar/plugins/` - SketchyBar plugin scripts
+- `themes/` - Exactly seven theme contracts and their wallpapers
 - `install/` - Modular installation scripts
 - `migrations/` - Database-style migrations for configuration updates
 - `templates/makaron.conf.default` - Default user configuration template
@@ -242,7 +257,17 @@ Available settings:
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
+AEROSPACE_SWIPE_FINGERS=4               # Fingers used to switch workspaces
+AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
+MAKARON_THEME=glass-light               # Selected desktop theme
+THEME_SET_WALLPAPER=true                 # Change wallpaper with the theme
+THEME_SET_MACOS_APPEARANCE=true          # Change macOS light/dark mode with the theme
+BORDERS_ENABLED=false                    # Enable JankyBorders
+BORDER_WIDTH=5                           # Window border width
+AEROSPACE_GAP_SIZE=0                     # Window gap in pixels (0-40)
 ```
+
+Themes do not modify Ghostty, VS Code, Cursor, the macOS accent color, gaps, borders enabled state, or UI mode.
 
 ## Contributing
 

@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/makaron-ui-helpers"
 echo "🛑 Stopping Makaron UI components..."
 echo ""
 
+stop_borders
 stop_aerospace
 stop_sketchybar
 restore_macos_defaults
