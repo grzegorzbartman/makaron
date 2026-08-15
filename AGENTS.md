@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for a focused developer setup. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and a set of install/update scripts for optional developer tools.
 
-The desktop layout defaults to zero window gaps and disabled borders, but both are persistent user settings. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. Colors are resolved from one of seven themes through `configs/sketchybar/colors.sh`.
+The desktop layout defaults to 12px window gaps and theme-aware borders, but both are persistent user settings. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. Colors are resolved from one of seven themes through `configs/sketchybar/colors.sh`.
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -75,7 +75,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 | Command | Components | Dock | Menu Bar |
 |---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden (autohide) | Hidden (autohide) |
+| `makaron-ui-full` | AeroSpace + SketchyBar + optional Borders | Hidden (autohide) | Hidden (autohide) |
 | `makaron-ui-stop` | Nothing | Visible | Visible |
 
 - `makaron-ui-helpers` is a shared library, not a user command. It contains AeroSpace, SketchyBar, Borders, layout, macOS settings, and UI mode helpers.
@@ -104,7 +104,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ### AeroSpace Layout
 `switch_aerospace_config()` in `makaron-ui-helpers` updates `outer.top` in `~/.aerospace.toml`.
 
-All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `0`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.bottom`, and `outer.right`.
+All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.bottom`, and `outer.right`.
 
 For gap `g`, the top reserve is:
 - **Full mode + no notch:** `outer.top = 40 + g`
@@ -254,6 +254,7 @@ $HOME/
 ├── .config/makaron/
 │   ├── makaron.conf                 # User settings
 │   └── packages.conf                # Optional package selections
+├── .config/borders/bordersrc         # Theme colors managed by Makaron
 ├── .config/sketchybar -> ...        # Symlink
 └── .aerospace.toml -> ...           # Symlink
 ```
@@ -300,9 +301,9 @@ AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (s
 MAKARON_THEME=glass-light               # Selected theme
 THEME_SET_WALLPAPER=true                 # Apply theme wallpaper
 THEME_SET_MACOS_APPEARANCE=true          # Apply theme light/dark mode
-BORDERS_ENABLED=false                    # Persist Borders state
+BORDERS_ENABLED=true                     # Persist Borders state
 BORDER_WIDTH=5                           # Border width
-AEROSPACE_GAP_SIZE=0                     # Persistent gap (0-40)
+AEROSPACE_GAP_SIZE=12                    # Persistent gap (0-40)
 ```
 
 ---
