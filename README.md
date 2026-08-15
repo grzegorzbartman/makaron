@@ -113,7 +113,7 @@ Available themes: `glass-light`, `everforest`, `tokyo-night`, `catppuccin`, `kan
 | `makaron-ui-full` | AeroSpace + SketchyBar, optional Borders | Hidden | Hidden | configured gaps, theme-aware borders |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-The default remains gapless with borders disabled. If the configured gap is `g`, a screen without a notch reserves `40 + g` pixels above windows for SketchyBar, while a notched built-in display uses `g`; external monitors always use `40 + g`. For example:
+The default layout uses theme-aware borders and a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `40 + g` pixels above windows for SketchyBar, while a notched built-in display uses `g`; external monitors always use `40 + g`. For example:
 
 ```bash
 makaron-theme set everforest
@@ -217,6 +217,7 @@ install/
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `configs/sketchybar/plugins/` - SketchyBar plugin scripts
 - `themes/` - Exactly seven theme contracts and their wallpapers
+- `~/.config/borders/bordersrc` - Generated theme colors for the Borders service
 - `install/` - Modular installation scripts
 - `migrations/` - Database-style migrations for configuration updates
 - `templates/makaron.conf.default` - Default user configuration template
@@ -262,9 +263,9 @@ AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
 MAKARON_THEME=glass-light               # Selected desktop theme
 THEME_SET_WALLPAPER=true                 # Change wallpaper with the theme
 THEME_SET_MACOS_APPEARANCE=true          # Change macOS light/dark mode with the theme
-BORDERS_ENABLED=false                    # Enable JankyBorders
+BORDERS_ENABLED=true                     # Enable JankyBorders
 BORDER_WIDTH=5                           # Window border width
-AEROSPACE_GAP_SIZE=0                     # Window gap in pixels (0-40)
+AEROSPACE_GAP_SIZE=12                    # Window gap in pixels (0-40)
 ```
 
 Themes do not modify Ghostty, VS Code, Cursor, the macOS accent color, gaps, borders enabled state, or UI mode.

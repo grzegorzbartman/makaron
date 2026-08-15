@@ -26,6 +26,6 @@ THEME_SET_WALLPAPER=true
 THEME_SET_MACOS_APPEARANCE=true
 
 # Window layout. A gap applies independently of window borders.
-BORDERS_ENABLED=false
+BORDERS_ENABLED=true
 BORDER_WIDTH=5
-AEROSPACE_GAP_SIZE=0
+AEROSPACE_GAP_SIZE=12

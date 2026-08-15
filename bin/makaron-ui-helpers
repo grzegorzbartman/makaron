@@ -4,6 +4,7 @@
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 UI_MODE_FILE="${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"
 MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
+BORDERS_CONFIG_PATH="${BORDERS_CONFIG_PATH:-$HOME/.config/borders/bordersrc}"
 
 THEME_HELPERS="$MAKARON_PATH/bin/makaron-theme-helpers"
 if [ -f "$THEME_HELPERS" ]; then
@@ -24,21 +25,21 @@ MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.
 
 _get_borders_enabled() {
     (
-        BORDERS_ENABLED=false
+        BORDERS_ENABLED=true
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        [ "${BORDERS_ENABLED:-false}" = "true" ] && echo true || echo false
+        [ "${BORDERS_ENABLED:-true}" = "true" ] && echo true || echo false
     )
 }
 
 _get_gap_size() {
     (
-        AEROSPACE_GAP_SIZE=0
+        AEROSPACE_GAP_SIZE=12
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
         if [[ "${AEROSPACE_GAP_SIZE:-}" =~ ^[0-9]+$ ]] &&
             [ "$AEROSPACE_GAP_SIZE" -le 40 ]; then
             echo "$AEROSPACE_GAP_SIZE"
         else
-            echo 0
+            echo 12
         fi
     )
 }
@@ -328,6 +329,17 @@ borders_service_started() {
         brew services list 2>/dev/null | awk '$1 == "borders" && $2 == "started" { found=1 } END { exit !found }'
 }
 
+write_borders_config() {
+    local width="$1"
+    mkdir -p "$(dirname "$BORDERS_CONFIG_PATH")"
+    {
+        printf '#!/bin/bash\n\n'
+        printf 'borders active_color=%s inactive_color=%s width=%s\n' \
+            "$ACTIVE_BORDER_COLOR" "$INACTIVE_BORDER_COLOR" "$width"
+    } > "$BORDERS_CONFIG_PATH"
+    chmod +x "$BORDERS_CONFIG_PATH"
+}
+
 stop_borders() {
     command -v borders >/dev/null 2>&1 || return 0
     if borders_service_started; then
@@ -356,19 +368,49 @@ start_borders() {
         return 1
     fi
 
-    local width
+    local width action
     width="$(_get_border_width)"
-    if borders_running; then
-        borders active_color="$ACTIVE_BORDER_COLOR" inactive_color="$INACTIVE_BORDER_COLOR" width="$width" >/dev/null 2>&1
+    write_borders_config "$width" || {
+        echo "  ⚠️  Could not write Borders config"
+        return 1
+    }
+
+    if borders_service_started && borders_running; then
+        if ! borders active_color="$ACTIVE_BORDER_COLOR" inactive_color="$INACTIVE_BORDER_COLOR" width="$width" >/dev/null 2>&1; then
+            echo "  ⚠️  Could not update Borders"
+            return 1
+        fi
         echo "  ✓ Borders updated (${width}px, $MAKARON_RESOLVED_THEME)"
-    else
-        borders active_color="$ACTIVE_BORDER_COLOR" inactive_color="$INACTIVE_BORDER_COLOR" width="$width" >/dev/null 2>&1 &
-        echo "  ✓ Borders started (${width}px, $MAKARON_RESOLVED_THEME)"
+        return 0
     fi
+
+    if ! command -v brew >/dev/null 2>&1; then
+        echo "  ⚠️  Homebrew is required to start Borders"
+        return 1
+    fi
+
+    action=start
+    if borders_service_started; then
+        action=restart
+    else
+        borders_running && killall borders 2>/dev/null || true
+    fi
+
+    if ! brew services "$action" borders >/dev/null 2>&1; then
+        echo "  ⚠️  Could not $action Borders service"
+        return 1
+    fi
+
+    sleep 1
+    if ! borders_running; then
+        echo "  ⚠️  Borders service started but its process is not running"
+        return 1
+    fi
+
+    echo "  ✓ Borders started (${width}px, $MAKARON_RESOLVED_THEME)"
 }
 
 reload_borders() {
-    borders_running || return 0
     start_borders
 }
 
