@@ -122,8 +122,8 @@ cat > "$TEST_BIN_DIR/brew" <<'EOF'
 #!/bin/bash
 printf '%s\n' "$*" >> "$TEST_SERVICE_LOG"
 case "$1:$2:$3" in
-    services:start:borders|services:restart:borders) touch "$TEST_SERVICE_MARKER" ;;
-    services:stop:borders) rm -f "$TEST_SERVICE_MARKER" ;;
+    services:start:felixkratz/formulae/borders|services:restart:felixkratz/formulae/borders) touch "$TEST_SERVICE_MARKER" ;;
+    services:stop:felixkratz/formulae/borders) rm -f "$TEST_SERVICE_MARKER" ;;
     services:list:*) [ -f "$TEST_SERVICE_MARKER" ] && printf 'borders started\n' ;;
 esac
 EOF
@@ -135,7 +135,11 @@ export TEST_SERVICE_MARKER TEST_SERVICE_LOG
     borders_service_started() { [ -f "$TEST_SERVICE_MARKER" ]; }
     PATH="$TEST_BIN_DIR:$PATH" start_borders >/dev/null
 )
-grep -q '^services start borders$' "$TEST_SERVICE_LOG" || fail "Borders not started as a service"
+assert_equal "$(printf '%s\n' \
+    'trust --json=v1' \
+    'trust --formula felixkratz/formulae/borders' \
+    'services start felixkratz/formulae/borders')" \
+    "$(cat "$TEST_SERVICE_LOG")" "Borders trust must precede qualified service start"
 grep -q 'active_color=0xff7fbbb3 inactive_color=0xff475258 width=5' "$TEST_BORDERS_CONFIG" || fail "Borders config missing theme values"
 
 printf 'full\n' > "$TEST_UI_MODE"
@@ -147,6 +151,10 @@ PATH=/usr/bin:/bin "$REPO_ROOT/bin/makaron-theme" current >/dev/null || fail "th
 export MAKARON_CONF_DIR="$TEST_ROOT/migration-config"
 export MAKARON_CONF="$MAKARON_CONF_DIR/makaron.conf"
 PATH="$TEST_BIN_DIR:$PATH" bash "$REPO_ROOT/migrations/1786783412.sh" >/dev/null
+: > "$TEST_SERVICE_LOG"
+PATH="$TEST_BIN_DIR:$PATH" bash "$REPO_ROOT/migrations/1786788368.sh" >/dev/null
+PATH="$TEST_BIN_DIR:$PATH" bash "$REPO_ROOT/migrations/1786788368.sh" >/dev/null
+assert_equal 2 "$(grep -c '^trust --formula felixkratz/formulae/borders$' "$TEST_SERVICE_LOG")" "Borders trust migration idempotency"
 sed -i '' 's/^BORDERS_ENABLED=.*/BORDERS_ENABLED=false/' "$MAKARON_CONF"
 sed -i '' 's/^AEROSPACE_GAP_SIZE=.*/AEROSPACE_GAP_SIZE=0/' "$MAKARON_CONF"
 PATH="$TEST_BIN_DIR:$PATH" bash "$REPO_ROOT/migrations/1786784745.sh" >/dev/null

@@ -5,6 +5,7 @@ MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 UI_MODE_FILE="${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"
 MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 BORDERS_CONFIG_PATH="${BORDERS_CONFIG_PATH:-$HOME/.config/borders/bordersrc}"
+MAKARON_BORDERS_FORMULA="felixkratz/formulae/borders"
 
 THEME_HELPERS="$MAKARON_PATH/bin/makaron-theme-helpers"
 if [ -f "$THEME_HELPERS" ]; then
@@ -329,6 +330,11 @@ borders_service_started() {
         brew services list 2>/dev/null | awk '$1 == "borders" && $2 == "started" { found=1 } END { exit !found }'
 }
 
+trust_borders_formula() {
+    brew trust --json=v1 >/dev/null 2>&1 || return 0
+    brew trust --formula "$MAKARON_BORDERS_FORMULA" >/dev/null 2>&1
+}
+
 write_borders_config() {
     local width="$1"
     mkdir -p "$(dirname "$BORDERS_CONFIG_PATH")"
@@ -343,7 +349,8 @@ write_borders_config() {
 stop_borders() {
     command -v borders >/dev/null 2>&1 || return 0
     if borders_service_started; then
-        brew services stop borders >/dev/null 2>&1 || true
+        trust_borders_formula || true
+        brew services stop "$MAKARON_BORDERS_FORMULA" >/dev/null 2>&1 || true
     fi
     if borders_running; then
         echo "  Stopping Borders..."
@@ -368,7 +375,7 @@ start_borders() {
         return 1
     fi
 
-    local width action
+    local width action service_output
     width="$(_get_border_width)"
     write_borders_config "$width" || {
         echo "  ⚠️  Could not write Borders config"
@@ -389,6 +396,11 @@ start_borders() {
         return 1
     fi
 
+    if ! trust_borders_formula; then
+        echo "  ⚠️  Could not trust Borders formula"
+        return 1
+    fi
+
     action=start
     if borders_service_started; then
         action=restart
@@ -396,8 +408,9 @@ start_borders() {
         borders_running && killall borders 2>/dev/null || true
     fi
 
-    if ! brew services "$action" borders >/dev/null 2>&1; then
+    if ! service_output="$(brew services "$action" "$MAKARON_BORDERS_FORMULA" 2>&1)"; then
         echo "  ⚠️  Could not $action Borders service"
+        [ -n "$service_output" ] && printf '  %s\n' "$service_output" >&2
         return 1
     fi
 
