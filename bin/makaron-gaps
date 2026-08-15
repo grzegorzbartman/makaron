@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKARON_PATH="${MAKARON_PATH:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+
+# shellcheck source=bin/makaron-ui-helpers
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+if [ "$#" -eq 0 ]; then
+    _get_gap_size
+    exit 0
+fi
+
+if [ "$#" -ne 1 ] || [[ ! "$1" =~ ^[0-9]+$ ]] || [ "$1" -gt 40 ]; then
+    echo "Usage: makaron-gaps <0-40>" >&2
+    exit 2
+fi
+
+set_makaron_conf_value AEROSPACE_GAP_SIZE "$1"
+echo "Window gaps set to ${1}px"
+MAKARON_APPLY_VERBOSE=1 apply_desktop_state

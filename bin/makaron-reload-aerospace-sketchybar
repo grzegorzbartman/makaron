@@ -1,5 +1,5 @@
 #!/bin/bash
-# Reload AeroSpace + SketchyBar and re-derive layout state (gaps, outer.top).
+# Reload AeroSpace + SketchyBar and re-derive layout state (gaps, top, borders).
 # All layout decisions live in apply_desktop_state (single source of truth).
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"

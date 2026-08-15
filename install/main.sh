@@ -95,6 +95,7 @@ check_app() {
 echo "Core Components:"
 check_installed "aerospace" "AeroSpace" || true
 check_installed "sketchybar" "SketchyBar" || true
+check_installed "borders" "Borders" || true
 check_app "Ghostty" || true
 
 if [ -f "$HOME/.config/makaron/packages.conf" ]; then
@@ -124,6 +125,9 @@ else
     echo "Commands:"
     echo "  makaron-ui-full     - Start UI (full mode: SketchyBar + hidden menu bar)"
     echo "  makaron-ui-stop     - Stop UI"
+    echo "  makaron-theme list  - List desktop themes"
+    echo "  makaron-borders on  - Enable window borders"
+    echo "  makaron-gaps 12     - Set window gaps"
     echo "  makaron-update      - Update"
     echo "  makaron-doctor      - Diagnostics"
     echo ""
@@ -134,4 +138,3 @@ echo ""
 echo "═══════════════════════════════════════════════════════════════════"
 echo ""
 echo "Run 'source ~/.zshrc' or restart terminal to use commands."
-

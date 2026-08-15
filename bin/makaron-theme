@@ -1,0 +1,116 @@
+#!/bin/bash
+
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKARON_PATH="${MAKARON_PATH:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+
+# shellcheck source=bin/makaron-theme-helpers
+source "$SCRIPT_DIR/makaron-theme-helpers"
+
+usage() {
+    cat <<EOF
+Usage:
+  makaron-theme list
+  makaron-theme current
+  makaron-theme set <theme>
+EOF
+}
+
+theme_option_enabled() {
+    local option="$1"
+    (
+        THEME_SET_WALLPAPER=true
+        THEME_SET_MACOS_APPEARANCE=true
+        if [ -f "$MAKARON_CONF_PATH" ]; then
+            # shellcheck source=/dev/null
+            source "$MAKARON_CONF_PATH"
+        fi
+        [ "${!option:-true}" = "true" ]
+    )
+}
+
+apply_theme_appearance() {
+    theme_option_enabled THEME_SET_MACOS_APPEARANCE || return 0
+    command -v osascript >/dev/null 2>&1 || return 0
+
+    local dark_mode=false
+    [ "$THEME_MODE" = "dark" ] && dark_mode=true
+    osascript -e "tell application \"System Events\" to tell appearance preferences to set dark mode to $dark_mode" >/dev/null 2>&1 || {
+        echo "Warning: could not set macOS appearance" >&2
+        return 0
+    }
+}
+
+apply_theme_wallpaper() {
+    theme_option_enabled THEME_SET_WALLPAPER || return 0
+    command -v osascript >/dev/null 2>&1 || return 0
+
+    if ! osascript - "$THEME_WALLPAPER_PATH" >/dev/null 2>&1 <<'APPLESCRIPT'
+on run argv
+    set wallpaperFile to POSIX file (item 1 of argv)
+    tell application "System Events"
+        repeat with desktopItem in desktops
+            set picture of desktopItem to wallpaperFile
+        end repeat
+    end tell
+end run
+APPLESCRIPT
+    then
+        echo "Warning: could not set wallpaper" >&2
+        return 0
+    fi
+}
+
+reload_theme_components() {
+    if [ -f "${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}" ] &&
+        grep -q '^stop$' "${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"; then
+        return 0
+    fi
+
+    if command -v sketchybar >/dev/null 2>&1 && pgrep -x sketchybar >/dev/null 2>&1; then
+        sketchybar --reload >/dev/null 2>&1 || echo "Warning: could not reload SketchyBar" >&2
+    fi
+
+    if command -v borders >/dev/null 2>&1 && pgrep -x borders >/dev/null 2>&1; then
+        # shellcheck source=bin/makaron-ui-helpers
+        source "$SCRIPT_DIR/makaron-ui-helpers"
+        reload_borders >/dev/null 2>&1 || echo "Warning: could not reload Borders" >&2
+    fi
+}
+
+case "${1:-}" in
+    list)
+        for slug in "${MAKARON_THEME_SLUGS[@]}"; do
+            if load_theme "$slug" >/dev/null 2>&1; then
+                printf '%-14s %s\n' "$slug" "$THEME_NAME"
+            else
+                printf '%-14s %s\n' "$slug" "(invalid)"
+            fi
+        done
+        ;;
+    current)
+        load_configured_theme >/dev/null || exit 1
+        printf '%s\n' "$MAKARON_RESOLVED_THEME"
+        ;;
+    set)
+        if [ "$#" -ne 2 ]; then
+            usage >&2
+            exit 2
+        fi
+
+        load_theme "$2" || exit 1
+        set_makaron_conf_value MAKARON_THEME "$2"
+        apply_theme_appearance
+        apply_theme_wallpaper
+        reload_theme_components
+        echo "Theme set to $2 ($THEME_NAME)"
+        ;;
+    help|--help|-h)
+        usage
+        ;;
+    *)
+        usage >&2
+        exit 2
+        ;;
+esac

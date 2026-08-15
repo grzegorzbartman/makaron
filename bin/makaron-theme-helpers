@@ -1,0 +1,148 @@
+#!/bin/bash
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
+MAKARON_DEFAULT_THEME="glass-light"
+
+MAKARON_THEME_SLUGS=(
+    glass-light
+    everforest
+    tokyo-night
+    catppuccin
+    kanagawa
+    matte-black
+    retro-82
+)
+
+MAKARON_THEME_REQUIRED_TOKENS=(
+    THEME_NAME THEME_MODE THEME_WALLPAPER
+    BAR_COLOR BAR_BACKGROUND_COLOR BAR_BLUR ICON_COLOR LABEL_COLOR
+    SPACE_ICON_COLOR SPACE_LABEL_COLOR SPACE_BACKGROUND_COLOR SPACE_BORDER_COLOR
+    SPACE_FOCUSED_ICON_COLOR SPACE_FOCUSED_LABEL_COLOR
+    SPACE_FOCUSED_BACKGROUND_COLOR SPACE_FOCUSED_BORDER_COLOR
+    ACTIVE_BORDER_COLOR INACTIVE_BORDER_COLOR
+)
+
+set_makaron_conf_value() {
+    local key="$1" value="$2"
+    mkdir -p "$(dirname "$MAKARON_CONF_PATH")"
+    touch "$MAKARON_CONF_PATH"
+
+    if grep -q "^${key}=" "$MAKARON_CONF_PATH" 2>/dev/null; then
+        sed -i '' "s|^${key}=.*|${key}=${value}|" "$MAKARON_CONF_PATH"
+    else
+        printf '%s=%s\n' "$key" "$value" >> "$MAKARON_CONF_PATH"
+    fi
+}
+
+list_theme_slugs() {
+    printf '%s\n' "${MAKARON_THEME_SLUGS[@]}"
+}
+
+theme_slug_is_valid() {
+    local slug="$1" known
+    case "$slug" in
+        ''|*[!a-z0-9-]*) return 1 ;;
+    esac
+
+    for known in "${MAKARON_THEME_SLUGS[@]}"; do
+        [ "$slug" = "$known" ] && return 0
+    done
+    return 1
+}
+
+configured_theme_slug() {
+    (
+        MAKARON_THEME="$MAKARON_DEFAULT_THEME"
+        if [ -f "$MAKARON_CONF_PATH" ]; then
+            # shellcheck source=/dev/null
+            source "$MAKARON_CONF_PATH"
+        fi
+        printf '%s\n' "${MAKARON_THEME:-$MAKARON_DEFAULT_THEME}"
+    )
+}
+
+load_theme() {
+    local slug="$1" theme_file token value
+
+    if ! theme_slug_is_valid "$slug"; then
+        echo "Unknown Makaron theme: $slug" >&2
+        return 1
+    fi
+
+    theme_file="$MAKARON_PATH/themes/$slug/theme.sh"
+    if [ ! -f "$theme_file" ]; then
+        echo "Makaron theme file missing: $theme_file" >&2
+        return 1
+    fi
+
+    for token in "${MAKARON_THEME_REQUIRED_TOKENS[@]}"; do
+        unset "$token"
+    done
+
+    # shellcheck source=/dev/null
+    source "$theme_file"
+
+    for token in "${MAKARON_THEME_REQUIRED_TOKENS[@]}"; do
+        if [ -z "${!token+x}" ] || [ -z "${!token}" ]; then
+            echo "Makaron theme '$slug' is missing token: $token" >&2
+            return 1
+        fi
+    done
+
+    case "$THEME_MODE" in
+        light|dark) ;;
+        *)
+            echo "Makaron theme '$slug' has invalid THEME_MODE: $THEME_MODE" >&2
+            return 1
+            ;;
+    esac
+
+    for token in BAR_COLOR BAR_BACKGROUND_COLOR ICON_COLOR LABEL_COLOR \
+        SPACE_ICON_COLOR SPACE_LABEL_COLOR SPACE_BACKGROUND_COLOR SPACE_BORDER_COLOR \
+        SPACE_FOCUSED_ICON_COLOR SPACE_FOCUSED_LABEL_COLOR \
+        SPACE_FOCUSED_BACKGROUND_COLOR SPACE_FOCUSED_BORDER_COLOR \
+        ACTIVE_BORDER_COLOR INACTIVE_BORDER_COLOR; do
+        value="${!token}"
+        if [[ ! "$value" =~ ^0x[0-9a-fA-F]{8}$ ]]; then
+            echo "Makaron theme '$slug' has invalid $token: $value" >&2
+            return 1
+        fi
+    done
+
+    if [[ ! "$BAR_BLUR" =~ ^[0-9]+$ ]]; then
+        echo "Makaron theme '$slug' has invalid BAR_BLUR: $BAR_BLUR" >&2
+        return 1
+    fi
+
+    case "$THEME_WALLPAPER" in
+        /*|*'..'*)
+            echo "Makaron theme '$slug' has unsafe wallpaper path: $THEME_WALLPAPER" >&2
+            return 1
+            ;;
+    esac
+
+    MAKARON_RESOLVED_THEME="$slug"
+    MAKARON_THEME_DIR="$MAKARON_PATH/themes/$slug"
+    THEME_WALLPAPER_PATH="$MAKARON_THEME_DIR/$THEME_WALLPAPER"
+
+    if [ ! -f "$THEME_WALLPAPER_PATH" ]; then
+        echo "Makaron theme '$slug' wallpaper missing: $THEME_WALLPAPER_PATH" >&2
+        return 1
+    fi
+
+    export MAKARON_RESOLVED_THEME MAKARON_THEME_DIR THEME_WALLPAPER_PATH
+    export "${MAKARON_THEME_REQUIRED_TOKENS[@]}"
+}
+
+load_configured_theme() {
+    local configured
+    configured="$(configured_theme_slug)"
+
+    if load_theme "$configured"; then
+        return 0
+    fi
+
+    echo "Falling back to Makaron theme: $MAKARON_DEFAULT_THEME" >&2
+    load_theme "$MAKARON_DEFAULT_THEME"
+}
