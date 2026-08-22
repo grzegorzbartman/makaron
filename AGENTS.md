@@ -14,7 +14,7 @@ The desktop layout defaults to 12px window gaps, a persistent user setting. Full
 ## Contribution Workflow (Default)
 Unless the user says otherwise, every change follows this flow:
 - Never commit directly to `main`. Create a feature branch first (e.g. `feat/...`, `fix/...`).
-- Before committing, run the pre-commit review (`.cursor/skills/pre-commit-review/SKILL.md`):
+- Before committing, run the pre-commit review (`.agents/skills/pre-commit-review/SKILL.md`):
   - Read this file, then `git status` and `git diff`.
   - Check for breakage risk for both new and existing users (the `makaron-update` path and `migrations/` folder).
   - Check that new keyboard shortcuts don't conflict with Polish characters (lowercase and uppercase: ą, ć, ę, ł, ń, ó, ś, ź, ż, Ą, Ć, Ę, Ł, Ń, Ó, Ś, Ź, Ż).
