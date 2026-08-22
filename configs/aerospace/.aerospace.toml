@@ -12,7 +12,6 @@ config-version = 2
 start-at-login = true
 
 # Commands to run after AeroSpace startup
-# Border colors are loaded from theme file via makaron-reload-aerospace-sketchybar
 after-startup-command = []
 
 # Trigger SketchyBar when workspace changes

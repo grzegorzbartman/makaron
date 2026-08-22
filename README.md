@@ -4,7 +4,7 @@
 
 Complete macOS development environment for PHP and Drupal developers with AeroSpace window management, a SketchyBar top status bar, Ghostty, and optional productivity tools.
 
-![Makaron desktop with AeroSpace tiling, SketchyBar, window gaps, and theme-aware borders](docs/images/makaron-desktop.png)
+![Makaron desktop with AeroSpace tiling, SketchyBar, and window gaps](docs/images/makaron-desktop.png)
 
 > [!IMPORTANT]
 > **Use this as a starting point, not a finished product.** Makaron is a personal, opinionated setup that changes frequently - widgets get added, removed, or rewired, defaults are tweaked, and breaking changes can land between updates. The best way to use it is to **fork the repository**, install from your own fork, and adjust it to fit your own workflow.
@@ -34,9 +34,7 @@ After installation, reload your shell or open a new terminal.
 
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
-- **SketchyBar** - Custom top status bar
-- **JankyBorders** - Optional theme-aware window borders
-- **Themes v2** - Seven coordinated SketchyBar, border, wallpaper, and appearance presets
+- **SketchyBar** - Custom top status bar with a translucent, macOS-native look
 - **Nerd Fonts** - Developer-friendly fonts with icon support
 
 ### Productivity Tools
@@ -100,26 +98,20 @@ This command will:
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
-- **`makaron-theme list|current|set <name>`** - List, inspect, or switch desktop themes
-- **`makaron-borders on|off|toggle`** - Control theme-aware window borders
 - **`makaron-gaps <0-40>`** - Set persistent AeroSpace window gaps
 - **`makaron-gaps-zero`** - Set window gaps to zero
 - **`makaron-macos-config-reload`** - Apply macOS settings
-
-Available themes: `glass-light`, `everforest`, `tokyo-night`, `catppuccin`, `kanagawa`, `matte-black`, and `retro-82`. The seven compatibility wrappers, such as `makaron-theme-everforest`, call the same central theme command.
 
 ### UI Modes
 
 | Command | Components | Dock | Menu Bar | Layout |
 |---|---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar, optional Borders | Hidden | Hidden | configured gaps, theme-aware borders |
+| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | configured gaps |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-The default layout uses theme-aware borders and a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `40 + g` pixels above windows for SketchyBar, while a notched built-in display uses `g`; external monitors always use `40 + g`. For example:
+The default layout uses a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `40 + g` pixels above windows for SketchyBar, while a notched built-in display uses `g`; external monitors always use `40 + g`. For example:
 
 ```bash
-makaron-theme set everforest
-makaron-borders on
 makaron-gaps 12
 ```
 
@@ -205,7 +197,7 @@ install/
 ├── mandatory.sh        # Core requirements
 ├── packages.sh         # Optional package selector
 ├── brew.sh             # Homebrew setup
-├── desktop/            # AeroSpace, SketchyBar, Borders, fonts
+├── desktop/            # AeroSpace, SketchyBar, fonts
 ├── terminal/           # Ghostty and terminal helpers
 ├── editors/            # Editor application installers
 ├── development/        # Languages, frameworks, dev tools
@@ -215,11 +207,9 @@ install/
 ## Files
 
 - `configs/aerospace/.aerospace.toml` - AeroSpace config
-- `configs/sketchybar/colors.sh` - Resolves the selected theme for SketchyBar
+- `configs/sketchybar/colors.sh` - SketchyBar color palette
 - `configs/sketchybar/sketchybarrc` - SketchyBar status bar config
 - `configs/sketchybar/plugins/` - SketchyBar plugin scripts
-- `themes/` - Exactly seven theme contracts and their wallpapers
-- `~/.config/borders/bordersrc` - Generated theme colors for the Borders service
 - `install/` - Modular installation scripts
 - `migrations/` - Database-style migrations for configuration updates
 - `templates/makaron.conf.default` - Default user configuration template
@@ -262,15 +252,8 @@ SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 AEROSPACE_SWIPE_FINGERS=4               # Fingers used to switch workspaces
 AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
-MAKARON_THEME=glass-light               # Selected desktop theme
-THEME_SET_WALLPAPER=true                 # Change wallpaper with the theme
-THEME_SET_MACOS_APPEARANCE=true          # Change macOS light/dark mode with the theme
-BORDERS_ENABLED=true                     # Enable JankyBorders
-BORDER_WIDTH=5                           # Window border width
 AEROSPACE_GAP_SIZE=12                    # Window gap in pixels (0-40)
 ```
-
-Themes do not modify Ghostty, VS Code, Cursor, the macOS accent color, gaps, borders enabled state, or UI mode.
 
 ## Contributing
 
