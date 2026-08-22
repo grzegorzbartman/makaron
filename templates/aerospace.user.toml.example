@@ -1,0 +1,22 @@
+# Makaron AeroSpace overrides
+# Rename this file to aerospace.user.toml to activate, then run:
+#   makaron-reload-aerospace-sketchybar
+#
+# Rules: single-line `key = value` only. Your keys win over the base config.
+# Your [[on-window-detected]] rules run BEFORE Makaron's routing/float rules,
+# so a rule for the same app overrides the default. The [gaps] block is
+# managed by `makaron-gaps` and cannot be overridden here.
+
+# --- add or rebind keys ---
+# [mode.main.binding]
+# alt-enter = 'exec-and-forget open -na Ghostty'
+
+# --- route an app to a workspace (find the id: aerospace list-apps) ---
+# [[on-window-detected]]
+# if.app-id = "com.spotify.client"
+# run = ["move-node-to-workspace 5"]
+
+# --- undo a Makaron routing/float rule for an app ---
+# [[on-window-detected]]
+# if.app-id = "com.flexibits.fantastical2.mac"
+# run = ["layout tiling"]

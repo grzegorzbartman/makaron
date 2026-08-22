@@ -7,6 +7,14 @@ MAKARON_TEMPLATE="$MAKARON_PATH/templates/makaron.conf.default"
 
 mkdir -p "$MAKARON_CONF_DIR"
 
+# Seed override examples (never overwritten; user renames to activate)
+for _example in "$MAKARON_PATH"/templates/*.example; do
+    [ -f "$_example" ] || continue
+    _dest="$MAKARON_CONF_DIR/$(basename "$_example")"
+    [ -f "$_dest" ] || cp "$_example" "$_dest"
+done
+unset _example _dest
+
 if [ ! -f "$MAKARON_CONF" ]; then
     cp "$MAKARON_TEMPLATE" "$MAKARON_CONF"
 else

@@ -299,6 +299,16 @@ AEROSPACE_GAP_SIZE=12                    # Persistent gap (0-40)
 
 ---
 
+## User Overrides
+
+Users customize without forking via files in `~/.config/makaron/` (seeded as `*.example` by `install/makaron-conf.sh`, activated by renaming):
+- `aerospace.user.toml` - merged with `configs/aerospace/.aerospace.toml` by `bin/makaron-aerospace-generate` (bash+awk) into `~/.config/makaron/generated/aerospace.toml`; `~/.aerospace.toml` symlinks to the GENERATED file. Semantics: single-line `key = value` only; user keys win in named tables; user-only tables appended; user `[[on-window-detected]]` rules run after the auto-dwindle catch-all but before base routing/float rules (first-match-wins = user overrides routing); `[gaps]` is base-only (protects the sed/verify contract). Malformed user file -> base-only output + `fallback` status in `~/.local/state/makaron/aerospace-generate.status`, never nonzero exit. A merged config rejected by `aerospace reload-config --dry-run` is rolled back to `.lastgood`.
+- `colors.user.sh` - sourced at the end of `configs/sketchybar/colors.sh` (reaches sketchybarrc and all plugins).
+- `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
+- `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
+- Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
+- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds both `sketchybarrc` and `_get_bar_height()` in `makaron-ui-helpers`, keeping bar height and `outer.top` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config.
+
 ## Migration System
 
 ### Overview

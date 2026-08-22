@@ -182,6 +182,11 @@ if [ -f "$MAKARON_PATH/bin/makaron-migrate" ]; then
     bash "$MAKARON_PATH/bin/makaron-migrate"
 fi
 
+# Re-merge the AeroSpace config (base may have changed)
+if [ -f "$MAKARON_PATH/bin/makaron-aerospace-generate" ]; then
+    bash "$MAKARON_PATH/bin/makaron-aerospace-generate"
+fi
+
 # Reload configurations based on current UI mode. If the user explicitly
 # stopped Makaron UI, keep it stopped during update.
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then

@@ -8,6 +8,7 @@ MAKARON_TEMPLATE="$MAKARON_PATH/templates/makaron.conf.default"
 UI_MODE_FILE="${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"
 SKETCHYBAR_LINK="${MAKARON_SKETCHYBAR_LINK:-$HOME/.config/sketchybar}"
 AEROSPACE_LINK="${MAKARON_AEROSPACE_LINK:-$HOME/.aerospace.toml}"
+AEROSPACE_GENERATED="${MAKARON_AEROSPACE_GENERATED:-$HOME/.config/makaron/generated/aerospace.toml}"
 MEMORY_BINARY="${MAKARON_MEMORY_BINARY:-$MAKARON_PATH/bin/makaron-memory-stats}"
 
 DO_FIX=false
@@ -350,13 +351,46 @@ check_ui_services() {
     fi
 }
 
+check_aerospace_generated() {
+    local base="$MAKARON_PATH/configs/aerospace/.aerospace.toml"
+    local user_file="$HOME/.config/makaron/aerospace.user.toml"
+    local status_file="$HOME/.local/state/makaron/aerospace-generate.status"
+
+    if [ ! -f "$AEROSPACE_GENERATED" ] ||
+        [ "$base" -nt "$AEROSPACE_GENERATED" ] ||
+        { [ -f "$user_file" ] && [ "$user_file" -nt "$AEROSPACE_GENERATED" ]; }; then
+        if [ "$DO_FIX" = true ] && [ -f "$MAKARON_PATH/bin/makaron-aerospace-generate" ]; then
+            bash "$MAKARON_PATH/bin/makaron-aerospace-generate" >/dev/null 2>&1
+            if [ -f "$AEROSPACE_GENERATED" ]; then
+                add_result "fixed" "aerospace-generated" "regenerated"
+            else
+                add_result "fail" "aerospace-generated" "regeneration failed"
+            fi
+        elif [ ! -f "$AEROSPACE_GENERATED" ]; then
+            add_result "fail" "aerospace-generated" "missing; run makaron-doctor --fix"
+        else
+            add_result "warn" "aerospace-generated" "stale; run makaron-reload-aerospace-sketchybar"
+        fi
+        return
+    fi
+
+    local gen_status
+    gen_status=$(cat "$status_file" 2>/dev/null)
+    if [[ "$gen_status" == fallback* ]]; then
+        add_result "warn" "aerospace-generated" "aerospace.user.toml ignored: ${gen_status#fallback }"
+    else
+        add_result "ok" "aerospace-generated" "$AEROSPACE_GENERATED"
+    fi
+}
+
 run_checks() {
     check_repo
 
     if [ -d "$MAKARON_PATH" ]; then
         check_version
         check_symlink "sketchybar-symlink" "$SKETCHYBAR_LINK" "$MAKARON_PATH/configs/sketchybar"
-        check_symlink "aerospace-symlink" "$AEROSPACE_LINK" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
+        check_aerospace_generated
+        check_symlink "aerospace-symlink" "$AEROSPACE_LINK" "$AEROSPACE_GENERATED"
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
         check_bin_permissions
         check_makaron_conf

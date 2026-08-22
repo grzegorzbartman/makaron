@@ -16,3 +16,7 @@ export SPACE_FOCUSED_ICON_COLOR=0xffffffff
 export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
 export SPACE_FOCUSED_BACKGROUND_COLOR=0xff007AFF
 export SPACE_FOCUSED_BORDER_COLOR=0xff007AFF
+
+# User color overrides (sourced by sketchybarrc and every plugin)
+# shellcheck disable=SC1090
+[ -f "$HOME/.config/makaron/colors.user.sh" ] && source "$HOME/.config/makaron/colors.user.sh"

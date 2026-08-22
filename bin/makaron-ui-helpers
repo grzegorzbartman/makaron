@@ -9,9 +9,19 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 # Invalidate from display_change.sh on monitor hotplug.
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_has_builtin_notch}"
 
-# Constants for desktop layout.
-# Must match `height=...` in sketchybarrc.
-MAKARON_SKETCHYBAR_HEIGHT=40
+# Bar height, shared with sketchybarrc via SKETCHYBAR_HEIGHT in makaron.conf.
+_get_bar_height() {
+    (
+        SKETCHYBAR_HEIGHT=40
+        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
+        if [[ "${SKETCHYBAR_HEIGHT:-}" =~ ^[0-9]+$ ]] &&
+            [ "$SKETCHYBAR_HEIGHT" -ge 20 ] && [ "$SKETCHYBAR_HEIGHT" -le 80 ]; then
+            echo "$SKETCHYBAR_HEIGHT"
+        else
+            echo 40
+        fi
+    )
+}
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
 MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.right)
@@ -113,7 +123,7 @@ _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
-            local bar_top=$((MAKARON_SKETCHYBAR_HEIGHT + gap))
+            local bar_top=$(( $(_get_bar_height) + gap ))
             if [ "$has_notch" = "true" ]; then
                 echo "    outer.top = [{ monitor.\"Built-in\" = $gap }, $bar_top]"
             else

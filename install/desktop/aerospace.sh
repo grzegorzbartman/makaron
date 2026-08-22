@@ -37,24 +37,27 @@ if command -v aerospace &>/dev/null && _aerospace_below_021; then
     _aerospace_below_021 && { brew reinstall --cask nikitabobko/tap/aerospace || echo "Warning: AeroSpace upgrade failed (continuing...)"; }
 fi
 
-# Setup AeroSpace config
+# Setup AeroSpace config: base + user overrides merged into a generated file
+AEROSPACE_GENERATED="$HOME/.config/makaron/generated/aerospace.toml"
+bash "$MAKARON_PATH/bin/makaron-aerospace-generate"
+
 if [ ! -L "$HOME/.aerospace.toml" ] && [ ! -f "$HOME/.aerospace.toml" ]; then
-    ln -s "$MAKARON_PATH/configs/aerospace/.aerospace.toml" "$HOME/.aerospace.toml"
+    ln -s "$AEROSPACE_GENERATED" "$HOME/.aerospace.toml"
 else
-    # Check if symlink points to wrong location
+    # Check if symlink points to wrong location (including the old repo target)
     if [ -L "$HOME/.aerospace.toml" ]; then
         current_target=$(readlink "$HOME/.aerospace.toml")
-        if [[ "$current_target" != "$MAKARON_PATH/configs/aerospace/.aerospace.toml" ]]; then
+        if [[ "$current_target" != "$AEROSPACE_GENERATED" ]]; then
             echo "Fixing AeroSpace symlink to point to new location..."
             rm "$HOME/.aerospace.toml"
-            ln -s "$MAKARON_PATH/configs/aerospace/.aerospace.toml" "$HOME/.aerospace.toml"
+            ln -s "$AEROSPACE_GENERATED" "$HOME/.aerospace.toml"
         fi
     else
         read -p "AeroSpace config exists. Overwrite? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             rm -f "$HOME/.aerospace.toml"
-            ln -s "$MAKARON_PATH/configs/aerospace/.aerospace.toml" "$HOME/.aerospace.toml"
+            ln -s "$AEROSPACE_GENERATED" "$HOME/.aerospace.toml"
         fi
     fi
 fi

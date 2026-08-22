@@ -5,8 +5,16 @@
 WORKSPACE=$1
 MONITOR=$2
 
+# Optional user icon overrides: define makaron_user_app_icon() returning a glyph
+# shellcheck disable=SC1090
+[ -f "$HOME/.config/makaron/icons.user.sh" ] && source "$HOME/.config/makaron/icons.user.sh"
+
 # Map app names to icons (using Nerd Font icons)
 get_app_icon() {
+if type makaron_user_app_icon >/dev/null 2>&1; then
+    _user_icon="$(makaron_user_app_icon "$1")"
+    if [ -n "$_user_icon" ]; then echo "$_user_icon"; return; fi
+fi
 case "$1" in
 "kitty"|"Alacritty"|"iTerm2"|"Terminal"|"WezTerm"|"Ghostty") echo "" ;;
 "Safari"|"safari") echo "󰀹" ;;

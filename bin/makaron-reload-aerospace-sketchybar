@@ -8,6 +8,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "$SCRIPT_DIR/makaron-ui-helpers"
 
+# Re-merge base + user overrides into the generated AeroSpace config.
+bash "$SCRIPT_DIR/makaron-aerospace-generate"
+
 # Start AeroSpace if not running (apply_desktop_state will trigger reload-config).
 if ! pgrep -f "AeroSpace" > /dev/null; then
     echo "AeroSpace not running, starting..."
