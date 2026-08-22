@@ -18,3 +18,4 @@ bin/makaron-bar
 
 # OpenCode planning directory
 .opencode/
+.gstack/
