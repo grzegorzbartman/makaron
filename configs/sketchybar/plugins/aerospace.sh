@@ -99,14 +99,21 @@ else
 fi
 
 # Collect unique app names for the workspace and turn them into icons.
+# Breathing room between glyphs; at most 3 icons, a dot marks the rest.
 windows=$(aerospace list-windows --workspace "$WORKSPACE" 2>/dev/null | awk -F'|' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u)
 
 icons=""
+icon_count=0
 while IFS= read -r app; do
   if [[ -n "$app" ]]; then
+    icon_count=$((icon_count + 1))
+    if [[ "$icon_count" -gt 3 ]]; then
+      icons="$icons ·"
+      break
+    fi
     icon=$(get_app_icon "$app")
     if [[ -n "$icons" ]]; then
-      icons="$icons $icon"
+      icons="$icons  $icon"
     else
       icons="$icon"
     fi
