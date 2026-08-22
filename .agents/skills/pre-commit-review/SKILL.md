@@ -1,6 +1,6 @@
 ---
 name: pre-commit-review
-description: Pre commit review
+description: Pre-commit review checklist for Makaron - run before every commit to check update-path and migration risk and Polish-character shortcut conflicts.
 disable-model-invocation: true
 ---
 
