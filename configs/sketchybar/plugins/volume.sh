@@ -1,80 +1,81 @@
 #!/bin/sh
-
-# The volume_change event supplies a $INFO variable in which the current volume
-# percentage is passed to the script.
+# Volume for SketchyBar. Idle state is a quiet icon; on a volume change or an
+# output-device switch (speakers <-> bluetooth) the section lights up in the
+# accent color with the percent label for 3 seconds, then eases back.
 
 source "$CONFIG_DIR/colors.sh"
 
 CACHE_FILE="/tmp/sketchybar_$(id -u)_audio_device"
 CACHE_DURATION=5  # seconds
+DEVICE_FILE="/tmp/sketchybar_$(id -u)_volume_out_device"
 TS_FILE="/tmp/sketchybar_$(id -u)_volume_ts"
+
+ACCENT="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff007aff}"
+IDLE_ICON="${ICON_COLOR:-0xffc0caf5}"
 
 if [ "$SENDER" = "volume_change" ]; then
   VOLUME="$INFO"
-  SHOW_LABEL=true
+  VOLUME_CHANGED=true
 else
-  # Startup/forced refresh: draw the icon, no transient percent label
+  # Periodic/forced run: read volume, watch for output-device switches
   VOLUME=$(osascript -e 'output volume of (get volume settings)' 2>/dev/null)
   case "$VOLUME" in (*[!0-9]*|"") exit 0 ;; esac
-  SHOW_LABEL=false
+  VOLUME_CHANGED=false
 fi
 
-# Check if the default output device is Bluetooth (headphones)
+# Detect the output device (cached - system_profiler is slow)
 IS_HEADPHONES=false
-
-# Use cached result if available and recent (within 5 seconds)
 if [ -f "$CACHE_FILE" ] && [ $(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0))) -lt $CACHE_DURATION ]; then
   IS_HEADPHONES=$(cat "$CACHE_FILE")
 else
-  # Query audio device info (slow operation)
   AUDIO_INFO=$(system_profiler SPAudioDataType 2>/dev/null)
-
-  # Look for "Transport: Bluetooth" within the Default Output Device section
   if echo "$AUDIO_INFO" | grep -A 5 "Default Output Device: Yes" | grep -q "Transport: Bluetooth"; then
     IS_HEADPHONES=true
   fi
-
-  # Cache the result
   echo "$IS_HEADPHONES" > "$CACHE_FILE"
 fi
 
-# Choose icon based on device type and volume
+# Device switch since the last render? (first run only records)
+PREV_DEVICE=$(cat "$DEVICE_FILE" 2>/dev/null)
+echo "$IS_HEADPHONES" > "$DEVICE_FILE"
+DEVICE_CHANGED=false
+if [ -n "$PREV_DEVICE" ] && [ "$PREV_DEVICE" != "$IS_HEADPHONES" ]; then
+  DEVICE_CHANGED=true
+fi
+
 if [ "$IS_HEADPHONES" = true ]; then
-  # Headphone icons
   case "$VOLUME" in
-    [6-9][0-9]|100) ICON="󰋋"  # Headphones high
-    ;;
-    [3-5][0-9]) ICON="󰋋"       # Headphones medium
-    ;;
-    [1-9]|[1-2][0-9]) ICON="󰋋" # Headphones low
-    ;;
-    *) ICON="󰟎"                # Headphones muted
+    0|"") ICON="󰟎" ;;
+    *) ICON="󰋋" ;;
   esac
 else
-  # Speaker icons (original)
   case "$VOLUME" in
-    [6-9][0-9]|100) ICON="󰕾"
-    ;;
-    [3-5][0-9]) ICON="󰖀"
-    ;;
-    [1-9]|[1-2][0-9]) ICON="󰕿"
-    ;;
-    *) ICON="󰖁"
+    [6-9][0-9]|100) ICON="󰕾" ;;
+    [3-5][0-9]) ICON="󰖀" ;;
+    [1-9]|[1-2][0-9]) ICON="󰕿" ;;
+    *) ICON="󰖁" ;;
   esac
 fi
 
-if [ "$SHOW_LABEL" = true ]; then
-  # Percent only matters while changing: show it, clear 2s after the last event
+if [ "$VOLUME_CHANGED" = true ] || [ "$DEVICE_CHANGED" = true ]; then
+  # Light up in accent for 3s (timestamp-guarded against rapid scrubbing)
   TS=$(date +%s%N 2>/dev/null || date +%s)
   echo "$TS" > "$TS_FILE"
   sketchybar --set "$NAME" icon="$ICON" label="$VOLUME%" label.drawing=on \
-    icon.color="${ICON_COLOR:-0xffc0caf5}" \
-    label.color="${LABEL_COLOR:-0xffc0caf5}"
+             --animate sin 12 --set "$NAME" icon.color="$ACCENT" label.color="$ACCENT"
   (
-    sleep 2
-    [ "$(cat "$TS_FILE" 2>/dev/null)" = "$TS" ] && sketchybar --set "$NAME" label.drawing=off
+    sleep 3
+    if [ "$(cat "$TS_FILE" 2>/dev/null)" = "$TS" ]; then
+      sketchybar --animate sin 20 --set "$NAME" icon.color="$IDLE_ICON" \
+                 --set "$NAME" label.drawing=off
+    fi
   ) &
 else
-  sketchybar --set "$NAME" icon="$ICON" label.drawing=off \
-    icon.color="${ICON_COLOR:-0xffc0caf5}"
+  # Idle refresh: never clobber an active highlight
+  LAST_TS=$(cat "$TS_FILE" 2>/dev/null)
+  if [ -n "$LAST_TS" ]; then
+    NOW=$(date +%s%N 2>/dev/null || date +%s)
+    [ $((NOW - LAST_TS)) -lt 3000000000 ] 2>/dev/null && exit 0
+  fi
+  sketchybar --set "$NAME" icon="$ICON" icon.color="$IDLE_ICON" label.drawing=off
 fi

@@ -25,4 +25,5 @@ else
 fi
 
 sketchybar --set "$NAME" label="${CPU_PCT}%" \
+           --animate sin 15 --set "$NAME" \
   icon.color="$COLOR" label.color="$COLOR" 2>/dev/null

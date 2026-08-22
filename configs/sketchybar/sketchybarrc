@@ -158,7 +158,7 @@ sketchybar --add item spacer_time right \
                       click_script="open 'x-apple.systempreferences:com.apple.preference.network'" \
            --subscribe wifi wifi_change \
            --add item volume right \
-           --set volume icon.padding_left=4 icon.padding_right=2 \
+           --set volume update_freq=10 icon.padding_left=4 icon.padding_right=2 \
                         label.padding_left=0 label.padding_right=4 \
                         script="$PLUGIN_DIR/volume.sh" \
            --subscribe volume volume_change \

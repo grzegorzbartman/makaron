@@ -43,5 +43,6 @@ else
 fi
 
 sketchybar --set "$NAME" icon="$ICON" label="${PERCENTAGE}%" \
+           --animate sin 15 --set "$NAME" \
   icon.color="$DISPLAY_ICON_COLOR" \
   label.color="$DISPLAY_LABEL_COLOR"

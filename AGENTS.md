@@ -170,7 +170,7 @@ ALERT_COLOR, ALERT_BACKGROUND_COLOR
 - **memory.sh** - Calls compiled Swift binary `makaron-memory-stats`, shows `X/Y GB`.
 - **cpu.sh** / **memory.sh** - Always visible (CPU percent, memory `X/Y GB`); label turns `ALERT_COLOR` above `CPU_ALERT_THRESHOLD` / `MEMORY_ALERT_THRESHOLD` (80%).
 - **storage.sh** - Threshold alert: invisible below `STORAGE_ALERT_THRESHOLD` (90%); above, an `ALERT_*`-tinted pill appears.
-- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons. Icon-only; the percent label shows for 2s after a volume change.
+- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons. Icon-only at rest; a volume change or output-device switch lights the section in the accent color with the percent label for 3s, then eases back.
 - **update_check.sh** - `makaron_update` item, hidden unless the installed repo is behind its channel target (fetches every 4h and on wake); click runs `makaron-update` in Ghostty.
 - **display_change.sh** - Invalidates display caches and reapplies layout on every display topology change; reloads SketchyBar when monitor count changes.
 
