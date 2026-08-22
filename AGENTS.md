@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar uses a translucent, macOS-native glass look with static colors in `configs/sketchybar/colors.sh`.
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with static colors in `configs/sketchybar/colors.sh`. The bar's `y_offset=4` in sketchybarrc must match `MAKARON_BAR_Y_OFFSET` in `bin/makaron-ui-helpers` - it is part of the window `outer.top` math.
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -153,7 +153,7 @@ All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/c
 
 ```bash
 # Bar
-BAR_COLOR, BAR_BACKGROUND_COLOR, BAR_BLUR
+BAR_COLOR, BAR_BACKGROUND_COLOR, BAR_BLUR, BAR_BORDER_COLOR
 # Items
 ICON_COLOR, LABEL_COLOR
 # Workspaces (inactive)

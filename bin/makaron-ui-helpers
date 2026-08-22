@@ -9,6 +9,9 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 # Invalidate from display_change.sh on monitor hotplug.
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_has_builtin_notch}"
 
+# Floating-bar offset from the top edge. Must match y_offset in sketchybarrc.
+MAKARON_BAR_Y_OFFSET=4
+
 # Bar height, shared with sketchybarrc via SKETCHYBAR_HEIGHT in makaron.conf.
 _get_bar_height() {
     (
@@ -123,7 +126,7 @@ _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
-            local bar_top=$(( $(_get_bar_height) + gap ))
+            local bar_top=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET + gap ))
             if [ "$has_notch" = "true" ]; then
                 echo "    outer.top = [{ monitor.\"Built-in\" = $gap }, $bar_top]"
             else
