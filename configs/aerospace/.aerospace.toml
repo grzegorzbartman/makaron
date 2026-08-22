@@ -130,6 +130,9 @@ persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
     # Open a new terminal window (like in i3)
     alt-enter = 'exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/new-terminal.sh'
 
+    # Keyboard shortcut overlay ("?"); press again or esc to close
+    alt-shift-slash = 'exec-and-forget $HOME/.local/share/makaron/bin/makaron-help'
+
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
     alt-slash = 'layout tiles horizontal vertical'
     alt-comma = 'layout accordion horizontal vertical'

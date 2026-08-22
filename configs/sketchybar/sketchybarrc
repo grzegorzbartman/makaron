@@ -66,6 +66,9 @@ if [ "$SKETCHYBAR_LOGO" = "true" ]; then
              --set makaron.version label="Makaron" update_freq=3600 \
                    label.padding_left=10 label.padding_right=10 \
                    script="$PLUGIN_DIR/makaron_menu.sh" \
+             --add item makaron.shortcuts popup.makaron_logo \
+             --set makaron.shortcuts label="Shortcuts" \
+                   click_script="sketchybar --set makaron_logo popup.drawing=off; $HOME/.local/share/makaron/bin/makaron-help" \
              --add item makaron.update popup.makaron_logo \
              --set makaron.update label="Update" \
                    click_script="sketchybar --set makaron_logo popup.drawing=off; open -na Ghostty --args -e $HOME/.local/share/makaron/bin/makaron-update" \

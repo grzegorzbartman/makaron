@@ -24,6 +24,14 @@ if [ -f "$MAKARON_PATH/src/has_notch.swift" ]; then
     }
 fi
 
+# Compile shortcut overlay panel (NSPanel + WKWebView, used by makaron-help)
+if [ -f "$MAKARON_PATH/src/help_window.swift" ]; then
+    echo "Compiling help_window..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-help-window" "$MAKARON_PATH/src/help_window.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile help_window.swift, makaron-help will open in the browser"
+    }
+fi
+
 # Setup SketchyBar config
 mkdir -p "$HOME/.config"
 

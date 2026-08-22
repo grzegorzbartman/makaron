@@ -191,14 +191,14 @@ makaron-reload-aerospace-sketchybar
 
 Keyboard shortcuts are configured in `configs/aerospace/.aerospace.toml`.
 
-Common defaults include:
-- `alt-h/j/k/l` - Focus windows
-- `alt-shift-h/j/k/l` - Move windows
-- `alt-1..9` - Switch workspaces
-- `alt-shift-1..9` - Move window to workspace
-- `alt-f` - Toggle fullscreen
+Press `alt-shift-/` (that is: `?`) anytime to open the shortcut overlay - a floating glass panel listing every binding, generated live from your config so it always matches what is actually bound, including your own overrides. Press it again or `esc` to close. Also available from the Makaron menu in the bar (Shortcuts).
 
-Review the AeroSpace config for the full list.
+Highlights:
+- `alt-1..0`, `alt-q/w` - Switch workspaces
+- `alt-shift-1..0` - Move window to workspace
+- `alt-enter` - New terminal window
+- `alt-comma` / `alt-slash` - Accordion / tiled layout
+- `alt-m` - Fullscreen (monocle)
 
 ## Modular Installation
 
