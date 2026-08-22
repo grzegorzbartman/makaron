@@ -167,6 +167,13 @@ _emit_ws_group() {
 _section() { [ -n "$2" ] && printf '<section><h2>%s</h2>%s</section>' "$1" "$2"; }
 
 VERSION=$("$MAKARON_PATH/bin/makaron-version" 2>/dev/null || echo "")
+# Full wordmark from the brand assets; thicker stroke stays ~1px at header size
+LOGO_FILE="$MAKARON_PATH/assets/branding/makaron-logo.svg"
+if [ -f "$LOGO_FILE" ]; then
+    LOGO_HTML=$(sed 's/#0F172A/currentColor/g; s/stroke-width="22"/stroke-width="34"/' "$LOGO_FILE")
+else
+    LOGO_HTML='<span class="wordmark">Makaron</span>'
+fi
 SERVICE_HEAD="Service mode"
 [ -n "$SERVICE_ENTRY" ] && SERVICE_HEAD="Service mode <span class=\"entry\">${SERVICE_ENTRY} then</span>"
 SWIPE_ROW=$(_row "<kbd>${AEROSPACE_SWIPE_FINGERS:-4}-finger swipe</kbd>" "Switch workspace")
@@ -185,9 +192,10 @@ body {
   padding: 26px 32px 20px; -webkit-user-select: none; cursor: default;
   height: 100vh; display: flex; flex-direction: column; overflow: hidden;
 }
-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-header svg { width: 26px; height: 25px; opacity: .9; }
-header h1 { font-size: 16px; font-weight: 600; letter-spacing: .2px; }
+header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+header svg { height: 24px; width: auto; opacity: .92; }
+.wordmark { font-size: 20px; font-weight: 700; letter-spacing: .04em; }
+.ht { font-size: 13px; opacity: .55; }
 main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px 30px; flex: 1; align-content: start; overflow-y: auto; }
 section { margin-bottom: 14px; break-inside: avoid; }
 h2 { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; opacity: .5; margin-bottom: 7px; }
@@ -210,15 +218,15 @@ footer { display: flex; justify-content: space-between; font-size: 11px; opacity
 }
 </style></head><body>
 <header>
-<svg viewBox="-22 -685 770 727" aria-label="Makaron"><path fill="none" stroke="currentColor" stroke-width="30" stroke-linejoin="round" d="M492 -643H640Q661 -643 661 -622V-21Q661 0 640 0H558Q537 0 537 -21V-495H533L431 -160Q425 -140 406 -140H322Q303 -140 297 -160L193 -496H189V-21Q189 -9 185.0 -4.5Q181 0 168 0H86Q65 0 65 -21V-622Q65 -643 86 -643H235Q249 -643 254 -629L360 -276H366L473 -629Q476 -643 492 -643Z"/></svg>
-<h1>Keyboard Shortcuts</h1>
+${LOGO_HTML}
+<span class="ht">Keyboard Shortcuts</span>
 </header>
 <main>
 <div>$(_section "Workspaces" "$SEC_WS")$(_section "Move windows" "$SEC_MOVE")</div>
 <div>$(_section "Focus &amp; resize" "$SEC_FOCUS")$(_section "Layouts" "$SEC_LAYOUT")</div>
 <div>$(_section "Apps" "$SEC_APPS")$(_section "$SERVICE_HEAD" "$SEC_SERVICE")$(_section "Trackpad" "$SWIPE_ROW")$(_section "Other" "$SEC_OTHER")</div>
 </main>
-<footer><span>Makaron ${VERSION}</span><span>esc to close</span></footer>
+<footer><span>${VERSION}</span><span>esc to close</span></footer>
 </body></html>
 EOF
 

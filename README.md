@@ -20,6 +20,9 @@ so your screen holds only what you are working on.
 > [!NOTE]
 > Makaron is an opinionated setup, but you don't need to fork it. Install it, follow the stable release channel, and customize it through override files in `~/.config/makaron/` that survive every update - see [Customizing Makaron](#customizing-makaron).
 
+> [!TIP]
+> No shortcuts to memorize: press `alt-shift-/` (that is: `?`) anytime to open the shortcut overlay - a floating panel listing every binding, generated live from your config. See [Keyboard Shortcuts](#keyboard-shortcuts).
+
 ## Perfect For
 
 - **Keyboard-driven workers** - Switch, tile, and resize windows without touching the mouse
