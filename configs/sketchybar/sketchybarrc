@@ -45,6 +45,40 @@ default=(
 )
 sketchybar --default "${default[@]}"
 
+##### Makaron Menu (the "Apple menu" of the bar) #####
+# A small M mark; click opens a popup with Makaron actions.
+SKETCHYBAR_LOGO="${SKETCHYBAR_LOGO:-true}"
+if [ "$SKETCHYBAR_LOGO" = "true" ]; then
+  sketchybar --add item makaron_logo left \
+             --set makaron_logo icon.drawing=off label.drawing=off \
+                   padding_left=2 padding_right=2 width=30 \
+                   background.drawing=on \
+                   background.color=$SPACE_BACKGROUND_COLOR \
+                   background.corner_radius=12 \
+                   background.height=24 \
+                   background.image="$CONFIG_DIR/assets/$MAKARON_MARK" \
+                   background.image.scale=0.4 \
+                   click_script="sketchybar --set makaron_logo popup.drawing=toggle" \
+                   popup.background.color=$BAR_COLOR \
+                   popup.background.corner_radius=12 \
+                   popup.background.blur_radius=${BAR_BLUR:-0} \
+                   popup.background.border_width=1 \
+                   popup.background.border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+             --add item makaron.version popup.makaron_logo \
+             --set makaron.version label="Makaron" update_freq=3600 \
+                   label.padding_left=10 label.padding_right=10 \
+                   script="$PLUGIN_DIR/makaron_menu.sh" \
+             --add item makaron.update popup.makaron_logo \
+             --set makaron.update label="Update" \
+                   click_script="sketchybar --set makaron_logo popup.drawing=off; open -na Ghostty --args -e $HOME/.local/share/makaron/bin/makaron-update" \
+             --add item makaron.doctor popup.makaron_logo \
+             --set makaron.doctor label="Doctor" \
+                   click_script="sketchybar --set makaron_logo popup.drawing=off; open -na Ghostty --args -e /bin/bash -c '$HOME/.local/share/makaron/bin/makaron-doctor; echo; read -n 1 -s -p \"Press any key to close\"'" \
+             --add item makaron.reload popup.makaron_logo \
+             --set makaron.reload label="Reload bar" \
+                   click_script="sketchybar --set makaron_logo popup.drawing=off; $HOME/.local/share/makaron/bin/makaron-reload-aerospace-sketchybar"
+fi
+
 ##### Adding AeroSpace Workspace Indicators #####
 # Integration with AeroSpace window manager
 # https://nikitabobko.github.io/AeroSpace/goodness#show-aerospace-workspaces-in-sketchybar

@@ -146,7 +146,7 @@ Plugins live in `configs/sketchybar/plugins/`. Each plugin follows this pattern:
 3. Update SketchyBar: `sketchybar --set "$NAME" icon="..." label="..." icon.color=$COLOR`
 
 ### Color Format
-All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves the palette from the system appearance (`defaults read -g AppleInterfaceStyle`): light and dark liquid-glass variants, each with the matching system blue (`007aff` light / `0a84ff` dark). `plugins/appearance_change.sh` (hidden `appearance_check` item, 10s poll) reloads the bar when the appearance flips.
+All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves the brand palette (see `assets/branding/COLORS.md`: Ink/Cream glyphs, Blue #0d6efd focus, Amber update dot, Red alerts) from the system appearance (`defaults read -g AppleInterfaceStyle`): light and dark liquid-glass variants, each with the matching system blue (`007aff` light / `0a84ff` dark). `plugins/appearance_change.sh` (hidden `appearance_check` item, 10s poll) reloads the bar when the appearance flips.
 
 ### SketchyBar Color Variables
 `configs/sketchybar/colors.sh` exports:
@@ -165,6 +165,7 @@ ALERT_COLOR, ALERT_BACKGROUND_COLOR
 ```
 
 ### Key Plugins
+- **makaron_menu.sh** - Version label for the `makaron_logo` popup (the bar's "Apple menu": outline M mark from `configs/sketchybar/assets/`, first item on the left, gated by `SKETCHYBAR_LOGO`; popup has Update / Doctor / Reload bar).
 - **aerospace.sh** - Workspace indicator with animated (`--animate sin 12`) three-level hierarchy: focused = accent pill + app icons, occupied = quiet pill + app icons, empty = bare dimmed number. Icons use Nerd Font. Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
 - **battery.sh** - Battery status with low-threshold warning from `makaron.conf`.
 - **memory.sh** - Calls compiled Swift binary `makaron-memory-stats`, shows `X/Y GB`.
@@ -316,6 +317,7 @@ AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces 
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Show storage item only above this disk usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
 MEMORY_ALERT_THRESHOLD=80               # Memory label turns alert color above this usage (%)

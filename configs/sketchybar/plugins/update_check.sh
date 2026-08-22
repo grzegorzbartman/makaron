@@ -27,7 +27,7 @@ HEAD_REV=$(git -C "$REPO" rev-parse HEAD 2>/dev/null)
 
 if [ -n "$TARGET" ] && [ "$HEAD_REV" != "$TARGET" ]; then
   sketchybar --set "$NAME" drawing=on icon="󰚰" \
-    icon.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff007aff}"
+    icon.color=0xfff59e0b
 else
   sketchybar --set "$NAME" drawing=off
 fi
