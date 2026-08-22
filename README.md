@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/branding/makaron-logo-dark.svg">
+  <img src="assets/branding/makaron-logo.svg" alt="MAKARON" width="360">
+</picture>
+
 # Makaron - Focused macOS Work Environment
 
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.

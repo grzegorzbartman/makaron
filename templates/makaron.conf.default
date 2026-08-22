@@ -24,6 +24,9 @@ AEROSPACE_GAP_SIZE=12
 # SketchyBar height in px (20-80). Window layout adapts automatically.
 SKETCHYBAR_HEIGHT=40
 
+# SketchyBar: show the Makaron menu (M mark, click for actions) on the left
+SKETCHYBAR_LOGO=true
+
 # SketchyBar: show the storage item only above this disk usage (%)
 STORAGE_ALERT_THRESHOLD=90
 

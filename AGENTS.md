@@ -165,6 +165,7 @@ ALERT_COLOR, ALERT_BACKGROUND_COLOR
 ```
 
 ### Key Plugins
+- **makaron_menu.sh** - Version label for the `makaron_logo` popup (the bar's "Apple menu": M mark, first item on the left, gated by `SKETCHYBAR_LOGO`; popup has Update / Doctor / Reload bar). Brand SVGs live in `assets/branding/`.
 - **aerospace.sh** - Workspace indicator with animated (`--animate sin 12`) three-level hierarchy: focused = accent pill + app icons, occupied = quiet pill + app icons, empty = bare dimmed number. Icons use Nerd Font. Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
 - **battery.sh** - Battery status with low-threshold warning from `makaron.conf`.
 - **memory.sh** - Calls compiled Swift binary `makaron-memory-stats`, shows `X/Y GB`.
@@ -316,6 +317,7 @@ AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces 
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+SKETCHYBAR_LOGO=true                    # Makaron menu (M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Show storage item only above this disk usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
 MEMORY_ALERT_THRESHOLD=80               # Memory label turns alert color above this usage (%)
