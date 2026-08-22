@@ -1,0 +1,16 @@
+#!/bin/bash
+# Print the installed Makaron version and update channel.
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+MAKARON_CONF="${MAKARON_CONF:-$HOME/.config/makaron/makaron.conf}"
+
+desc=$(git -C "$MAKARON_PATH" describe --tags --match 'v*' --always 2>/dev/null || echo unknown)
+
+channel=stable
+[ -f "$MAKARON_CONF" ] && channel=$(sed -n 's/^MAKARON_CHANNEL=//p' "$MAKARON_CONF" | tail -1)
+case "$channel" in
+    stable|edge) ;;
+    *) channel=stable ;;
+esac
+
+echo "$desc ($channel)"

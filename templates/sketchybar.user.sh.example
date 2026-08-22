@@ -1,0 +1,11 @@
+#!/bin/bash
+# Makaron SketchyBar item overrides
+# Rename to sketchybar.user.sh to activate, then run: makaron-reload-aerospace-sketchybar
+# Runs after all base items exist, right before the final --update.
+# $CONFIG_DIR and $PLUGIN_DIR are available.
+
+# Remove a widget:
+# sketchybar --remove cpu
+
+# Add your own item:
+# sketchybar --add item my_note right --set my_note label="focus"

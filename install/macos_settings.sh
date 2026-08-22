@@ -7,6 +7,36 @@
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 
+# Snapshot the pre-Makaron value of every key we are about to write.
+# Write-once: reinstalls and updates never overwrite the original values.
+snapshot_defaults() {
+    # shellcheck source=install/defaults-registry.sh
+    source "$MAKARON_PATH/install/defaults-registry.sh" || return 0
+    local f="$MAKARON_DEFAULTS_SNAPSHOT_DIR/values"
+    mkdir -p "$MAKARON_DEFAULTS_SNAPSHOT_DIR"
+    touch "$f"
+
+    local entry domain key flag val type
+    for entry in "${MAKARON_DEFAULTS_KEYS[@]}"; do
+        IFS='|' read -r domain key flag <<< "$entry"
+        grep -q "^${domain}|${key}|" "$f" && continue
+        if [ "$flag" = "currentHost" ]; then
+            val=$(defaults -currentHost read "$domain" "$key" 2>/dev/null) || val="__ABSENT__"
+            type=$(defaults -currentHost read-type "$domain" "$key" 2>/dev/null | awk '{print $3}')
+        else
+            val=$(defaults read "$domain" "$key" 2>/dev/null) || val="__ABSENT__"
+            type=$(defaults read-type "$domain" "$key" 2>/dev/null | awk '{print $3}')
+        fi
+        printf '%s|%s|%s|%s|%s\n' "$domain" "$key" "$flag" "${type:-none}" "$val" >> "$f"
+    done
+
+    # Full Dock export - persistent-apps is wiped with -array and only a
+    # domain import can bring the user's pinned apps back.
+    if [ ! -f "$MAKARON_DEFAULTS_SNAPSHOT_DIR/com.apple.dock.plist" ]; then
+        defaults export com.apple.dock "$MAKARON_DEFAULTS_SNAPSHOT_DIR/com.apple.dock.plist" 2>/dev/null || true
+    fi
+}
+
 # Keyboard settings
 configure_keyboard() {
     echo "Setting comfortable keyboard repeat rates..."
@@ -177,6 +207,7 @@ restart_applications() {
 
 echo "Configuring macOS settings for optimal use with AeroSpace..."
 
+snapshot_defaults
 configure_keyboard
 configure_finder
 configure_system

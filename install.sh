@@ -49,17 +49,45 @@ echo "📦 Repository:"
 echo "   Path: $MAKARON_PATH"
 echo ""
 
+# Latest release tag (strict vN.N.N). Full clone required - no --depth.
+latest_stable_tag() {
+    git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1
+}
+
+# Update channel from user config (default stable)
+CHANNEL=stable
+if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
+    CHANNEL=$(sed -n 's/^MAKARON_CHANNEL=//p' "$HOME/.config/makaron/makaron.conf" | tail -1)
+fi
+case "$CHANNEL" in stable|edge) ;; *) CHANNEL=stable ;; esac
+
+checkout_channel_target() {
+    local tag=""
+    if [ "$CHANNEL" = "stable" ]; then
+        tag="$(latest_stable_tag)" || tag=""
+    fi
+    if [ -n "$tag" ]; then
+        git reset --hard "refs/tags/$tag"
+        echo "   ✓ At release $tag (stable channel)"
+    else
+        git reset --hard origin/main
+        echo "   ✓ At latest main"
+    fi
+}
+
 # Clone or update
 if [ -d "$MAKARON_PATH/.git" ]; then
     echo "📥 Updating existing installation..."
     cd "$MAKARON_PATH"
-    git pull origin main || { echo "   ✗ Update failed"; exit 1; }
-    echo "   ✓ Updated"
+    git fetch --tags --prune --prune-tags --force origin || { echo "   ✗ Update failed"; exit 1; }
+    checkout_channel_target
 else
     echo "📥 Cloning fresh installation..."
     rm -rf "$MAKARON_PATH" 2>/dev/null || true
     mkdir -p "$(dirname "$MAKARON_PATH")"
     git clone "$REPO_URL" "$MAKARON_PATH" || { echo "   ✗ Clone failed"; exit 1; }
+    cd "$MAKARON_PATH"
+    checkout_channel_target
     echo "   ✓ Cloned"
 fi
 

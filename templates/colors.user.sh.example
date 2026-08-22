@@ -1,0 +1,7 @@
+#!/bin/bash
+# Makaron SketchyBar color overrides
+# Rename to colors.user.sh to activate, then run: makaron-reload-aerospace-sketchybar
+# All colors are ARGB hex: 0xAARRGGBB. Available variables: see configs/sketchybar/colors.sh
+
+# export SPACE_FOCUSED_BACKGROUND_COLOR=0xffff375f
+# export BAR_COLOR=0x66111111

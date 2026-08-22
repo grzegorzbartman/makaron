@@ -3,12 +3,40 @@
 set -e
 
 export MAKARON_PATH="$HOME/.local/share/makaron"
+MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 SKIP_CONFIRM=false
+SET_CHANNEL=""
 for arg in "$@"; do
     case "$arg" in
-        -y|--yes) SKIP_CONFIRM=true; break ;;
+        -y|--yes) SKIP_CONFIRM=true ;;
+        --stable) SET_CHANNEL=stable ;;
+        --edge) SET_CHANNEL=edge ;;
     esac
 done
+
+# Resolve update channel: flag persists the choice, conf holds it, default stable
+if [ -n "$SET_CHANNEL" ]; then
+    mkdir -p "$(dirname "$MAKARON_CONF")"
+    touch "$MAKARON_CONF"
+    if grep -q '^MAKARON_CHANNEL=' "$MAKARON_CONF"; then
+        sed -i '' "s/^MAKARON_CHANNEL=.*/MAKARON_CHANNEL=$SET_CHANNEL/" "$MAKARON_CONF"
+    else
+        printf 'MAKARON_CHANNEL=%s\n' "$SET_CHANNEL" >> "$MAKARON_CONF"
+    fi
+    echo "Update channel set to: $SET_CHANNEL"
+fi
+
+CHANNEL=stable
+[ -f "$MAKARON_CONF" ] && CHANNEL=$(sed -n 's/^MAKARON_CHANNEL=//p' "$MAKARON_CONF" | tail -1)
+case "$CHANNEL" in
+    stable|edge) ;;
+    *) CHANNEL=stable ;;
+esac
+
+# Latest release tag (strict vN.N.N - skips pre-releases and legacy tags)
+latest_stable_tag() {
+    git tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1
+}
 
 # Install gum if not available
 install_gum_if_needed() {
@@ -58,19 +86,44 @@ create_backup() {
     return 0
 }
 
-# Check if makaron exists
-if [ ! -d "$MAKARON_PATH" ]; then
+UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
+UPDATE_UI_MODE="full"
+if [ -f "$UI_MODE_FILE" ]; then
+    UPDATE_UI_MODE="$(head -n 1 "$UI_MODE_FILE" | tr -d '[:space:]')"
+    UPDATE_UI_MODE="${UPDATE_UI_MODE:-full}"
+fi
+
+if [ ! -d "$MAKARON_PATH/.git" ]; then
     echo "Makaron not found at $MAKARON_PATH"
     echo "Please run the installation script first:"
     echo "curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash"
     exit 1
 fi
 
-UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
-UPDATE_UI_MODE="full"
-if [ -f "$UI_MODE_FILE" ]; then
-    UPDATE_UI_MODE="$(head -n 1 "$UI_MODE_FILE" | tr -d '[:space:]')"
-    UPDATE_UI_MODE="${UPDATE_UI_MODE:-full}"
+cd "$MAKARON_PATH"
+
+echo "Fetching latest changes..."
+# --prune-tags requires the bare form (no refspec): fetches branches + tags,
+# drops tags deleted upstream.
+git fetch --tags --prune --prune-tags --force origin
+
+TARGET_REF="origin/main"
+TARGET_LABEL="edge (origin/main)"
+if [ "$CHANNEL" = "stable" ]; then
+    TAG="$(latest_stable_tag)" || TAG=""
+    if [ -n "$TAG" ]; then
+        TARGET_REF="refs/tags/$TAG"
+        TARGET_LABEL="$TAG (stable)"
+    else
+        TARGET_LABEL="origin/main (stable - no releases yet)"
+    fi
+fi
+
+CURRENT_DESC="$(git describe --tags --match 'v*' --always 2>/dev/null || echo unknown)"
+
+if [ "$(git rev-parse HEAD)" = "$(git rev-parse "$TARGET_REF^{commit}")" ]; then
+    echo "✅ Already up to date: $CURRENT_DESC ($CHANNEL)"
+    exit 0
 fi
 
 # Install gum if needed
@@ -81,11 +134,11 @@ echo ""
 echo "🔄 Makaron Update"
 echo "================="
 echo ""
-echo "This will update your Makaron configuration to the latest version."
+echo "Current: $CURRENT_DESC"
+echo "Target:  $TARGET_LABEL"
+echo ""
 echo "A backup snapshot will be created first in:"
 echo "  $MAKARON_PATH/tmp/snapshot-backup-YYYY-MM-DD-HH-MM-SS.zip"
-echo ""
-echo "Are you sure you want to continue with the update?"
 echo ""
 
 if [ "$SKIP_CONFIRM" = true ]; then
@@ -108,60 +161,53 @@ else
     exit 1
 fi
 
-if [ -d "$MAKARON_PATH/.git" ]; then
-    cd "$MAKARON_PATH"
+# ~/.local/share/makaron is deployment - always reset to target, no local commits
+echo ""
+echo "📦 Creating backup snapshot..."
+create_backup
+echo ""
 
-    # ~/.local/share/makaron is deployment - always reset to origin, no local commits
-    # Create backup
-    echo ""
-    echo "📦 Creating backup snapshot..."
-    create_backup
-    echo ""
+git reset --hard "$TARGET_REF"
+echo "Updated to: $TARGET_LABEL"
 
-    echo "Fetching latest changes..."
-    git fetch origin main
-    git reset --hard origin/main
-    echo "Configuration updated successfully!"
-
-    # Update user config with new variables
-    if [ -f "$MAKARON_PATH/install/makaron-conf.sh" ]; then
-        echo "Updating user configuration..."
-        source "$MAKARON_PATH/install/makaron-conf.sh"
-    fi
-
-    # Run migrations
-    if [ -f "$MAKARON_PATH/bin/makaron-migrate" ]; then
-        echo "Running migrations..."
-        bash "$MAKARON_PATH/bin/makaron-migrate"
-    fi
-
-    # Reload configurations based on current UI mode. If the user explicitly
-    # stopped Makaron UI, keep it stopped during update.
-    if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
-        source "$MAKARON_PATH/bin/makaron-ui-helpers"
-        current_ui_mode="$UPDATE_UI_MODE"
-
-        case "$current_ui_mode" in
-            full)
-                echo "Reloading configurations for UI mode: $current_ui_mode..."
-                reload_current_ui
-                ;;
-            stop)
-                echo "UI mode is 'stop', ensuring Makaron UI remains stopped..."
-                stop_aerospace || true
-                stop_sketchybar || true
-                ;;
-            *)
-                echo "Unknown UI mode '$current_ui_mode', skipping UI reload."
-                ;;
-        esac
-    fi
-
-    echo ""
-    echo "✅ Update completed successfully!"
-else
-    echo "Makaron not found at $MAKARON_PATH"
-    echo "Please run the installation script first:"
-    echo "curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash"
-    exit 1
+# Update user config with new variables
+if [ -f "$MAKARON_PATH/install/makaron-conf.sh" ]; then
+    echo "Updating user configuration..."
+    source "$MAKARON_PATH/install/makaron-conf.sh"
 fi
+
+# Run migrations
+if [ -f "$MAKARON_PATH/bin/makaron-migrate" ]; then
+    echo "Running migrations..."
+    bash "$MAKARON_PATH/bin/makaron-migrate"
+fi
+
+# Re-merge the AeroSpace config (base may have changed)
+if [ -f "$MAKARON_PATH/bin/makaron-aerospace-generate" ]; then
+    bash "$MAKARON_PATH/bin/makaron-aerospace-generate"
+fi
+
+# Reload configurations based on current UI mode. If the user explicitly
+# stopped Makaron UI, keep it stopped during update.
+if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
+    source "$MAKARON_PATH/bin/makaron-ui-helpers"
+    current_ui_mode="$UPDATE_UI_MODE"
+
+    case "$current_ui_mode" in
+        full)
+            echo "Reloading configurations for UI mode: $current_ui_mode..."
+            reload_current_ui
+            ;;
+        stop)
+            echo "UI mode is 'stop', ensuring Makaron UI remains stopped..."
+            stop_aerospace || true
+            stop_sketchybar || true
+            ;;
+        *)
+            echo "Unknown UI mode '$current_ui_mode', skipping UI reload."
+            ;;
+    esac
+fi
+
+echo ""
+echo "✅ Update completed successfully! ($(git describe --tags --match 'v*' --always 2>/dev/null))"

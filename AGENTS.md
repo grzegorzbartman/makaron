@@ -2,7 +2,7 @@
 
 ## What Is Makaron
 
-Makaron is a macOS desktop environment manager for a focused developer setup. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and a set of install/update scripts for optional developer tools.
+Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
 
 The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar uses a translucent, macOS-native glass look with static colors in `configs/sketchybar/colors.sh`.
 
@@ -84,12 +84,14 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps.
 
 ### System Commands
-- `makaron-update` - Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI.
+- `makaron-update` - Resets installed repo to the latest release tag (`stable` channel, default) or `origin/main` (`edge`), runs migrations, reloads UI. `--stable`/`--edge` persist the channel in `MAKARON_CHANNEL` (makaron.conf).
+- `makaron-version` - Prints `git describe` version and update channel.
 - `makaron-reinstall` - Removes `~/.local/share/makaron/`, re-clones, re-installs.
 - `makaron-select-packages` - Re-run optional package selection UI (gum-based).
 - `makaron-reload-aerospace-sketchybar` - Reloads AeroSpace + SketchyBar and re-applies layout state.
 - `makaron-macos-config-reload` - Re-applies macOS settings from `install/macos_settings.sh`.
 - `makaron-doctor` - Concise health check with optional safe repairs.
+- `makaron-uninstall` - Full uninstall: stops UI, restores defaults from `~/.local/state/makaron/defaults-snapshot/` (write-once snapshot taken by `install/macos_settings.sh`; key registry in `install/defaults-registry.sh`), removes symlinks/PATH/services/repo. Flags: `-y`, `--keep-packages`, `--dry-run`.
 
 ### Development Commands
 - `makaron-dev-add-migration` may not exist in every checkout. If absent, create a timestamped migration manually in `migrations/`.
@@ -297,6 +299,16 @@ AEROSPACE_GAP_SIZE=12                    # Persistent gap (0-40)
 ```
 
 ---
+
+## User Overrides
+
+Users customize without forking via files in `~/.config/makaron/` (seeded as `*.example` by `install/makaron-conf.sh`, activated by renaming):
+- `aerospace.user.toml` - merged with `configs/aerospace/.aerospace.toml` by `bin/makaron-aerospace-generate` (bash+awk) into `~/.config/makaron/generated/aerospace.toml`; `~/.aerospace.toml` symlinks to the GENERATED file. Semantics: single-line `key = value` only; user keys win in named tables; user-only tables appended; user `[[on-window-detected]]` rules run after the auto-dwindle catch-all but before base routing/float rules (first-match-wins = user overrides routing); `[gaps]` is base-only (protects the sed/verify contract). Malformed user file -> base-only output + `fallback` status in `~/.local/state/makaron/aerospace-generate.status`, never nonzero exit. A merged config rejected by `aerospace reload-config --dry-run` is rolled back to `.lastgood`.
+- `colors.user.sh` - sourced at the end of `configs/sketchybar/colors.sh` (reaches sketchybarrc and all plugins).
+- `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
+- `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
+- Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
+- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds both `sketchybarrc` and `_get_bar_height()` in `makaron-ui-helpers`, keeping bar height and `outer.top` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config.
 
 ## Migration System
 

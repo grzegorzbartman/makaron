@@ -1,0 +1,10 @@
+#!/bin/bash
+# Makaron workspace app-icon overrides (Nerd Font glyphs)
+# Rename to icons.user.sh to activate, then run: makaron-reload-aerospace-sketchybar
+# Return a glyph for the app name, or nothing to fall back to the built-in map.
+
+# makaron_user_app_icon() {
+#     case "$1" in
+#         "Spotify") echo "" ;;
+#     esac
+# }

@@ -1,0 +1,58 @@
+#!/bin/bash
+# Registry of every `defaults` key Makaron writes (install/macos_settings.sh).
+# Format: "domain|key|flag" (flag: currentHost or empty).
+# Consumed by the snapshot step in macos_settings.sh and by makaron-uninstall.
+# com.apple.dock persistent-apps is NOT here - it is covered by a full
+# domain export (defaults export) because -array wipes are not key-restorable.
+
+MAKARON_DEFAULTS_KEYS=(
+    "NSGlobalDomain|InitialKeyRepeat|"
+    "NSGlobalDomain|KeyRepeat|"
+    "com.apple.finder|AppleShowAllFiles|"
+    "NSGlobalDomain|AppleShowAllExtensions|"
+    "com.apple.finder|FXPreferredViewStyle|"
+    "com.apple.finder|ShowPathbar|"
+    "com.apple.finder|ShowStatusBar|"
+    "com.apple.finder|_FXSortFoldersFirst|"
+    "com.apple.finder|NewWindowTarget|"
+    "com.apple.finder|NewWindowTargetPath|"
+    "com.apple.finder|FXDefaultSearchScope|"
+    "com.apple.LaunchServices|LSQuarantine|"
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad|Clicking|"
+    "NSGlobalDomain|com.apple.mouse.tapBehavior|currentHost"
+    "com.apple.driver.AppleBluetoothMultitouch.trackpad|TrackpadThreeFingerDrag|"
+    "com.apple.AppleMultitouchTrackpad|TrackpadThreeFingerDrag|"
+    "NSGlobalDomain|NSAutomaticSpellingCorrectionEnabled|"
+    "NSGlobalDomain|NSAutomaticCapitalizationEnabled|"
+    "NSGlobalDomain|NSAutomaticDashSubstitutionEnabled|"
+    "NSGlobalDomain|NSAutomaticQuoteSubstitutionEnabled|"
+    "NSGlobalDomain|ApplePressAndHoldEnabled|"
+    "NSGlobalDomain|NSTextMovementDefaultKeyTimeout|"
+    "NSGlobalDomain|NSNavPanelExpandedStateForSaveMode|"
+    "NSGlobalDomain|NSNavPanelExpandedStateForSaveMode2|"
+    "NSGlobalDomain|PMPrintingExpandedStateForPrint|"
+    "NSGlobalDomain|PMPrintingExpandedStateForPrint2|"
+    "NSGlobalDomain|NSWindowResizeTime|"
+    "NSGlobalDomain|NSToolbarTitleViewRolloverDelay|"
+    "com.apple.screencapture|type|"
+    "com.apple.screencapture|include-date|"
+    "com.apple.screencapture|location|"
+    "com.apple.screencapture|disable-shadow|"
+    "com.apple.desktopservices|DSDontWriteNetworkStores|"
+    "com.apple.desktopservices|DSDontWriteUSBStores|"
+    "com.apple.dock|autohide|"
+    "com.apple.dock|autohide-delay|"
+    "com.apple.dock|autohide-time-modifier|"
+    "com.apple.dock|expose-animation-duration|"
+    "com.apple.dock|springboard-show-duration|"
+    "com.apple.dock|springboard-hide-duration|"
+    "com.apple.dock|springboard-page-duration|"
+    "com.apple.dock|mru-spaces|"
+    "com.apple.dock|expose-group-apps|"
+    "NSGlobalDomain|_HIHideMenuBar|"
+    "com.apple.universalaccess|reduceTransparency|"
+    "NSGlobalDomain|NSDocumentSaveNewDocumentsToCloud|"
+    "com.apple.CloudSubscriptionFeatures.optIn|545129924|"
+)
+
+MAKARON_DEFAULTS_SNAPSHOT_DIR="$HOME/.local/state/makaron/defaults-snapshot"

@@ -52,6 +52,16 @@ echo ""
 echo "📥 Cloning fresh repository..."
 git clone "$REPO_URL" "$MAKARON_PATH"
 
+# Stable channel: land on the latest release tag (edge stays on main)
+CHANNEL=stable
+if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
+    CHANNEL=$(sed -n 's/^MAKARON_CHANNEL=//p' "$HOME/.config/makaron/makaron.conf" | tail -1)
+fi
+if [ "$CHANNEL" != "edge" ]; then
+    TAG=$(git -C "$MAKARON_PATH" tag -l 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1) || TAG=""
+    [ -n "$TAG" ] && git -C "$MAKARON_PATH" reset --hard "refs/tags/$TAG"
+fi
+
 echo "🔧 Running full installation..."
 cd "$MAKARON_PATH"
 bash "$MAKARON_PATH/install/all.sh"
