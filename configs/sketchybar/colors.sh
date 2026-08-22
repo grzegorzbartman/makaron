@@ -24,7 +24,6 @@ if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
 
     export ALERT_COLOR=0xffff453a
     export ALERT_BACKGROUND_COLOR=0x33ff453a
-    export MAKARON_MARK=makaron-m-dark@2x.png
 else
     # Light: translucent glass, dark text, system blue
     export BAR_COLOR=0x66f5f5f7
@@ -47,7 +46,6 @@ else
 
     export ALERT_COLOR=0xffff3b30
     export ALERT_BACKGROUND_COLOR=0x26ff3b30
-    export MAKARON_MARK=makaron-m-light@2x.png
 fi
 
 # User color overrides (sourced by sketchybarrc and every plugin)
