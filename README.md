@@ -1,8 +1,19 @@
-# Makaron - Focused macOS Work Environment
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/branding/makaron-logo-dark.svg">
+    <img src="assets/branding/makaron-logo.svg" alt="Makaron" width="460">
+  </picture>
+</p>
+
+<h1 align="center">Focused macOS Work Environment</h1>
+
+<p align="center">
+A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar,<br>
+the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden<br>
+so your screen holds only what you are working on.
+</p>
 
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
-
-A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar, the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden so your screen holds only what you are working on.
 
 ![Makaron desktop with AeroSpace tiling, window gaps, and the translucent SketchyBar](docs/images/makaron-desktop.png)
 
@@ -35,7 +46,7 @@ After installation, reload your shell or open a new terminal.
 
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
-- **SketchyBar** - Custom top status bar with a translucent, macOS-native look
+- **SketchyBar** - Custom top status bar with a translucent, macOS-native look; the disk indicator stays hidden until usage crosses its alert threshold
 - **Nerd Fonts** - Icon-capable fonts for the status bar and terminal
 
 ### AI Tools
@@ -308,6 +319,9 @@ SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in 
 AEROSPACE_SWIPE_FINGERS=4               # Fingers used to switch workspaces
 AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
 AEROSPACE_GAP_SIZE=12                    # Window gap in pixels (0-40)
+CPU_ALERT_THRESHOLD=80                   # CPU turns alert color above this usage (%)
+MEMORY_ALERT_THRESHOLD=80                # Memory turns alert color above this usage (%)
+STORAGE_ALERT_THRESHOLD=90               # Show disk only above this usage (%)
 ```
 
 ## Contributing

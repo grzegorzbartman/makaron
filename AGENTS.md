@@ -146,7 +146,7 @@ Plugins live in `configs/sketchybar/plugins/`. Each plugin follows this pattern:
 3. Update SketchyBar: `sketchybar --set "$NAME" icon="..." label="..." icon.color=$COLOR`
 
 ### Color Format
-All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves the palette from the system appearance (`defaults read -g AppleInterfaceStyle`): light and dark liquid-glass variants, each with the matching system blue (`007aff` light / `0a84ff` dark). `plugins/appearance_change.sh` (hidden `appearance_check` item, 10s poll) reloads the bar when the appearance flips.
+All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves the brand palette (see `assets/branding/COLORS.md`: Ink/Cream glyphs, Blue #0d6efd focus, Amber update dot, Red alerts) from the system appearance (`defaults read -g AppleInterfaceStyle`): light and dark liquid-glass variants, each with the matching system blue (`007aff` light / `0a84ff` dark). `plugins/appearance_change.sh` (hidden `appearance_check` item, 10s poll) reloads the bar when the appearance flips.
 
 ### SketchyBar Color Variables
 `configs/sketchybar/colors.sh` exports:
@@ -160,15 +160,18 @@ ICON_COLOR, LABEL_COLOR
 SPACE_ICON_COLOR, SPACE_LABEL_COLOR, SPACE_BACKGROUND_COLOR, SPACE_BORDER_COLOR
 # Workspaces (focused)
 SPACE_FOCUSED_ICON_COLOR, SPACE_FOCUSED_LABEL_COLOR, SPACE_FOCUSED_BACKGROUND_COLOR, SPACE_FOCUSED_BORDER_COLOR
+# Threshold alerts (cpu/memory/storage pills, low battery)
+ALERT_COLOR, ALERT_BACKGROUND_COLOR
 ```
 
 ### Key Plugins
-- **aerospace.sh** - Workspace indicator: shows focused state + app icons (Nerd Font). Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
+- **makaron_menu.sh** - Version label for the `makaron_logo` popup (the bar's "Apple menu": outline M mark from `configs/sketchybar/assets/`, first item on the left, gated by `SKETCHYBAR_LOGO`; popup has Update / Doctor / Reload bar).
+- **aerospace.sh** - Workspace indicator with animated (`--animate sin 12`) three-level hierarchy: focused = accent pill + app icons, occupied = quiet pill + app icons, empty = bare dimmed number. Icons use Nerd Font. Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
 - **battery.sh** - Battery status with low-threshold warning from `makaron.conf`.
 - **memory.sh** - Calls compiled Swift binary `makaron-memory-stats`, shows `X/Y GB`.
-- **cpu.sh** - CPU usage percent (sum of per-process `%cpu` / cores); warning color above 80%.
-- **storage.sh** - Hidden below `STORAGE_ALERT_THRESHOLD` (default 90%); warning label when the disk is nearly full.
-- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons. Icon-only; the percent label shows for 2s after a volume change.
+- **cpu.sh** / **memory.sh** - Always visible (CPU percent, memory `X/Y GB`); label turns `ALERT_COLOR` above `CPU_ALERT_THRESHOLD` / `MEMORY_ALERT_THRESHOLD` (80%).
+- **storage.sh** - Threshold alert: invisible below `STORAGE_ALERT_THRESHOLD` (90%); above, an `ALERT_*`-tinted pill appears.
+- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons. Icon-only at rest; a volume change or output-device switch lights the section in the accent color with the percent label for 3s, then eases back.
 - **update_check.sh** - `makaron_update` item, hidden unless the installed repo is behind its channel target (fetches every 4h and on wake); click runs `makaron-update` in Ghostty.
 - **display_change.sh** - Invalidates display caches and reapplies layout on every display topology change; reloads SketchyBar when monitor count changes.
 
@@ -314,7 +317,10 @@ AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces 
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Show storage item only above this disk usage (%)
+CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
+MEMORY_ALERT_THRESHOLD=80               # Memory label turns alert color above this usage (%)
 AEROSPACE_AUTO_DWINDLE=true             # Dwindle auto-layout for new windows
 FLOAT_ALL_LAYOUT=cascade                # float-all (alt-shift-f) arrangement: cascade | grid
 MAKARON_CHANNEL=stable                  # Update channel: stable | edge
