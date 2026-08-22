@@ -244,61 +244,6 @@ check_makaron_conf() {
     fi
 }
 
-check_themes() {
-    local helpers="$MAKARON_PATH/bin/makaron-theme-helpers"
-    if [ ! -f "$helpers" ]; then
-        add_result "fail" "themes" "missing makaron-theme-helpers"
-        return
-    fi
-
-    MAKARON_CONF_PATH="$MAKARON_CONF"
-    # shellcheck source=bin/makaron-theme-helpers
-    source "$helpers"
-
-    local directory_count configured validation_error
-    directory_count=$(find "$MAKARON_PATH/themes" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$directory_count" != "7" ]; then
-        add_result "fail" "theme-count" "found $directory_count theme directories, expected 7"
-    else
-        add_result "ok" "theme-count" "exactly 7 themes"
-    fi
-
-    configured="$(configured_theme_slug)"
-    if load_theme "$configured" >/dev/null 2>&1; then
-        add_result "ok" "theme" "$configured ($THEME_NAME)"
-        return
-    fi
-
-    validation_error="$(load_theme "$configured" 2>&1 || true)"
-
-    if [ "$DO_FIX" = true ] && load_theme "$MAKARON_DEFAULT_THEME" >/dev/null 2>&1; then
-        set_makaron_conf_value MAKARON_THEME "$MAKARON_DEFAULT_THEME"
-        add_result "fixed" "theme" "$configured -> $MAKARON_DEFAULT_THEME"
-    else
-        add_result "fail" "theme" "${validation_error:-invalid theme: $configured}"
-    fi
-}
-
-check_borders_install() {
-    if command -v borders >/dev/null 2>&1; then
-        add_result "ok" "borders-binary" "$(command -v borders)"
-        return
-    fi
-
-    if [ "$DO_FIX" = true ] && command -v brew >/dev/null 2>&1; then
-        if (
-            source "$MAKARON_PATH/install/helpers.sh"
-            source "$MAKARON_PATH/install/desktop/borders.sh"
-        ) >/dev/null 2>&1; then
-            add_result "fixed" "borders-binary" "installed Borders"
-        else
-            add_result "fail" "borders-binary" "Borders installation failed"
-        fi
-    else
-        add_result "fail" "borders-binary" "missing; run makaron-doctor --fix"
-    fi
-}
-
 check_desktop_layout() {
     local helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
     if [ ! -f "$helpers" ]; then
@@ -317,11 +262,7 @@ check_desktop_layout() {
     fi
 
     if [ "$DO_FIX" = true ]; then
-        if [ "$(get_ui_mode)" = "stop" ]; then
-            stop_borders >/dev/null 2>&1
-        else
-            apply_desktop_state >/dev/null 2>&1
-        fi
+        apply_desktop_state >/dev/null 2>&1
 
         if result="$(verify_desktop_state 2>&1)"; then
             add_result "fixed" "desktop-layout" "${result##*$'\n'}"
@@ -410,8 +351,6 @@ run_checks() {
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
         check_bin_permissions
         check_makaron_conf
-        check_themes
-        check_borders_install
         check_ui_services
         check_desktop_layout
     fi

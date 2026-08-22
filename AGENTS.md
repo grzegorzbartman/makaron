@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for a focused developer setup. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and a set of install/update scripts for optional developer tools.
 
-The desktop layout defaults to 12px window gaps and theme-aware borders, but both are persistent user settings. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. Colors are resolved from one of seven themes through `configs/sketchybar/colors.sh`.
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar uses a translucent, macOS-native glass look with static colors in `configs/sketchybar/colors.sh`.
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -75,15 +75,12 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 | Command | Components | Dock | Menu Bar |
 |---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar + optional Borders | Hidden (autohide) | Hidden (autohide) |
+| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden (autohide) | Hidden (autohide) |
 | `makaron-ui-stop` | Nothing | Visible | Visible |
 
-- `makaron-ui-helpers` is a shared library, not a user command. It contains AeroSpace, SketchyBar, Borders, layout, macOS settings, and UI mode helpers.
+- `makaron-ui-helpers` is a shared library, not a user command. It contains AeroSpace, SketchyBar, layout, macOS settings, and UI mode helpers.
 
-### Theme and Layout Commands
-- `makaron-theme list|current|set <theme>` - Manage the selected desktop theme.
-- `makaron-theme-{glass-light,everforest,tokyo-night,catppuccin,kanagawa,matte-black,retro-82}` - Compatibility wrappers.
-- `makaron-borders on|off|toggle` - Persist and apply Borders state.
+### Layout Commands
 - `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps.
 
 ### System Commands
@@ -127,12 +124,12 @@ The function resolves the symlink target before editing to modify the actual con
 
 ### Architecture
 Plugins live in `configs/sketchybar/plugins/`. Each plugin follows this pattern:
-1. Load the selected theme colors: `source "$CONFIG_DIR/colors.sh"`
+1. Load the colors: `source "$CONFIG_DIR/colors.sh"`
 2. Get data (system call, compiled binary, etc.)
 3. Update SketchyBar: `sketchybar --set "$NAME" icon="..." label="..." icon.color=$COLOR`
 
 ### Color Format
-All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves `MAKARON_THEME` and exports its colors, falling back to `glass-light`.
+All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` exports a static glass palette: translucent bar with blur and the macOS system blue for the focused workspace.
 
 ### SketchyBar Color Variables
 `configs/sketchybar/colors.sh` exports:
@@ -180,7 +177,7 @@ curl -sL install.sh | bash
        |     |-- makaron-conf.sh
        |     |-- brew.sh
        |     |-- gum, jq
-       |     |-- desktop/ (aerospace, aerospace-swipe, sketchybar, borders, fonts)
+       |     |-- desktop/ (aerospace, aerospace-swipe, sketchybar, fonts)
        |     |-- terminal/ghostty.sh
        |
        |-- install/packages.sh       # Optional packages:
@@ -195,7 +192,7 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, aerospace-swipe, SketchyBar, JankyBorders, Nerd Fonts, Ghostty.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, aerospace-swipe, SketchyBar, Nerd Fonts, Ghostty.
 
 > aerospace-swipe talks to AeroSpace over the v0.21 socket protocol, so AeroSpace **>= 0.21** is required. `install/desktop/aerospace.sh` upgrades older installs in place (`install_cask` alone skips already-installed apps).
 
@@ -241,7 +238,6 @@ makaron/
 │   └── terminal/           # Terminal tools
 ├── migrations/             # Timestamped migration scripts
 ├── src/                    # Swift source files (compiled to bin/)
-├── themes/                 # Seven theme contracts and wallpapers
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
 
@@ -254,7 +250,6 @@ $HOME/
 ├── .config/makaron/
 │   ├── makaron.conf                 # User settings
 │   └── packages.conf                # Optional package selections
-├── .config/borders/bordersrc         # Theme colors managed by Makaron
 ├── .config/sketchybar -> ...        # Symlink
 └── .aerospace.toml -> ...           # Symlink
 ```
@@ -298,11 +293,6 @@ SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right s
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
-MAKARON_THEME=glass-light               # Selected theme
-THEME_SET_WALLPAPER=true                 # Apply theme wallpaper
-THEME_SET_MACOS_APPEARANCE=true          # Apply theme light/dark mode
-BORDERS_ENABLED=true                     # Persist Borders state
-BORDER_WIDTH=5                           # Border width
 AEROSPACE_GAP_SIZE=12                    # Persistent gap (0-40)
 ```
 

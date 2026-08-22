@@ -4,14 +4,6 @@
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 UI_MODE_FILE="${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"
 MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
-BORDERS_CONFIG_PATH="${BORDERS_CONFIG_PATH:-$HOME/.config/borders/bordersrc}"
-MAKARON_BORDERS_FORMULA="felixkratz/formulae/borders"
-
-THEME_HELPERS="$MAKARON_PATH/bin/makaron-theme-helpers"
-if [ -f "$THEME_HELPERS" ]; then
-    # shellcheck source=bin/makaron-theme-helpers
-    source "$THEME_HELPERS"
-fi
 
 # Notch detection cache — Swift cold-start (~1s) is too expensive to repeat.
 # Invalidate from display_change.sh on monitor hotplug.
@@ -24,12 +16,16 @@ MAKARON_SKETCHYBAR_HEIGHT=40
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
 MAKARON_GAP_KEYS=(inner.horizontal inner.vertical outer.left outer.bottom outer.right)
 
-_get_borders_enabled() {
-    (
-        BORDERS_ENABLED=true
-        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        [ "${BORDERS_ENABLED:-true}" = "true" ] && echo true || echo false
-    )
+set_makaron_conf_value() {
+    local key="$1" value="$2"
+    mkdir -p "$(dirname "$MAKARON_CONF_PATH")"
+    touch "$MAKARON_CONF_PATH"
+
+    if grep -q "^${key}=" "$MAKARON_CONF_PATH" 2>/dev/null; then
+        sed -i '' "s|^${key}=.*|${key}=${value}|" "$MAKARON_CONF_PATH"
+    else
+        printf '%s=%s\n' "$key" "$value" >> "$MAKARON_CONF_PATH"
+    fi
 }
 
 _get_gap_size() {
@@ -41,18 +37,6 @@ _get_gap_size() {
             echo "$AEROSPACE_GAP_SIZE"
         else
             echo 12
-        fi
-    )
-}
-
-_get_border_width() {
-    (
-        BORDER_WIDTH=5
-        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        if [[ "${BORDER_WIDTH:-}" =~ ^([1-9]|1[0-9]|20)(\.[0-9]+)?$ ]]; then
-            echo "$BORDER_WIDTH"
-        else
-            echo 5
         fi
     )
 }
@@ -206,13 +190,13 @@ _set_aerospace_gaps() {
 }
 
 # ============================================================================
-# apply_desktop_state — single source of truth for layout (gaps + top + borders).
+# apply_desktop_state — single source of truth for layout (gaps + top).
 #
 # Scope: layout only. Does NOT start/stop AeroSpace, SketchyBar, or apply macOS
 # settings. Callers (makaron-ui-full) handle bootstrap.
 #
 # Inputs read: ui-mode state file.
-# Outputs:     ~/.aerospace.toml (inner/outer gaps + outer.top), Borders state.
+# Outputs:     ~/.aerospace.toml (inner/outer gaps + outer.top).
 # ============================================================================
 apply_desktop_state() {
     local ui_mode gap
@@ -229,12 +213,6 @@ apply_desktop_state() {
     gap="$(_get_gap_size)"
     _set_aerospace_gaps "$gap"
     switch_aerospace_config "$ui_mode" "$gap"
-
-    if [ "$(_get_borders_enabled)" = "true" ]; then
-        start_borders
-    else
-        stop_borders
-    fi
 
     if command -v aerospace &> /dev/null && pgrep -f "AeroSpace" > /dev/null; then
         aerospace reload-config 2>/dev/null || true
@@ -319,123 +297,11 @@ stop_sketchybar() {
     fi
 }
 
-# --- Borders ---
-
-borders_running() {
-    pgrep -x borders >/dev/null 2>&1
-}
-
-borders_service_started() {
-    command -v brew >/dev/null 2>&1 &&
-        brew services list 2>/dev/null | awk '$1 == "borders" && $2 == "started" { found=1 } END { exit !found }'
-}
-
-trust_borders_formula() {
-    brew trust --json=v1 >/dev/null 2>&1 || return 0
-    brew trust --formula "$MAKARON_BORDERS_FORMULA" >/dev/null 2>&1
-}
-
-write_borders_config() {
-    local width="$1"
-    mkdir -p "$(dirname "$BORDERS_CONFIG_PATH")"
-    {
-        printf '#!/bin/bash\n\n'
-        printf 'borders active_color=%s inactive_color=%s width=%s\n' \
-            "$ACTIVE_BORDER_COLOR" "$INACTIVE_BORDER_COLOR" "$width"
-    } > "$BORDERS_CONFIG_PATH"
-    chmod +x "$BORDERS_CONFIG_PATH"
-}
-
-stop_borders() {
-    command -v borders >/dev/null 2>&1 || return 0
-    if borders_service_started; then
-        trust_borders_formula || true
-        brew services stop "$MAKARON_BORDERS_FORMULA" >/dev/null 2>&1 || true
-    fi
-    if borders_running; then
-        echo "  Stopping Borders..."
-        killall borders 2>/dev/null || true
-        echo "  ✓ Borders stopped"
-    fi
-}
-
-start_borders() {
-    if [ "$(_get_borders_enabled)" != "true" ]; then
-        stop_borders
-        return 0
-    fi
-
-    if ! command -v borders >/dev/null 2>&1; then
-        echo "  ⚠️  Borders not installed"
-        return 0
-    fi
-
-    if ! command -v load_configured_theme >/dev/null 2>&1 || ! load_configured_theme; then
-        echo "  ⚠️  Could not load border colors"
-        return 1
-    fi
-
-    local width action service_output
-    width="$(_get_border_width)"
-    write_borders_config "$width" || {
-        echo "  ⚠️  Could not write Borders config"
-        return 1
-    }
-
-    if borders_service_started && borders_running; then
-        if ! borders active_color="$ACTIVE_BORDER_COLOR" inactive_color="$INACTIVE_BORDER_COLOR" width="$width" >/dev/null 2>&1; then
-            echo "  ⚠️  Could not update Borders"
-            return 1
-        fi
-        echo "  ✓ Borders updated (${width}px, $MAKARON_RESOLVED_THEME)"
-        return 0
-    fi
-
-    if ! command -v brew >/dev/null 2>&1; then
-        echo "  ⚠️  Homebrew is required to start Borders"
-        return 1
-    fi
-
-    if ! trust_borders_formula; then
-        echo "  ⚠️  Could not trust Borders formula"
-        return 1
-    fi
-
-    action=start
-    if borders_service_started; then
-        action=restart
-    else
-        borders_running && killall borders 2>/dev/null || true
-    fi
-
-    if ! service_output="$(brew services "$action" "$MAKARON_BORDERS_FORMULA" 2>&1)"; then
-        echo "  ⚠️  Could not $action Borders service"
-        [ -n "$service_output" ] && printf '  %s\n' "$service_output" >&2
-        return 1
-    fi
-
-    sleep 1
-    if ! borders_running; then
-        echo "  ⚠️  Borders service started but its process is not running"
-        return 1
-    fi
-
-    echo "  ✓ Borders started (${width}px, $MAKARON_RESOLVED_THEME)"
-}
-
-reload_borders() {
-    start_borders
-}
-
 verify_desktop_state() {
     local ui_mode gap config_file drift=0 key escaped actual
     ui_mode="$(get_ui_mode)"
 
     if [ "$ui_mode" = "stop" ]; then
-        if borders_running; then
-            echo "  ⚠️  Borders running while ui-mode=stop"
-            return 1
-        fi
         echo "  ✓ Desktop UI is stopped"
         return 0
     fi
@@ -465,16 +331,8 @@ verify_desktop_state() {
         drift=1
     fi
 
-    local expected_borders=false running_borders=false
-    [ "$(_get_borders_enabled)" = "true" ] && expected_borders=true
-    borders_running && running_borders=true
-    if [ "$expected_borders" != "$running_borders" ]; then
-        echo "  ⚠️  Borders running=$running_borders, expected $expected_borders"
-        drift=1
-    fi
-
     if [ "$drift" -eq 0 ]; then
-        echo "  ✓ Desktop state is in sync (gap=${gap}px, borders=$expected_borders)"
+        echo "  ✓ Desktop state is in sync (gap=${gap}px)"
     fi
     return "$drift"
 }

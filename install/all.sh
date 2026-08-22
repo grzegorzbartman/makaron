@@ -19,13 +19,4 @@ fi
 # System settings and migrations (always run)
 source "$MAKARON_PATH/install/macos_settings.sh"
 
-# Apply the selected theme on fresh install/reinstall. Updates preserve the
-# current desktop and only reload its already-selected colors.
-if [ -f "$MAKARON_PATH/bin/makaron-theme-helpers" ]; then
-    source "$MAKARON_PATH/bin/makaron-theme-helpers"
-    selected_theme="$(configured_theme_slug)"
-    load_theme "$selected_theme" >/dev/null 2>&1 || selected_theme="$MAKARON_DEFAULT_THEME"
-    bash "$MAKARON_PATH/bin/makaron-theme" set "$selected_theme" || true
-fi
-
 source "$MAKARON_PATH/install/migrations.sh"
