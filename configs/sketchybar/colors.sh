@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export BAR_COLOR=0x66f5f5f7
 export BAR_BACKGROUND_COLOR=0x00000000
 export BAR_BLUR=30
