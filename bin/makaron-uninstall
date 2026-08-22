@@ -1,0 +1,263 @@
+#!/bin/bash
+# Uninstall Makaron: stop the UI, restore macOS settings, remove symlinks,
+# services, and state. Safe to re-run; tolerates already-missing components.
+# The whole script is parsed before main runs, so deleting the repo last is safe.
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+SNAPSHOT_DIR="$HOME/.local/state/makaron/defaults-snapshot"
+PACKAGES_CONF="$HOME/.config/makaron/packages.conf"
+SWIPE_PLIST="$HOME/Library/LaunchAgents/com.acsandmann.swipe.plist"
+
+SKIP_CONFIRM=false
+KEEP_PACKAGES=false
+DRY_RUN=false
+for arg in "$@"; do
+    case "$arg" in
+        -y|--yes) SKIP_CONFIRM=true ;;
+        --keep-packages) KEEP_PACKAGES=true ;;
+        --dry-run) DRY_RUN=true ;;
+        -h|--help)
+            echo "Usage: makaron-uninstall [-y] [--keep-packages] [--dry-run]"
+            exit 0
+            ;;
+    esac
+done
+
+confirm() {
+    local prompt="$1"
+    [ "$SKIP_CONFIRM" = true ] && return 0
+    if command -v gum &>/dev/null && [ -t 0 ]; then
+        gum confirm "$prompt"
+    elif [ -t 0 ]; then
+        read -p "$prompt (y/N): " -n 1 -r
+        echo
+        [[ $REPLY =~ ^[Yy]$ ]]
+    else
+        echo "No TTY detected. Run with -y to skip confirmation."
+        return 1
+    fi
+}
+
+print_manifest() {
+    echo ""
+    echo "🗑️  Makaron Uninstall"
+    echo "===================="
+    echo ""
+    echo "Will remove:"
+    echo "  - AeroSpace + SketchyBar UI state (Dock/menu bar restored)"
+    [ -f "$SWIPE_PLIST" ] && echo "  - aerospace-swipe LaunchAgent and its files"
+    [ -L "$HOME/.aerospace.toml" ] && echo "  - ~/.aerospace.toml symlink"
+    [ -L "$HOME/.config/sketchybar" ] && echo "  - ~/.config/sketchybar symlink"
+    echo "  - makaron PATH entries in ~/.zshrc and ~/.bashrc"
+    echo "  - macOS defaults written by Makaron (restored from snapshot if present)"
+    echo "  - ~/.local/state/makaron and ~/.local/share/makaron"
+    if [ "$KEEP_PACKAGES" = false ]; then
+        echo "  - optionally: Homebrew packages installed by Makaron (you will choose)"
+    fi
+    echo ""
+    echo "Cannot be restored:"
+    if [ ! -f "$SNAPSHOT_DIR/com.apple.dock.plist" ]; then
+        echo "  - Dock pinned apps (cleared at install time, no snapshot exists)"
+    fi
+    if [ ! -f "$SNAPSHOT_DIR/values" ]; then
+        echo "  - original values of macOS settings (no snapshot; Apple factory defaults will be used)"
+    fi
+    echo "  - menu bar autohide reverts to 'In Full Screen Only' (macOS default-ish), adjust manually if needed"
+    echo ""
+}
+
+stop_ui() {
+    echo "▸ Stopping Makaron UI..."
+    if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
+        # shellcheck source=/dev/null
+        source "$MAKARON_PATH/bin/makaron-ui-helpers"
+        stop_aerospace 2>/dev/null || true
+        stop_sketchybar 2>/dev/null || true
+        restore_macos_defaults 2>/dev/null || true
+    fi
+    command -v brew >/dev/null 2>&1 && brew services stop sketchybar >/dev/null 2>&1
+    osascript -e 'tell application "AeroSpace" to quit' >/dev/null 2>&1 || true
+}
+
+remove_swipe() {
+    echo "▸ Removing aerospace-swipe..."
+    launchctl unload "$SWIPE_PLIST" 2>/dev/null || true
+    rm -f "$SWIPE_PLIST"
+    rm -rf "$HOME/.local/share/aerospace-swipe" "$HOME/.config/aerospace-swipe"
+}
+
+remove_symlinks() {
+    echo "▸ Removing config symlinks..."
+    local link target
+    for link in "$HOME/.aerospace.toml" "$HOME/.config/sketchybar"; do
+        [ -L "$link" ] || continue
+        target=$(readlink "$link")
+        case "$target" in
+            "$MAKARON_PATH"*|"$HOME/.config/makaron/generated"*) rm -f "$link" ;;
+            *) echo "  Keeping $link (not managed by Makaron)" ;;
+        esac
+    done
+    local backup
+    backup=$(ls -1dt "$HOME/.config/sketchybar.backup."* 2>/dev/null | head -1)
+    if [ -n "$backup" ] && [ ! -e "$HOME/.config/sketchybar" ]; then
+        if confirm "Restore your pre-Makaron SketchyBar config from $(basename "$backup")?"; then
+            mv "$backup" "$HOME/.config/sketchybar"
+        fi
+    fi
+}
+
+clean_shell_rc() {
+    echo "▸ Cleaning shell rc files..."
+    local rc
+    for rc in "$HOME/.zshrc" "$HOME/.bashrc"; do
+        [ -f "$rc" ] || continue
+        sed -i.makaron-uninstall.bak '/makaron\/bin/d' "$rc" 2>/dev/null || true
+    done
+}
+
+restore_defaults() {
+    echo "▸ Restoring macOS settings..."
+
+    if [ -f "$SNAPSHOT_DIR/values" ]; then
+        local domain key flag type val write_flag
+        while IFS='|' read -r domain key flag type val; do
+            [ -z "$domain" ] && continue
+            if [ "$val" = "__ABSENT__" ]; then
+                if [ "$flag" = "currentHost" ]; then
+                    defaults -currentHost delete "$domain" "$key" 2>/dev/null || true
+                else
+                    defaults delete "$domain" "$key" 2>/dev/null || true
+                fi
+                continue
+            fi
+            case "$type" in
+                boolean) write_flag="-bool"; [ "$val" = "1" ] && val=true || val=false ;;
+                integer) write_flag="-int" ;;
+                float)   write_flag="-float" ;;
+                string)  write_flag="-string" ;;
+                *) continue ;;  # non-scalar - leave as-is
+            esac
+            if [ "$flag" = "currentHost" ]; then
+                defaults -currentHost write "$domain" "$key" "$write_flag" "$val" 2>/dev/null || true
+            else
+                defaults write "$domain" "$key" "$write_flag" "$val" 2>/dev/null || true
+            fi
+        done < "$SNAPSHOT_DIR/values"
+        echo "  ✓ Restored original values from snapshot"
+    elif [ -f "$MAKARON_PATH/install/defaults-registry.sh" ]; then
+        # shellcheck source=/dev/null
+        source "$MAKARON_PATH/install/defaults-registry.sh"
+        local entry domain key flag
+        for entry in "${MAKARON_DEFAULTS_KEYS[@]}"; do
+            IFS='|' read -r domain key flag <<< "$entry"
+            if [ "$flag" = "currentHost" ]; then
+                defaults -currentHost delete "$domain" "$key" 2>/dev/null || true
+            else
+                defaults delete "$domain" "$key" 2>/dev/null || true
+            fi
+        done
+        echo "  ✓ Deleted Makaron-written keys (Apple factory defaults apply)"
+        echo "  ⚠️  Dock pinned apps cannot be restored (no snapshot)"
+    fi
+
+    if [ -f "$SNAPSHOT_DIR/com.apple.dock.plist" ]; then
+        if confirm "Restore your pre-Makaron Dock (pinned apps) from snapshot?"; then
+            defaults import com.apple.dock "$SNAPSHOT_DIR/com.apple.dock.plist" 2>/dev/null || true
+        fi
+    fi
+
+    killall Dock Finder SystemUIServer 2>/dev/null || true
+}
+
+uninstall_packages() {
+    [ "$KEEP_PACKAGES" = true ] && return 0
+    command -v brew >/dev/null 2>&1 || return 0
+    confirm "Also uninstall Homebrew packages installed by Makaron?" || return 0
+
+    echo "▸ Uninstalling Homebrew packages..."
+    brew autoupdate delete >/dev/null 2>&1 || true
+
+    # Mandatory casks/formulas
+    brew uninstall --cask aerospace ghostty 2>/dev/null || true
+    brew uninstall sketchybar gum jq 2>/dev/null || true
+    brew uninstall font-hack-nerd-font 2>/dev/null || true
+
+    # Optional selections
+    if [ -f "$PACKAGES_CONF" ]; then
+        # shellcheck source=/dev/null
+        source "$PACKAGES_CONF"
+        local id
+        for id in ${MAKARON_PACKAGES:-}; do
+            case "$id" in
+                vscode)     brew uninstall --cask visual-studio-code 2>/dev/null || true ;;
+                cursor)     brew uninstall --cask cursor 2>/dev/null || true ;;
+                sublime)    brew uninstall --cask sublime-text 2>/dev/null || true ;;
+                neovim)     brew uninstall neovim 2>/dev/null || true ;;
+                codex)      brew uninstall --cask codex 2>/dev/null || true ;;
+                claude-code) brew uninstall --cask claude-code 2>/dev/null || true ;;
+                ddev)       brew uninstall ddev/ddev/ddev 2>/dev/null || true ;;
+                upsun)      brew uninstall upsun/tap/platformsh-cli 2>/dev/null || true ;;
+                docker)     brew uninstall --cask docker-desktop 2>/dev/null || true ;;
+                sequel-ace) brew uninstall --cask sequel-ace 2>/dev/null || true ;;
+                stats)      brew uninstall --cask stats 2>/dev/null || true ;;
+                fnm)        brew uninstall fnm 2>/dev/null || true ;;
+                pipx)       brew uninstall pipx 2>/dev/null || true ;;
+                *)          brew uninstall "$id" 2>/dev/null || true ;;
+            esac
+        done
+    fi
+
+    local tap
+    for tap in domt4/autoupdate FelixKratz/formulae nikitabobko/tap ddev/ddev upsun/tap; do
+        brew untap "$tap" 2>/dev/null || true
+    done
+    echo "  ✓ Packages removed (Homebrew itself was kept)"
+}
+
+remove_state() {
+    echo "▸ Removing Makaron state..."
+    rm -rf "$HOME/.local/state/makaron"
+    if confirm "Also remove ~/.config/makaron (your settings and overrides)?"; then
+        rm -rf "$HOME/.config/makaron"
+    else
+        echo "  Keeping ~/.config/makaron for a future install"
+    fi
+}
+
+remove_repo() {
+    case "$MAKARON_PATH" in
+        "$HOME/.local/share/makaron") ;;
+        *)
+            [ -d "$MAKARON_PATH/.git" ] || { echo "  ⚠️  Refusing to remove unexpected path: $MAKARON_PATH"; return; }
+            ;;
+    esac
+    echo "▸ Removing $MAKARON_PATH..."
+    rm -rf "$MAKARON_PATH"
+}
+
+main() {
+    print_manifest
+
+    if [ "$DRY_RUN" = true ]; then
+        echo "(dry run - nothing was changed)"
+        exit 0
+    fi
+
+    confirm "Uninstall Makaron?" || { echo "Cancelled."; exit 0; }
+
+    stop_ui
+    remove_swipe
+    remove_symlinks
+    clean_shell_rc
+    restore_defaults
+    uninstall_packages
+    remove_state
+    remove_repo
+
+    echo ""
+    echo "✅ Makaron uninstalled. Restart your terminal to refresh PATH."
+    echo "   Reinstall anytime: curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash"
+}
+
+main "$@"
+exit

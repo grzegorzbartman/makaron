@@ -262,6 +262,14 @@ export SPACE_FOCUSED_BACKGROUND_COLOR=0xffff375f  # change the focus color
 
 Your AeroSpace keys win over the base config; your window rules run before Makaron's routing/float rules. The `[gaps]` block stays managed by `makaron-gaps`. A broken override file never breaks the desktop - Makaron falls back to the base config and `makaron-doctor` tells you why. Layout scalars live in `~/.config/makaron/makaron.conf` (`AEROSPACE_GAP_SIZE`, `SKETCHYBAR_HEIGHT`, `AEROSPACE_AUTO_DWINDLE`).
 
+## Uninstall
+
+```bash
+makaron-uninstall
+```
+
+Stops the UI, restores macOS settings (from a snapshot taken at install time when available), removes symlinks, PATH entries, services, and Makaron itself. Optionally uninstalls the Homebrew packages Makaron installed - you choose. `--dry-run` shows the full plan first. Note: on setups installed before snapshotting existed, macOS settings revert to Apple factory defaults rather than your exact previous values.
+
 ## Releases and Update Channels
 
 Makaron ships as tagged releases (`vX.Y.Z`). By default `makaron-update` follows the **stable** channel and resets to the latest release tag. Switch channels with:

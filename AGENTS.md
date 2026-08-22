@@ -91,6 +91,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-reload-aerospace-sketchybar` - Reloads AeroSpace + SketchyBar and re-applies layout state.
 - `makaron-macos-config-reload` - Re-applies macOS settings from `install/macos_settings.sh`.
 - `makaron-doctor` - Concise health check with optional safe repairs.
+- `makaron-uninstall` - Full uninstall: stops UI, restores defaults from `~/.local/state/makaron/defaults-snapshot/` (write-once snapshot taken by `install/macos_settings.sh`; key registry in `install/defaults-registry.sh`), removes symlinks/PATH/services/repo. Flags: `-y`, `--keep-packages`, `--dry-run`.
 
 ### Development Commands
 - `makaron-dev-add-migration` may not exist in every checkout. If absent, create a timestamped migration manually in `migrations/`.
