@@ -1,0 +1,238 @@
+#!/bin/bash
+# Keyboard shortcut overlay: parses the live AeroSpace config (user overrides
+# included) into HTML and shows it in the makaron-help-window glass panel.
+# Bound to alt-shift-slash; pressing it again closes the panel.
+# --print-html writes the HTML to stdout (used by tests).
+
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+STATE_DIR="$HOME/.local/state/makaron"
+HTML_FILE="$STATE_DIR/help.html"
+VIEWER="$MAKARON_PATH/bin/makaron-help-window"
+
+PRINT_ONLY=false
+[ "$1" = "--print-html" ] && PRINT_ONLY=true
+
+# Toggle: a second invocation closes the open panel
+if [ "$PRINT_ONLY" = "false" ] && pkill -x makaron-help-window 2>/dev/null; then
+    exit 0
+fi
+
+CONF="${MAKARON_HELP_CONFIG:-}"
+if [ -z "$CONF" ]; then
+    CONF=$(readlink "$HOME/.aerospace.toml" 2>/dev/null)
+    [ -f "$CONF" ] || CONF="$HOME/.aerospace.toml"
+    [ -f "$CONF" ] || CONF="$MAKARON_PATH/configs/aerospace/.aerospace.toml"
+fi
+
+AEROSPACE_SWIPE_FINGERS=4
+# shellcheck disable=SC1090
+[ -f "$HOME/.config/makaron/makaron.conf" ] && source "$HOME/.config/makaron/makaron.conf"
+
+_sym() {
+    case "$1" in
+        alt) printf '⌥' ;; shift) printf '⇧' ;; ctrl) printf '⌃' ;; cmd) printf '⌘' ;;
+        slash) printf '/' ;; comma) printf ',' ;; period) printf '.' ;;
+        minus) printf '−' ;; equal) printf '=' ;; backtick) printf '`' ;;
+        semicolon) printf ';' ;; quote) printf "'" ;; backslash) printf '\\' ;;
+        enter) printf '↩' ;; esc) printf 'esc' ;; space) printf 'space' ;;
+        tab) printf '⇥' ;; backspace) printf '⌫' ;;
+        left) printf '←' ;; down) printf '↓' ;; up) printf '↑' ;; right) printf '→' ;;
+        [a-z]) printf '%s' "$1" | tr 'a-z' 'A-Z' ;;
+        *) printf '%s' "$1" ;;
+    esac
+}
+
+_chips() {
+    local out="" part
+    for part in $(printf '%s' "$1" | tr '-' ' '); do
+        out="$out<kbd>$(_sym "$part")</kbd>"
+    done
+    printf '%s' "$out"
+}
+
+_esc_html() { printf '%s' "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'; }
+
+_row() { printf '<div class="row"><span class="keys">%s</span><span class="d">%s</span></div>' "$1" "$2"; }
+
+# Extract "mode<TAB>key<TAB>first-command" from the binding tables
+BINDINGS=$(awk '
+    /^\[mode\.main\.binding\]/ { m = "main"; next }
+    /^\[mode\.service\.binding\]/ { m = "service"; next }
+    /^\[/ { m = ""; next }
+    m != "" && $0 ~ /^[ \t]*[a-zA-Z0-9-]+[ \t]*=/ {
+        line = $0; sub(/^[ \t]+/, "", line)
+        key = line; sub(/[ \t]*=.*/, "", key)
+        val = line; sub(/^[^=]*=[ \t]*/, "", val)
+        if (match(val, /'\''[^'\'']*'\''/)) val = substr(val, RSTART + 1, RLENGTH - 2)
+        print m "\t" key "\t" val
+    }
+' "$CONF")
+
+SEC_WS="" SEC_MOVE="" SEC_FOCUS="" SEC_LAYOUT="" SEC_APPS="" SEC_SERVICE="" SEC_OTHER=""
+SERVICE_ENTRY=""
+GO_KEYS="" GO_MODS="" GO_OK=true
+MV_KEYS="" MV_MODS="" MV_OK=true
+
+_mods_of() { printf '%s' "${1%-*}"; }
+_last_of() { printf '%s' "${1##*-}"; }
+
+while IFS=$'\t' read -r mode key cmd; do
+    [ -z "$key" ] && continue
+    chips=$(_chips "$key")
+
+    if [ "$mode" = "service" ]; then
+        case "$cmd" in
+            reload-config) d="Reload AeroSpace config" ;;
+            flatten-workspace-tree) d="Reset layout" ;;
+            "layout floating tiling") d="Toggle floating" ;;
+            close-all-windows-but-current) d="Close all other windows" ;;
+            "join-with left") d="Join with window on the left" ;;
+            "join-with down") d="Join with window below" ;;
+            "join-with up") d="Join with window above" ;;
+            "join-with right") d="Join with window on the right" ;;
+            "volume down") d="Volume down" ;;
+            "volume up") d="Volume up" ;;
+            "volume set 0") d="Mute" ;;
+            *) d="<code>$(_esc_html "$cmd")</code>" ;;
+        esac
+        SEC_SERVICE="$SEC_SERVICE$(_row "$chips" "$d")"
+        continue
+    fi
+
+    case "$cmd" in
+        "mode service") SERVICE_ENTRY="$chips" ;;
+        workspace-back-and-forth) SEC_WS="$SEC_WS$(_row "$chips" "Back to previous workspace")" ;;
+        "workspace next") SEC_WS="$SEC_WS$(_row "$chips" "Next workspace")" ;;
+        "workspace prev") SEC_WS="$SEC_WS$(_row "$chips" "Previous workspace")" ;;
+        workspace\ *)
+            ws="${cmd#workspace }"
+            if [ -z "$GO_MODS" ]; then GO_MODS=$(_mods_of "$key"); fi
+            [ "$(_mods_of "$key")" != "$GO_MODS" ] && GO_OK=false
+            GO_KEYS="$GO_KEYS$key=$ws " ;;
+        "move-node-to-workspace next") SEC_MOVE="$SEC_MOVE$(_row "$chips" "To next workspace")" ;;
+        "move-node-to-workspace prev") SEC_MOVE="$SEC_MOVE$(_row "$chips" "To previous workspace")" ;;
+        move-node-to-workspace\ *)
+            ws="${cmd#move-node-to-workspace }"
+            if [ -z "$MV_MODS" ]; then MV_MODS=$(_mods_of "$key"); fi
+            [ "$(_mods_of "$key")" != "$MV_MODS" ] && MV_OK=false
+            MV_KEYS="$MV_KEYS$key=$ws " ;;
+        "move-node-to-monitor left") SEC_MOVE="$SEC_MOVE$(_row "$chips" "To left monitor")" ;;
+        "move-node-to-monitor right") SEC_MOVE="$SEC_MOVE$(_row "$chips" "To right monitor")" ;;
+        move-node-to-monitor\ *) SEC_MOVE="$SEC_MOVE$(_row "$chips" "To monitor ${cmd#move-node-to-monitor }")" ;;
+        "move left") SEC_MOVE="$SEC_MOVE$(_row "$chips" "Move left")" ;;
+        "move down") SEC_MOVE="$SEC_MOVE$(_row "$chips" "Move down")" ;;
+        "move up") SEC_MOVE="$SEC_MOVE$(_row "$chips" "Move up")" ;;
+        "move right") SEC_MOVE="$SEC_MOVE$(_row "$chips" "Move right")" ;;
+        "focus left") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus window left")" ;;
+        "focus down") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus window below")" ;;
+        "focus up") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus window above")" ;;
+        "focus right") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus window right")" ;;
+        "focus-monitor next") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus next monitor")" ;;
+        "focus-monitor prev") SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Focus previous monitor")" ;;
+        resize\ smart\ -*) SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Shrink window")" ;;
+        resize\ smart\ +*) SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Grow window")" ;;
+        balance-sizes) SEC_FOCUS="$SEC_FOCUS$(_row "$chips" "Equalize window sizes")" ;;
+        "layout tiles horizontal vertical") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Tile windows (toggle orientation)")" ;;
+        "layout accordion horizontal vertical") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Accordion (toggle orientation)")" ;;
+        "layout floating tiling") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Toggle floating for window")" ;;
+        fullscreen) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Fullscreen (monocle)")" ;;
+        *new-terminal.sh*) SEC_APPS="$SEC_APPS$(_row "$chips" "New terminal window")" ;;
+        *float-all-toggle.sh*) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Float / unfloat all windows")" ;;
+        *makaron-help*) SEC_APPS="$SEC_APPS$(_row "$chips" "Show this overlay")" ;;
+        *) SEC_OTHER="$SEC_OTHER$(_row "$chips" "<code>$(_esc_html "$cmd")</code>")" ;;
+    esac
+done <<< "$BINDINGS"
+
+# Collapse per-workspace rows into one line when the modifiers are uniform
+_emit_ws_group() {
+    local keys="$1" mods="$2" ok="$3" desc="$4" secvar="$5" pair labels="" chips row=""
+    local n
+    n=$(printf '%s' "$keys" | wc -w | tr -d ' ')
+    if [ "$ok" = "true" ] && [ "$n" -ge 4 ]; then
+        for pair in $keys; do labels="$labels$(_sym "$(_last_of "${pair%%=*}")") "; done
+        labels=$(printf '%s' "$labels" | sed 's/ $//; s/^1 2 3 4 5 6 7 8 9 0/1–0/')
+        chips=$(_chips "$mods")
+        for l in $labels; do chips="$chips<kbd>$l</kbd>"; done
+        row=$(_row "$chips" "$desc")
+    else
+        for pair in $keys; do
+            row="$row$(_row "$(_chips "${pair%%=*}")" "$desc ${pair##*=}")"
+        done
+    fi
+    eval "$secvar=\"\$row\$$secvar\""
+}
+[ -n "$GO_KEYS" ] && _emit_ws_group "$GO_KEYS" "$GO_MODS" "$GO_OK" "Go to workspace" SEC_WS
+[ -n "$MV_KEYS" ] && _emit_ws_group "$MV_KEYS" "$MV_MODS" "$MV_OK" "To workspace" SEC_MOVE
+
+_section() { [ -n "$2" ] && printf '<section><h2>%s</h2>%s</section>' "$1" "$2"; }
+
+VERSION=$("$MAKARON_PATH/bin/makaron-version" 2>/dev/null || echo "")
+# Full wordmark from the brand assets; thicker stroke stays ~1px at header size
+LOGO_FILE="$MAKARON_PATH/assets/branding/makaron-logo.svg"
+if [ -f "$LOGO_FILE" ]; then
+    LOGO_HTML=$(sed 's/#0F172A/currentColor/g; s/stroke-width="22"/stroke-width="34"/' "$LOGO_FILE")
+else
+    LOGO_HTML='<span class="wordmark">Makaron</span>'
+fi
+SERVICE_HEAD="Service mode"
+[ -n "$SERVICE_ENTRY" ] && SERVICE_HEAD="Service mode <span class=\"entry\">${SERVICE_ENTRY} then</span>"
+SWIPE_ROW=$(_row "<kbd>${AEROSPACE_SWIPE_FINGERS:-4}-finger swipe</kbd>" "Switch workspace")
+
+mkdir -p "$STATE_DIR"
+OUT="$HTML_FILE"
+[ "$PRINT_ONLY" = "true" ] && OUT=/dev/stdout
+
+cat > "$OUT" <<EOF
+<!doctype html><html><head><meta charset="utf-8"><title>Makaron Shortcuts</title><style>
+:root { color-scheme: light dark; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font: 13px/1.45 -apple-system, "SF Pro", sans-serif;
+  color: #0f172a; background: transparent;
+  padding: 26px 32px 20px; -webkit-user-select: none; cursor: default;
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+}
+header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+header svg { height: 24px; width: auto; opacity: .92; }
+.wordmark { font-size: 20px; font-weight: 700; letter-spacing: .04em; }
+.ht { font-size: 13px; opacity: .55; }
+main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px 30px; flex: 1; align-content: start; overflow-y: auto; }
+section { margin-bottom: 14px; break-inside: avoid; }
+h2 { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; opacity: .5; margin-bottom: 7px; }
+h2 .entry { text-transform: none; letter-spacing: 0; font-weight: 500; opacity: .9; }
+h2 .entry kbd { font-size: 10px; min-width: 16px; padding: 1px 4px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2.5px 0; }
+.keys { display: flex; gap: 3px; flex-shrink: 0; }
+.d { opacity: .82; text-align: right; }
+code { font: 11px ui-monospace, monospace; opacity: .9; }
+kbd {
+  display: inline-block; min-width: 21px; padding: 2px 5px;
+  font: 500 11.5px -apple-system, "SF Pro", sans-serif; text-align: center;
+  background: rgba(255,255,255,.5); border: 1px solid rgba(15,23,42,.14);
+  border-radius: 6px; box-shadow: 0 1px 0 rgba(15,23,42,.06);
+}
+footer { display: flex; justify-content: space-between; font-size: 11px; opacity: .45; padding-top: 10px; }
+@media (prefers-color-scheme: dark) {
+  body { color: #fafbfc; }
+  kbd { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); box-shadow: 0 1px 0 rgba(0,0,0,.2); }
+}
+</style></head><body>
+<header>
+${LOGO_HTML}
+<span class="ht">Keyboard Shortcuts</span>
+</header>
+<main>
+<div>$(_section "Workspaces" "$SEC_WS")$(_section "Move windows" "$SEC_MOVE")</div>
+<div>$(_section "Focus &amp; resize" "$SEC_FOCUS")$(_section "Layouts" "$SEC_LAYOUT")</div>
+<div>$(_section "Apps" "$SEC_APPS")$(_section "$SERVICE_HEAD" "$SEC_SERVICE")$(_section "Trackpad" "$SWIPE_ROW")$(_section "Other" "$SEC_OTHER")</div>
+</main>
+<footer><span>${VERSION}</span><span>esc to close</span></footer>
+</body></html>
+EOF
+
+[ "$PRINT_ONLY" = "true" ] && exit 0
+
+if [ -x "$VIEWER" ]; then
+    exec "$VIEWER" "$HTML_FILE"
+fi
+open "$HTML_FILE"
