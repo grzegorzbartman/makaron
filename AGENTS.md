@@ -84,7 +84,8 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps.
 
 ### System Commands
-- `makaron-update` - Pulls latest code to installed repo (`git reset --hard origin/main`), runs migrations, reloads UI.
+- `makaron-update` - Resets installed repo to the latest release tag (`stable` channel, default) or `origin/main` (`edge`), runs migrations, reloads UI. `--stable`/`--edge` persist the channel in `MAKARON_CHANNEL` (makaron.conf).
+- `makaron-version` - Prints `git describe` version and update channel.
 - `makaron-reinstall` - Removes `~/.local/share/makaron/`, re-clones, re-installs.
 - `makaron-select-packages` - Re-run optional package selection UI (gum-based).
 - `makaron-reload-aerospace-sketchybar` - Reloads AeroSpace + SketchyBar and re-applies layout state.

@@ -92,7 +92,8 @@ This command will:
 
 ### Available Commands
 
-- **`makaron-update`** - Update configuration to latest version
+- **`makaron-update`** - Update to the latest release (`stable` channel, default) or latest `main` (`--edge`); `--stable`/`--edge` persist the choice
+- **`makaron-version`** - Show installed version and update channel
 - **`makaron-reload-aerospace-sketchybar`** - Reload AeroSpace + SketchyBar and re-apply layout
 - **`makaron-reinstall`** - Complete reinstall from scratch
 - **`makaron-migrate`** - Run pending migrations
@@ -226,6 +227,17 @@ Makaron includes a migration system similar to database migrations. This allows 
 - Each migration runs only once per installation
 - State is tracked in `~/.local/state/makaron/migrations/`
 - Migrations run automatically during `makaron-update`
+
+## Releases and Update Channels
+
+Makaron ships as tagged releases (`vX.Y.Z`). By default `makaron-update` follows the **stable** channel and resets to the latest release tag. Switch channels with:
+
+```bash
+makaron-update --edge     # follow latest main
+makaron-update --stable   # back to releases
+```
+
+The choice is stored as `MAKARON_CHANNEL` in `~/.config/makaron/makaron.conf`.
 
 ### Creating Migrations
 

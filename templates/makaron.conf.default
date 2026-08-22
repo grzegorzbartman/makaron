@@ -20,3 +20,6 @@ AEROSPACE_SWIPE_NATURAL=true
 
 # Window layout: gap between windows in px (0-40)
 AEROSPACE_GAP_SIZE=12
+
+# Update channel: stable (latest release) or edge (latest main)
+MAKARON_CHANNEL=stable

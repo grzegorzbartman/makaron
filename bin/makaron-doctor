@@ -120,6 +120,14 @@ check_repo() {
     fi
 }
 
+check_version() {
+    local desc channel
+    desc=$(git -C "$MAKARON_PATH" describe --tags --match 'v*' --always 2>/dev/null) || desc=unknown
+    channel=$(sed -n 's/^MAKARON_CHANNEL=//p' "$MAKARON_CONF" 2>/dev/null | tail -1)
+    case "$channel" in stable|edge) ;; *) channel=stable ;; esac
+    add_result "ok" "version" "$desc ($channel)"
+}
+
 compile_swift() {
     local output="$1"
     local source="$2"
@@ -346,6 +354,7 @@ run_checks() {
     check_repo
 
     if [ -d "$MAKARON_PATH" ]; then
+        check_version
         check_symlink "sketchybar-symlink" "$SKETCHYBAR_LINK" "$MAKARON_PATH/configs/sketchybar"
         check_symlink "aerospace-symlink" "$AEROSPACE_LINK" "$MAKARON_PATH/configs/aerospace/.aerospace.toml"
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
