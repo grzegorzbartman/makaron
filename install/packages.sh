@@ -32,7 +32,7 @@ PKGS_AI=(
 )
 
 PKGS_DEV=(
-    "composer|Composer|PHP packages"
+    "composer|Composer|PHP dependency manager"
     "ddev|DDEV|local dev env"
     "gh|GitHub CLI|GitHub from terminal"
     "lazydocker|lazydocker|Docker TUI"
@@ -191,7 +191,7 @@ _show_group_selector() {
 
 _select_all_packages() {
     local all_pkgs=""
-    for entry in "${PKGS_TERMINAL[@]}" "${PKGS_EDITORS[@]}" "${PKGS_AI[@]}" \
+    for entry in "${PKGS_TERMINAL[@]}" "${PKGS_AI[@]}" "${PKGS_EDITORS[@]}" \
                  "${PKGS_DEV[@]}" "${PKGS_DESKTOP[@]}"; do
         all_pkgs="$all_pkgs ${entry%%|*}"
     done
@@ -231,8 +231,8 @@ show_package_selector() {
 
     local total=5
     _show_group_selector "Terminal Tools" 1 "$total" "${PKGS_TERMINAL[@]}"
-    _show_group_selector "Code Editors" 2 "$total" "${PKGS_EDITORS[@]}"
-    _show_group_selector "AI Tools" 3 "$total" "${PKGS_AI[@]}"
+    _show_group_selector "AI Tools" 2 "$total" "${PKGS_AI[@]}"
+    _show_group_selector "Code Editors" 3 "$total" "${PKGS_EDITORS[@]}"
     _show_group_selector "Development" 4 "$total" "${PKGS_DEV[@]}"
     _show_group_selector "Desktop Extras" 5 "$total" "${PKGS_DESKTOP[@]}"
 
