@@ -27,5 +27,8 @@ SKETCHYBAR_HEIGHT=40
 # Auto-arrange new windows in a dwindle layout (set false to disable)
 AEROSPACE_AUTO_DWINDLE=true
 
+# Float-all toggle (alt-shift-f) window arrangement: cascade | grid
+FLOAT_ALL_LAYOUT=cascade
+
 # Update channel: stable (latest release) or edge (latest main)
 MAKARON_CHANNEL=stable
