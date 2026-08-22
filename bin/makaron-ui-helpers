@@ -7,7 +7,7 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 
 # Notch detection cache — Swift cold-start (~1s) is too expensive to repeat.
 # Invalidate from display_change.sh on monitor hotplug.
-NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_has_builtin_notch}"
+NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_notch_v2}"
 
 # Floating-bar offset from the top edge. Must match y_offset in sketchybarrc.
 MAKARON_BAR_Y_OFFSET=4
@@ -85,24 +85,37 @@ reload_current_ui() {
 
 # --- AeroSpace Config ---
 
-# Detect if the built-in display has a notch (safeAreaInsets.top > 0).
-# Cached because Swift cold-start (~1s) makes this expensive to repeat.
-# Cache is invalidated by display_change.sh on monitor hotplug.
-_has_builtin_notch() {
-    if [ -f "$NOTCH_CACHE_FILE" ]; then
-        [[ "$(cat "$NOTCH_CACHE_FILE" 2>/dev/null)" == "1" ]]
-        return
+# Detect the built-in notch and the height of its unusable top strip.
+# Cache format: "<has_notch> <top_inset>". Cached because Swift cold-start
+# (~1s) makes this expensive to repeat; invalidated on monitor hotplug.
+_notch_probe() {
+    if [ ! -f "$NOTCH_CACHE_FILE" ]; then
+        local result
+        if [ -x "$MAKARON_PATH/bin/makaron-has-notch" ]; then
+            result=$("$MAKARON_PATH/bin/makaron-has-notch" 2>/dev/null)
+        else
+            result=$(swift -e 'import AppKit
+if let s = NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) {
+    print("1 \(max(Int((s.frame.maxY - s.visibleFrame.maxY).rounded()), 0))")
+} else { print("0 0") }' 2>/dev/null)
+        fi
+        case "$result" in
+            "1 "*|"0 "*) ;;
+            *) result="0 0" ;;
+        esac
+        echo "$result" > "$NOTCH_CACHE_FILE" 2>/dev/null || true
     fi
+    cat "$NOTCH_CACHE_FILE" 2>/dev/null || echo "0 0"
+}
 
-    local notch
-    if [ -x "$MAKARON_PATH/bin/makaron-has-notch" ]; then
-        notch=$("$MAKARON_PATH/bin/makaron-has-notch" 2>/dev/null)
-    else
-        notch=$(swift -e 'import AppKit; print(NSScreen.screens.contains { $0.safeAreaInsets.top > 0 } ? "1" : "0")' 2>/dev/null)
-    fi
-    [[ -z "$notch" ]] && notch="0"
-    echo "$notch" > "$NOTCH_CACHE_FILE" 2>/dev/null || true
-    [[ "$notch" == "1" ]]
+_has_builtin_notch() {
+    [[ "$(_notch_probe | awk '{print $1}')" == "1" ]]
+}
+
+_notch_top_inset() {
+    local inset
+    inset=$(_notch_probe | awk '{print $2}')
+    [[ "$inset" =~ ^[0-9]+$ ]] && echo "$inset" || echo 0
 }
 
 # Invalidate notch cache (call from display_change handler).
@@ -132,7 +145,13 @@ _expected_outer_top_line() {
         full)
             local bar_top=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET + gap ))
             if [ "$has_notch" = "true" ]; then
-                echo "    outer.top = [{ monitor.\"Built-in\" = $gap }, $bar_top]"
+                # The bar may extend below the notch strip; keep a full gap
+                # between the bar's bottom edge and the window tops.
+                local inset overhang
+                inset=$(_notch_top_inset)
+                overhang=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET - inset ))
+                [ "$overhang" -lt 0 ] && overhang=0
+                echo "    outer.top = [{ monitor.\"Built-in\" = $((gap + overhang)) }, $bar_top]"
             else
                 echo "    outer.top = $bar_top"
             fi

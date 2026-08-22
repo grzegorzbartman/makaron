@@ -120,9 +120,9 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.bottom`, and `outer.right`.
 
-For gap `g`, the top reserve is:
-- **Full mode + no notch:** `outer.top = 40 + g`
-- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g }, 40 + g]`
+For gap `g`, bar height `h`, bar y-offset `y` (4) and notch-strip height `i` (from `makaron-has-notch`), the top reserve is:
+- **Full mode + no notch:** `outer.top = h + y + g`
+- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g + max(0, h + y - i) }, h + y + g]` - the overhang term keeps a full gap below the bar, which extends past the notch strip.
 
 Notch detection uses `NSScreen.safeAreaInsets.top`, never model names. MacBook Neo and MacBook Air M1 built-in displays are handled as screens without a notch. External monitors are always handled without a notch. Display changes invalidate the cache and reapply the same persisted gap.
 
