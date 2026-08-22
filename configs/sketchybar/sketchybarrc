@@ -52,7 +52,11 @@ if [ "$SKETCHYBAR_LOGO" = "true" ]; then
   sketchybar --add item makaron_logo left \
              --set makaron_logo icon="M" \
                    icon.font="Hack Nerd Font:Bold:15.0" \
-                   icon.padding_left=8 icon.padding_right=6 label.drawing=off \
+                   icon.padding_left=8 icon.padding_right=8 label.drawing=off \
+                   background.drawing=on \
+                   background.color=$SPACE_BACKGROUND_COLOR \
+                   background.corner_radius=12 \
+                   background.height=24 \
                    click_script="sketchybar --set makaron_logo popup.drawing=toggle" \
                    popup.background.color=$BAR_COLOR \
                    popup.background.corner_radius=12 \
