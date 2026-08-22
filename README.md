@@ -4,8 +4,6 @@
 
 Complete macOS development environment for PHP and Drupal developers with AeroSpace window management, a SketchyBar top status bar, Ghostty, and optional productivity tools.
 
-![Makaron desktop with AeroSpace tiling, SketchyBar, and window gaps](docs/images/makaron-desktop.png)
-
 > [!IMPORTANT]
 > **Use this as a starting point, not a finished product.** Makaron is a personal, opinionated setup that changes frequently - widgets get added, removed, or rewired, defaults are tweaked, and breaking changes can land between updates. The best way to use it is to **fork the repository**, install from your own fork, and adjust it to fit your own workflow.
 
