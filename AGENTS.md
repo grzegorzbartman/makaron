@@ -146,7 +146,7 @@ Plugins live in `configs/sketchybar/plugins/`. Each plugin follows this pattern:
 3. Update SketchyBar: `sketchybar --set "$NAME" icon="..." label="..." icon.color=$COLOR`
 
 ### Color Format
-All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` exports a static glass palette: translucent bar with blur and the macOS system blue for the focused workspace.
+All colors use ARGB hex: `0xffRRGGBB` (ff = fully opaque). `configs/sketchybar/colors.sh` resolves the palette from the system appearance (`defaults read -g AppleInterfaceStyle`): light and dark liquid-glass variants, each with the matching system blue (`007aff` light / `0a84ff` dark). `plugins/appearance_change.sh` (hidden `appearance_check` item, 10s poll) reloads the bar when the appearance flips.
 
 ### SketchyBar Color Variables
 `configs/sketchybar/colors.sh` exports:

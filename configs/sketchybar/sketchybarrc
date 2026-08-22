@@ -111,6 +111,12 @@ else
   done
 fi
 
+##### Appearance Change Detection #####
+# Reload the bar when macOS switches between light and dark mode
+sketchybar --add item appearance_check left \
+           --set appearance_check drawing=off update_freq=10 \
+           script="$PLUGIN_DIR/appearance_change.sh"
+
 ##### Monitor Change Detection #####
 # Automatically reload SketchyBar when monitors are connected/disconnected
 sketchybar --add item display_change_detector left \
