@@ -23,7 +23,7 @@ source "$CONFIG_DIR/colors.sh"
 # Floating liquid-glass bar. y_offset=4 must match MAKARON_BAR_Y_OFFSET in
 # bin/makaron-ui-helpers (it is part of the window outer.top math).
 sketchybar --bar position=top height=${SKETCHYBAR_HEIGHT:-40} margin=12 y_offset=4 \
-           corner_radius=14 border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+           corner_radius=16 border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####
