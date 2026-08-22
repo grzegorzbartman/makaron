@@ -4,7 +4,8 @@ RUNTIME_ID=$(id -u)
 
 # Invalidate caches that depend on display topology.
 rm -f "/tmp/makaron_${RUNTIME_ID}_screen_width" 2>/dev/null
-rm -f "/tmp/makaron_${RUNTIME_ID}_has_builtin_notch" 2>/dev/null
+rm -f "/tmp/makaron_${RUNTIME_ID}_notch_v2" 2>/dev/null
+rm -f "/tmp/makaron_${RUNTIME_ID}_has_builtin_notch" 2>/dev/null  # legacy name
 
 command -v aerospace >/dev/null 2>&1 || exit 0
 
