@@ -341,16 +341,29 @@ verify_desktop_state() {
 
 # Toggle menu bar autohide via AppleScript UI click (toggle trick).
 # macOS ignores defaults write / CFPreferences — must click the dropdown in System Settings.
+# UI strings are localized, so every option carries its EN/PL/DE/FR variants
+# (extracted from ControlCenterSettings.appex Localizable.loctable).
 _set_menubar_autohide() {
     local target="$1"  # "Always", "In Full Screen Only", or "Never"
-    local opposite
 
+    local always='"Always", "Zawsze", "Immer", "Toujours"'
+    local desktop_only='"On Desktop Only", "Tylko na Biurku", "Nur auf Schreibtisch", "Sur le bureau uniquement"'
+    local fullscreen_only='"In Full Screen Only", "Tylko na pełnym ekranie", "Nur im Vollbildmodus", "En plein écran uniquement"'
+    local never='"Never", "Nigdy", "Nie", "Jamais"'
+
+    local target_values opposite_values
     case "$target" in
-        "Always"|"In Full Screen Only")
-            opposite="Never"
+        "Always")
+            target_values="$always"
+            opposite_values="$never"
+            ;;
+        "In Full Screen Only")
+            target_values="$fullscreen_only"
+            opposite_values="$never"
             ;;
         "Never")
-            opposite="Always"
+            target_values="$never"
+            opposite_values="$always"
             ;;
         *)
             echo "  ⚠️  Unsupported menu bar autohide target: $target"
@@ -359,9 +372,9 @@ _set_menubar_autohide() {
     esac
 
     if ! osascript <<EOF
-set targetValue to "$target"
-set oppositeValue to "$opposite"
-set validValues to {"Always", "On Desktop Only", "In Full Screen Only", "Never"}
+set targetValues to {$target_values}
+set oppositeValues to {$opposite_values}
+set validValues to {$always, $desktop_only, $fullscreen_only, $never}
 
 on waitForWindow(proc)
     repeat 20 times
@@ -391,12 +404,20 @@ on findMenuBarPopup(proc, validValues)
     error "Could not find menu bar autohide popup"
 end findMenuBarPopup
 
-on clickMenuItem(menuPopup, menuValue)
+on clickMenuItem(menuPopup, menuValues)
     tell application "System Events"
         click menuPopup
         delay 0.8
-        click menu item menuValue of menu 1 of menuPopup
+        repeat with i from 1 to count of menuValues
+            set menuValue to item i of menuValues as text
+            if exists menu item menuValue of menu 1 of menuPopup then
+                click menu item menuValue of menu 1 of menuPopup
+                return
+            end if
+        end repeat
+        key code 53 -- Escape: close the open menu before failing
     end tell
+    error "Menu item not found in any supported language"
 end clickMenuItem
 
 tell application "System Settings" to quit
@@ -411,10 +432,10 @@ tell application "System Events"
         set frontmost to true
         my waitForWindow(it)
         set menuPopup to my findMenuBarPopup(it, validValues)
-        my clickMenuItem(menuPopup, oppositeValue)
+        my clickMenuItem(menuPopup, oppositeValues)
         delay 1.5
         set menuPopup to my findMenuBarPopup(it, validValues)
-        my clickMenuItem(menuPopup, targetValue)
+        my clickMenuItem(menuPopup, targetValues)
         delay 1
     end tell
 end tell
