@@ -2,7 +2,7 @@
 
 ## What Is Makaron
 
-Makaron is a macOS desktop environment manager for a focused developer setup. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and a set of install/update scripts for optional developer tools.
+Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
 
 The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar uses a translucent, macOS-native glass look with static colors in `configs/sketchybar/colors.sh`.
 

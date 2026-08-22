@@ -1,8 +1,8 @@
-# Makaron - macOS Developer Configuration
+# Makaron - Focused macOS Work Environment
 
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
 
-Complete macOS development environment for PHP and Drupal developers with AeroSpace window management, a SketchyBar top status bar, Ghostty, and optional productivity tools.
+A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar, the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden so your screen holds only what you are working on.
 
 ![Makaron desktop with AeroSpace tiling, window gaps, and the translucent SketchyBar](docs/images/makaron-desktop.png)
 
@@ -11,10 +11,11 @@ Complete macOS development environment for PHP and Drupal developers with AeroSp
 
 ## Perfect For
 
-- **PHP Developers** - Optimized workflow for PHP development
-- **Drupal Developers** - Tailored environment for Drupal projects
-- **macOS Power Users** - Tiling window management with a compact custom top bar
-- **Terminal Users** - Ghostty, shell tools, and optional AI CLIs
+- **Keyboard-driven workers** - Switch, tile, and resize windows without touching the mouse
+- **Deep-work setups** - Hidden Dock, hidden menu bar, one compact status bar
+- **AI-assisted workflows** - Claude Code, Codex, and Cursor ready right after install
+- **Terminal users** - Ghostty plus fast CLI tools (fzf, btop, lazygit)
+- **Developers** - Optional group with editors, containers, and language tooling
 
 ## Requirements
 
@@ -35,7 +36,12 @@ After installation, reload your shell or open a new terminal.
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
 - **SketchyBar** - Custom top status bar with a translucent, macOS-native look
-- **Nerd Fonts** - Developer-friendly fonts with icon support
+- **Nerd Fonts** - Icon-capable fonts for the status bar and terminal
+
+### AI Tools
+- **Claude Code** - AI coding assistant
+- **Cursor** - AI-powered code editor
+- **Codex** - AI code assistant
 
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator (configuration stays user-managed)
@@ -44,12 +50,7 @@ After installation, reload your shell or open a new terminal.
 - **Neovim** - Modern Vim-based text editor
 - **Upsun CLI** - Upsun command-line tool
 
-### AI Tools
-- **Claude Code** - AI coding assistant
-- **Cursor** - AI-powered code editor
-- **Codex** - AI code assistant
-
-### Development Tools
+### Development Tools (optional)
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
 - **Sequel Ace** - MySQL/MariaDB database management
@@ -61,7 +62,7 @@ After installation, reload your shell or open a new terminal.
 - **pipx** - Python application installer
 
 ### System Configuration
-- **macOS Settings** - Optimized system preferences for development workflow
+- **macOS Settings** - System preferences tuned for tiling and distraction-free work
 - **Migration System** - Safe, incremental configuration updates
 - **User Config** - Personal settings in `~/.config/makaron/makaron.conf`
 
