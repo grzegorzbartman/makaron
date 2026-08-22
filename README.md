@@ -35,7 +35,7 @@ After installation, reload your shell or open a new terminal.
 
 ### UI & Window Management
 - **AeroSpace** - Modern tiling window manager
-- **SketchyBar** - Custom top status bar with a translucent, macOS-native look. When everything is fine it shows almost nothing - CPU, memory, and disk appear only above their alert thresholds
+- **SketchyBar** - Custom top status bar with a translucent, macOS-native look; the disk indicator stays hidden until usage crosses its alert threshold
 - **Nerd Fonts** - Icon-capable fonts for the status bar and terminal
 
 ### AI Tools
@@ -308,8 +308,8 @@ SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in 
 AEROSPACE_SWIPE_FINGERS=4               # Fingers used to switch workspaces
 AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
 AEROSPACE_GAP_SIZE=12                    # Window gap in pixels (0-40)
-CPU_ALERT_THRESHOLD=80                   # Show CPU on the bar only above this usage (%)
-MEMORY_ALERT_THRESHOLD=80                # Show memory only above this usage (%)
+CPU_ALERT_THRESHOLD=80                   # CPU turns alert color above this usage (%)
+MEMORY_ALERT_THRESHOLD=80                # Memory turns alert color above this usage (%)
 STORAGE_ALERT_THRESHOLD=90               # Show disk only above this usage (%)
 ```
 

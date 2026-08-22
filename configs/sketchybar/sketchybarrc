@@ -172,28 +172,34 @@ sketchybar --add item spacer_time right \
            --set spacer_status width=5 background.drawing=off icon.drawing=off label.drawing=off
 
 if [ "$SKETCHYBAR_COMPACT_MODE" != "true" ]; then
-  # Threshold alerts: invisible until CPU/memory/storage crosses its limit,
-  # then a warning-tinted pill appears (silence is the default state).
-  alert_item=(
-    drawing=off
-    icon.padding_left=8 icon.padding_right=2
-    label.padding_left=2 label.padding_right=8
-    background.drawing=on
-    background.corner_radius=12
-    background.height=24
-  )
+  # CPU and memory are always visible (alert color above their thresholds).
+  # Storage is a threshold alert: hidden until the disk crosses its limit,
+  # then a warning-tinted pill appears.
   sketchybar --add item memory right \
-             --set memory update_freq=5 icon=󰍛 "${alert_item[@]}" \
+             --set memory update_freq=5 icon=󰍛 icon.padding_left=4 icon.padding_right=2 \
+                          label.padding_left=0 label.padding_right=4 \
                           script="$PLUGIN_DIR/memory.sh" \
              --add item storage right \
-             --set storage update_freq=60 icon=󰋊 "${alert_item[@]}" \
+             --set storage update_freq=60 icon=󰋊 drawing=off \
+                           icon.padding_left=8 icon.padding_right=2 \
+                           label.padding_left=2 label.padding_right=8 \
+                           background.drawing=on background.corner_radius=12 background.height=24 \
                            script="$PLUGIN_DIR/storage.sh" \
              --add item cpu right \
-             --set cpu update_freq=5 icon=󰻠 "${alert_item[@]}" \
+             --set cpu update_freq=5 icon=󰻠 icon.padding_left=6 icon.padding_right=2 \
+                       label.padding_left=0 label.padding_right=4 \
                        script="$PLUGIN_DIR/cpu.sh"
 fi
 
 ##### Brackets for visual grouping #####
+# Group 1: System (CPU + Memory) — omitted in SKETCHYBAR_COMPACT_MODE
+if [ "$SKETCHYBAR_COMPACT_MODE" != "true" ]; then
+  sketchybar --add bracket system_bracket cpu memory \
+             --set system_bracket background.color=$SPACE_BACKGROUND_COLOR \
+                                  background.corner_radius=12 \
+                                  background.height=24
+fi
+
 # Group 2: Status (Battery + Volume + WiFi)
 sketchybar --add bracket status_bracket battery volume wifi \
            --set status_bracket background.color=$SPACE_BACKGROUND_COLOR \
