@@ -50,13 +50,12 @@ sketchybar --default "${default[@]}"
 SKETCHYBAR_LOGO="${SKETCHYBAR_LOGO:-true}"
 if [ "$SKETCHYBAR_LOGO" = "true" ]; then
   sketchybar --add item makaron_logo left \
-             --set makaron_logo icon="M" \
-                   icon.font="Hack Nerd Font:Bold:15.0" \
-                   icon.padding_left=8 icon.padding_right=8 label.drawing=off \
+             --set makaron_logo icon.drawing=off label.drawing=off \
+                   padding_left=6 padding_right=2 \
                    background.drawing=on \
-                   background.color=$SPACE_BACKGROUND_COLOR \
-                   background.corner_radius=12 \
-                   background.height=24 \
+                   background.color=0x00000000 \
+                   background.image="$CONFIG_DIR/assets/makaron-icon@2x.png" \
+                   background.image.scale=0.25 \
                    click_script="sketchybar --set makaron_logo popup.drawing=toggle" \
                    popup.background.color=$BAR_COLOR \
                    popup.background.corner_radius=12 \
