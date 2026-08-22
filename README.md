@@ -1,13 +1,19 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/branding/makaron-logo-dark.svg">
-  <img src="assets/branding/makaron-logo.svg" alt="MAKARON" width="360">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/branding/makaron-logo-dark.svg">
+    <img src="assets/branding/makaron-logo.svg" alt="Makaron" width="460">
+  </picture>
+</p>
 
-# Makaron - Focused macOS Work Environment
+<h1 align="center">Focused macOS Work Environment</h1>
+
+<p align="center">
+A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar,<br>
+the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden<br>
+so your screen holds only what you are working on.
+</p>
 
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
-
-A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar, the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden so your screen holds only what you are working on.
 
 ![Makaron desktop with AeroSpace tiling, window gaps, and the translucent SketchyBar](docs/images/makaron-desktop.png)
 
