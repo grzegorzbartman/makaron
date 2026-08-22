@@ -21,6 +21,9 @@ if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then
     export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
     export SPACE_FOCUSED_BACKGROUND_COLOR=0xff0a84ff
     export SPACE_FOCUSED_BORDER_COLOR=0xff0a84ff
+
+    export ALERT_COLOR=0xffff453a
+    export ALERT_BACKGROUND_COLOR=0x33ff453a
 else
     # Light: translucent glass, dark text, system blue
     export BAR_COLOR=0x66f5f5f7
@@ -40,6 +43,9 @@ else
     export SPACE_FOCUSED_LABEL_COLOR=0xffffffff
     export SPACE_FOCUSED_BACKGROUND_COLOR=0xff007AFF
     export SPACE_FOCUSED_BORDER_COLOR=0xff007AFF
+
+    export ALERT_COLOR=0xffff3b30
+    export ALERT_BACKGROUND_COLOR=0x26ff3b30
 fi
 
 # User color overrides (sourced by sketchybarrc and every plugin)

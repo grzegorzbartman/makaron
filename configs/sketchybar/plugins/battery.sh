@@ -33,10 +33,10 @@ if [[ "$CHARGING" != "" ]]; then
   ICON="󰂄"
 fi
 
-# Determine colors - use focused border color for low battery warning
+# Low battery gets the alert color
 if [ "$PERCENTAGE" -le "$BATTERY_LOW_THRESHOLD" ] && [ -z "$CHARGING" ]; then
-  DISPLAY_ICON_COLOR="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}"
-  DISPLAY_LABEL_COLOR="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}"
+  DISPLAY_ICON_COLOR="${ALERT_COLOR:-0xffff3b30}"
+  DISPLAY_LABEL_COLOR="${ALERT_COLOR:-0xffff3b30}"
 else
   DISPLAY_ICON_COLOR="${ICON_COLOR:-0xffc0caf5}"
   DISPLAY_LABEL_COLOR="${LABEL_COLOR:-0xffc0caf5}"

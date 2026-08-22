@@ -98,23 +98,6 @@ else
   IS_FOCUSED="$FOCUSED_WORKSPACE"
 fi
 
-if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
-  sketchybar --set "$NAME" \
-    background.drawing=on \
-    background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}" \
-    background.border_color="${SPACE_FOCUSED_BORDER_COLOR:-0xff7aa2f7}" \
-    background.border_width=2 \
-    icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}" \
-    label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"
-else
-  sketchybar --set "$NAME" \
-    background.drawing=on \
-    background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" \
-    background.border_width=0 \
-    icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
-    label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
-fi
-
 # Collect unique app names for the workspace and turn them into icons.
 windows=$(aerospace list-windows --workspace "$WORKSPACE" 2>/dev/null | awk -F'|' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u)
 
@@ -130,12 +113,18 @@ while IFS= read -r app; do
   fi
 done <<< "$windows"
 
-if [[ -n "$icons" ]]; then
-  sketchybar --set "$NAME" drawing=on label="$icons" label.drawing=on
+# Visual hierarchy, animated (sin easing):
+# - focused:            accent pill + app icons
+# - occupied, unfocused: quiet pill, number only
+# - empty, unfocused:    bare dimmed number (or hidden entirely)
+if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
+  sketchybar --set "$NAME" drawing=on              --animate sin 12 --set "$NAME"     background.drawing=on     background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}"     icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}"     label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"              --set "$NAME" label="$icons" label.drawing="$([[ -n "$icons" ]] && echo on || echo off)"
+elif [[ -n "$icons" ]]; then
+  sketchybar --set "$NAME" drawing=on label.drawing=off              --animate sin 12 --set "$NAME"     background.drawing=on     background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}"     icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}"     label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
 else
-  if [[ "$SKETCHYBAR_HIDE_EMPTY_WORKSPACES" == "true" && "$IS_FOCUSED" != "$WORKSPACE" ]]; then
+  if [[ "$SKETCHYBAR_HIDE_EMPTY_WORKSPACES" == "true" ]]; then
     sketchybar --set "$NAME" drawing=off
   else
-    sketchybar --set "$NAME" drawing=on label="" label.drawing=off
+    sketchybar --set "$NAME" drawing=on label.drawing=off                --animate sin 12 --set "$NAME"       background.drawing=off       icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}"
   fi
 fi

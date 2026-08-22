@@ -1,6 +1,6 @@
 #!/bin/sh
 # Storage alert for SketchyBar (APFS-aware): hidden below the threshold,
-# shown as a warning when the disk is nearly full.
+# shown as a warning pill when the disk is nearly full.
 
 source "$CONFIG_DIR/colors.sh"
 
@@ -13,8 +13,9 @@ case "$USED_PCT" in (*[!0-9]*|"") USED_PCT=0 ;; esac
 
 if [ "$USED_PCT" -gt "$STORAGE_ALERT_THRESHOLD" ]; then
   sketchybar --set "$NAME" drawing=on label="${USED_PCT}% full" \
-    icon.color="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}" \
-    label.color="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}" 2>/dev/null
+    background.color="${ALERT_BACKGROUND_COLOR:-0x26ff3b30}" \
+    icon.color="${ALERT_COLOR:-0xffff3b30}" \
+    label.color="${ALERT_COLOR:-0xffff3b30}" 2>/dev/null
 else
   sketchybar --set "$NAME" drawing=off 2>/dev/null
 fi
