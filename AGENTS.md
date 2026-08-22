@@ -20,6 +20,21 @@ Unless the user says otherwise, every change follows this flow:
   - Check that new keyboard shortcuts don't conflict with Polish characters (lowercase and uppercase: ą, ć, ę, ł, ń, ó, ś, ź, ż, Ą, Ć, Ę, Ł, Ń, Ó, Ś, Ź, Ż).
 - Push the branch and open a Pull Request, then return the PR link to the user.
 
+## Releasing
+
+Full runbook: `docs/RELEASING.md`. Short version:
+- Versions are git tags (`vX.Y.Z`), no VERSION file. `makaron-update` on the default `stable` channel resets the installed repo to the latest tag; `edge` follows `origin/main`.
+- Semver: **patch** = bug fixes; **minor** = features, new `makaron.conf` variables, migrations; **major** = breaking changes or manual steps required.
+- Cut a release after the PR merges and CI is green on `main`:
+
+```bash
+gh release create vX.Y.Z --target main --generate-notes
+```
+
+- Verify on an installed machine: `makaron-update` should show the new tag as target, then `Already up to date` on a second run; `makaron-version` prints the tag.
+- Never tag a commit that predates the channel-aware `makaron-update` (stable users reset to that tag would lose the channel mechanism). Tag only current `main`.
+- Merging a PR does NOT ship it to stable users - only tagging does. Batch merged PRs into a release deliberately.
+
 ## Code Style
 - Short, concise shell scripts - no verbose comments.
 - DRY and SOLID principles.
@@ -281,7 +296,7 @@ User-specific settings are stored outside the repo in `~/.config/makaron/makaron
 - Template: `templates/makaron.conf.default`
 - User file: `~/.config/makaron/makaron.conf`
 - On install: template is copied to user location
-- On update: missing variables are appended (existing values preserved)
+- On update: `install/makaron-conf.sh` regenerates the file from the template (structure and comments from template, user values win, unknown user variables preserved in a "User-defined settings" section)
 
 ### Adding New Config Variables
 1. Add variable to `templates/makaron.conf.default`.
@@ -295,7 +310,11 @@ SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right s
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
-AEROSPACE_GAP_SIZE=12                    # Persistent gap (0-40)
+AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
+SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+AEROSPACE_AUTO_DWINDLE=true             # Dwindle auto-layout for new windows
+FLOAT_ALL_LAYOUT=cascade                # float-all (alt-shift-f) arrangement: cascade | grid
+MAKARON_CHANNEL=stable                  # Update channel: stable | edge
 ```
 
 ---
@@ -464,7 +483,7 @@ sketchybar --reload
 ```
 
 ### makaron-update Fails (Entry not uptodate / Local changes)
-If update fails due to git state, re-run the install script (it fetches latest and fixes skip-worktree):
+If update fails due to git state, re-run the install script (it re-fetches and resets to the channel target):
 
 ```bash
 curl -sL https://raw.githubusercontent.com/grzegorzbartman/makaron/main/install.sh | bash
