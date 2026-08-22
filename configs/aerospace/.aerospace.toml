@@ -127,21 +127,17 @@ persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
 
     # All possible commands: https://nikitabobko.github.io/AeroSpace/commands
 
-    # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
-    # You can uncomment the following lines to open up terminal with alt + enter shortcut
-    # (like in i3)
-    # alt-enter = '''exec-and-forget osascript -e '
-    # tell application "Terminal"
-    #     do script
-    #     activate
-    # end tell'
-    # '''
+    # Open a new terminal window (like in i3)
+    alt-enter = 'exec-and-forget open -na Ghostty'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#layout
     alt-slash = 'layout tiles horizontal vertical'
     alt-comma = 'layout accordion horizontal vertical'
     alt-f = 'layout floating tiling'
     alt-shift-f = 'exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/float-all-toggle.sh'
+
+    # Monocle-style deep work: current window fullscreen, again to restore tiling
+    alt-m = 'fullscreen'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
     ctrl-alt-left = 'focus left'
@@ -194,6 +190,9 @@ persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
     # Go to previous workspace
     alt-left = 'workspace prev'
 
+    # Jump back to the previously focused workspace (like cmd-backtick within an app)
+    alt-backtick = 'workspace-back-and-forth'
+
     # Move node to next workspace
     cmd-alt-right = 'move-node-to-workspace next'
 
@@ -205,8 +204,9 @@ persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
 
     # Multi-monitor management
     # Quick focus switching between monitors
-    ctrl-tab = 'focus-monitor next'
-    ctrl-shift-tab = 'focus-monitor prev'
+    # (ctrl-alt: plain ctrl-tab must stay free for tab cycling in browsers/terminals)
+    ctrl-alt-tab = 'focus-monitor next'
+    ctrl-alt-shift-tab = 'focus-monitor prev'
 
     # Move windows between monitors
     ctrl-alt-shift-left = 'move-node-to-monitor left'
@@ -277,14 +277,15 @@ run = ["move-node-to-workspace W"]
 if.app-id = "com.apple.MobileSMS"
 run = ["move-node-to-workspace W"]
 
-# Workspace Q: Notes & Tasks
-[[on-window-detected]]
-if.app-id = "com.apple.Notes"
-run = ["move-node-to-workspace Q"]
-
+# Workspace 1: Tasks
 [[on-window-detected]]
 if.app-id = "com.todoist.mac.Todoist"
 run = ["move-node-to-workspace 1"]
+
+# Workspace Q: Notes & Calendar
+[[on-window-detected]]
+if.app-id = "com.apple.Notes"
+run = ["move-node-to-workspace Q"]
 
 [[on-window-detected]]
 if.app-id = "com.apple.iCal"
