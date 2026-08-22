@@ -98,6 +98,23 @@ else
   IS_FOCUSED="$FOCUSED_WORKSPACE"
 fi
 
+# FAST PATH: recolor the pill immediately - the expensive window query
+# happens after, so the focus highlight never waits on a subprocess.
+if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
+  # Instant attack: the new focus lights up with zero delay
+  sketchybar --set "$NAME" drawing=on \
+    background.drawing=on \
+    background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}" \
+    icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}" \
+    label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"
+else
+  # Soft release: the previous focus fades out gently
+  sketchybar --animate sin 10 --set "$NAME" \
+    icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
+    label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}" \
+    background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}"
+fi
+
 # Collect unique app names for the workspace and turn them into icons.
 # Breathing room between glyphs; at most 3 icons, a dot marks the rest.
 windows=$(aerospace list-windows --workspace "$WORKSPACE" 2>/dev/null | awk -F'|' '{print $2}' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u)
@@ -120,23 +137,18 @@ while IFS= read -r app; do
   fi
 done <<< "$windows"
 
-# Visual hierarchy, animated (sin easing):
+# SLOW PATH: hierarchy corrections once windows are known
 # - focused:            accent pill + app icons
 # - occupied, unfocused: quiet pill + app icons
 # - empty, unfocused:    bare dimmed number (or hidden entirely)
 if [[ "$IS_FOCUSED" == "$WORKSPACE" ]]; then
-  sketchybar --set "$NAME" drawing=on              --animate sin 12 --set "$NAME"     background.drawing=on     background.color="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff1a1b26}"     icon.color="${SPACE_FOCUSED_ICON_COLOR:-0xffc0caf5}"     label.color="${SPACE_FOCUSED_LABEL_COLOR:-0xffc0caf5}"              --set "$NAME" label="$icons" label.drawing="$([[ -n "$icons" ]] && echo on || echo off)"
+  sketchybar --set "$NAME" label="$icons" label.drawing="$([[ -n "$icons" ]] && echo on || echo off)"
 elif [[ -n "$icons" ]]; then
-  sketchybar --set "$NAME" drawing=on label="$icons" label.drawing=on \
-             --animate sin 12 --set "$NAME" \
-    background.drawing=on \
-    background.color="${SPACE_BACKGROUND_COLOR:-0xff24283b}" \
-    icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}" \
-    label.color="${SPACE_LABEL_COLOR:-0xffa9b1d6}"
+  sketchybar --set "$NAME" drawing=on label="$icons" label.drawing=on background.drawing=on
 else
   if [[ "$SKETCHYBAR_HIDE_EMPTY_WORKSPACES" == "true" ]]; then
     sketchybar --set "$NAME" drawing=off
   else
-    sketchybar --set "$NAME" drawing=on label.drawing=off                --animate sin 12 --set "$NAME"       background.drawing=off       icon.color="${SPACE_ICON_COLOR:-0xffa9b1d6}"
+    sketchybar --set "$NAME" drawing=on label.drawing=off background.drawing=off
   fi
 fi
