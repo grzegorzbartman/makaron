@@ -1,27 +1,27 @@
 #!/bin/sh
-# CPU load average and core count for SketchyBar
+# CPU usage percentage for SketchyBar (warning color under heavy load)
 
 source "$CONFIG_DIR/colors.sh"
 
-# Get number of CPU cores
 CPU_CORES=$(sysctl -n hw.ncpu)
+# Sum of per-process %cpu (decaying average, instant read) over core count
+CPU_SUM=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
 
-# Get 1-minute load average
-LOAD_AVERAGE=$(uptime | awk -F'load averages:' '{print $2}' | awk '{print $1}' | sed 's/,//')
-
-# Round load average to 2 decimal places
-LOAD_ROUNDED=$(echo "$LOAD_AVERAGE" | awk '{printf "%.2f", $1}')
-
-# Error handling for invalid values
-if [ -z "$LOAD_ROUNDED" ] || [ -z "$CPU_CORES" ] || ! [[ "$LOAD_ROUNDED" =~ ^[0-9]+\.?[0-9]*$ ]] || ! [[ "$CPU_CORES" =~ ^[0-9]+$ ]]; then
+if [ -z "$CPU_SUM" ] || [ -z "$CPU_CORES" ] || [ "$CPU_CORES" -eq 0 ] 2>/dev/null; then
   CPU_DISPLAY="N/A"
+  COLOR="${LABEL_COLOR:-0xffc0caf5}"
 else
-  CPU_DISPLAY="${LOAD_ROUNDED}/${CPU_CORES}"
+  CPU_PCT=$((CPU_SUM / CPU_CORES))
+  [ "$CPU_PCT" -gt 100 ] && CPU_PCT=100
+  CPU_DISPLAY="${CPU_PCT}%"
+  if [ "$CPU_PCT" -gt 80 ]; then
+    COLOR="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}"
+  else
+    COLOR="${LABEL_COLOR:-0xffc0caf5}"
+  fi
 fi
 
-# Update SketchyBar with error handling
-sketchybar --set "$NAME" label="$CPU_DISPLAY" \
-  label.color="${LABEL_COLOR:-0xffc0caf5}" 2>/dev/null || {
+sketchybar --set "$NAME" label="$CPU_DISPLAY" label.color="$COLOR" 2>/dev/null || {
   echo "Error updating CPU display" >&2
   exit 1
 }

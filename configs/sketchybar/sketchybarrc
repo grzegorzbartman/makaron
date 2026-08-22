@@ -132,6 +132,14 @@ sketchybar --add item clock right \
                        label.padding_left=2 label.padding_right=6 \
                        script="$PLUGIN_DIR/clock.sh"
 
+# Update indicator: hidden unless a newer release (or main on edge) is available
+sketchybar --add item makaron_update right \
+           --set makaron_update update_freq=14400 drawing=off \
+                       icon.padding_left=4 icon.padding_right=4 label.drawing=off \
+                       script="$PLUGIN_DIR/update_check.sh" \
+                       click_script="open -na Ghostty --args -e $HOME/.local/share/makaron/bin/makaron-update" \
+           --subscribe makaron_update system_woke
+
 sketchybar --add item spacer_time right \
            --set spacer_time width=5 background.drawing=off icon.drawing=off label.drawing=off \
            --add item wifi right \

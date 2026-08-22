@@ -6,6 +6,6 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-sketchybar --set "$NAME" label="$(date '+%a | %Y-%m-%d | %H:%M')" \
+sketchybar --set "$NAME" label="$(date '+%a %d %b  %H:%M')" \
   label.color="${LABEL_COLOR:-0xffc0caf5}"
 
