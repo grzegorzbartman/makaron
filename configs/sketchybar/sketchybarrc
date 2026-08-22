@@ -20,7 +20,11 @@ source "$CONFIG_DIR/colors.sh"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-sketchybar --bar position=top height=${SKETCHYBAR_HEIGHT:-40} color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
+# Floating liquid-glass bar. y_offset=4 must match MAKARON_BAR_Y_OFFSET in
+# bin/makaron-ui-helpers (it is part of the window outer.top math).
+sketchybar --bar position=top height=${SKETCHYBAR_HEIGHT:-40} margin=12 y_offset=4 \
+           corner_radius=14 border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+           color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####
 # We now change some default values, which are applied to all further items.
@@ -31,7 +35,7 @@ default=(
   padding_left=3
   padding_right=3
   icon.font="Hack Nerd Font:Bold:14.0"
-  label.font="Hack Nerd Font:Bold:12.0"
+  label.font="SF Pro:Medium:13.0"
   icon.color=$ICON_COLOR
   label.color=$LABEL_COLOR
   icon.padding_left=3
@@ -68,7 +72,7 @@ if [ "$MONITOR_COUNT" -eq 1 ]; then
       label.font="Hack Nerd Font:Bold:10.0" \
       label.color=$SPACE_LABEL_COLOR \
       background.color=$SPACE_BACKGROUND_COLOR \
-      background.corner_radius=6 \
+      background.corner_radius=12 \
       background.height=24 \
       background.drawing=on \
       background.border_color=$SPACE_BORDER_COLOR \
@@ -96,7 +100,7 @@ else
         label.font="Hack Nerd Font:Bold:10.0" \
         label.color=$SPACE_LABEL_COLOR \
         background.color=$SPACE_BACKGROUND_COLOR \
-        background.corner_radius=6 \
+        background.corner_radius=12 \
         background.height=24 \
         background.drawing=on \
         background.border_color=$SPACE_BORDER_COLOR \
@@ -181,20 +185,20 @@ fi
 if [ "$SKETCHYBAR_COMPACT_MODE" != "true" ]; then
   sketchybar --add bracket system_bracket cpu memory storage \
              --set system_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                                  background.corner_radius=6 \
+                                  background.corner_radius=12 \
                                   background.height=24
 fi
 
 # Group 2: Status (Battery + Volume + WiFi)
 sketchybar --add bracket status_bracket battery volume wifi \
            --set status_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                                background.corner_radius=6 \
+                                background.corner_radius=12 \
                                 background.height=24
 
 # Group 3: Time (Clock)
 sketchybar --add bracket time_bracket clock \
            --set time_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                              background.corner_radius=6 \
+                              background.corner_radius=12 \
                               background.height=24
 
 ##### User overrides (add/remove/restyle items) #####
