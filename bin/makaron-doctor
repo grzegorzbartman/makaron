@@ -392,6 +392,7 @@ run_checks() {
         check_aerospace_generated
         check_symlink "aerospace-symlink" "$AEROSPACE_LINK" "$AEROSPACE_GENERATED"
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
+        check_swift_binary "notch-binary" "$MAKARON_PATH/bin/makaron-has-notch" "$MAKARON_PATH/src/has_notch.swift"
         check_bin_permissions
         check_makaron_conf
         check_ui_services
