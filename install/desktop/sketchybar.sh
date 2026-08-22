@@ -16,6 +16,14 @@ if [ -f "$MAKARON_PATH/src/memory_stats.swift" ]; then
     }
 fi
 
+# Compile notch detection binary (avoids slow `swift -e` cold start)
+if [ -f "$MAKARON_PATH/src/has_notch.swift" ]; then
+    echo "Compiling has_notch..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-has-notch" "$MAKARON_PATH/src/has_notch.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile has_notch.swift, falling back to swift -e"
+    }
+fi
+
 # Setup SketchyBar config
 mkdir -p "$HOME/.config"
 

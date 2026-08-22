@@ -95,7 +95,11 @@ _has_builtin_notch() {
     fi
 
     local notch
-    notch=$(swift -e 'import AppKit; print(NSScreen.screens.contains { $0.safeAreaInsets.top > 0 } ? "1" : "0")' 2>/dev/null)
+    if [ -x "$MAKARON_PATH/bin/makaron-has-notch" ]; then
+        notch=$("$MAKARON_PATH/bin/makaron-has-notch" 2>/dev/null)
+    else
+        notch=$(swift -e 'import AppKit; print(NSScreen.screens.contains { $0.safeAreaInsets.top > 0 } ? "1" : "0")' 2>/dev/null)
+    fi
     [[ -z "$notch" ]] && notch="0"
     echo "$notch" > "$NOTCH_CACHE_FILE" 2>/dev/null || true
     [[ "$notch" == "1" ]]
