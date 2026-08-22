@@ -166,8 +166,10 @@ SPACE_FOCUSED_ICON_COLOR, SPACE_FOCUSED_LABEL_COLOR, SPACE_FOCUSED_BACKGROUND_CO
 - **aerospace.sh** - Workspace indicator: shows focused state + app icons (Nerd Font). Multi-monitor aware via `$MONITOR` parameter. On `aerospace_workspace_change` it only refreshes workspaces matching `$FOCUSED_WORKSPACE` or `$PREV_WORKSPACE`; all other senders fall through to the full refresh path. Honors `SKETCHYBAR_HIDE_EMPTY_WORKSPACES` from `makaron.conf` (focused workspace is always drawn).
 - **battery.sh** - Battery status with low-threshold warning from `makaron.conf`.
 - **memory.sh** - Calls compiled Swift binary `makaron-memory-stats`, shows `X/Y GB`.
-- **cpu.sh** - Load average from `uptime` divided by core count.
-- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons.
+- **cpu.sh** - CPU usage percent (sum of per-process `%cpu` / cores); warning color above 80%.
+- **storage.sh** - Hidden below `STORAGE_ALERT_THRESHOLD` (default 90%); warning label when the disk is nearly full.
+- **volume.sh** - Detects Bluetooth vs speakers (caches `system_profiler` result for 5s), different icons. Icon-only; the percent label shows for 2s after a volume change.
+- **update_check.sh** - `makaron_update` item, hidden unless the installed repo is behind its channel target (fetches every 4h and on wake); click runs `makaron-update` in Ghostty.
 - **display_change.sh** - Invalidates display caches and reapplies layout on every display topology change; reloads SketchyBar when monitor count changes.
 
 ### SketchyBar Plugin Conventions
@@ -312,6 +314,7 @@ AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces 
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+STORAGE_ALERT_THRESHOLD=90              # Show storage item only above this disk usage (%)
 AEROSPACE_AUTO_DWINDLE=true             # Dwindle auto-layout for new windows
 FLOAT_ALL_LAYOUT=cascade                # float-all (alt-shift-f) arrangement: cascade | grid
 MAKARON_CHANNEL=stable                  # Update channel: stable | edge

@@ -1,19 +1,20 @@
 #!/bin/sh
-# Storage usage for SketchyBar (APFS-aware)
+# Storage alert for SketchyBar (APFS-aware): hidden below the threshold,
+# shown as a warning when the disk is nearly full.
 
 source "$CONFIG_DIR/colors.sh"
 
-# Get disk usage for Data volume (actual user data on APFS)
-DISK_INFO=$(df -H /System/Volumes/Data 2>/dev/null | tail -1 | awk '{print $3, $2}')
-USED=$(echo "$DISK_INFO" | awk '{print $1}' | tr -d 'G')
-TOTAL=$(echo "$DISK_INFO" | awk '{print $2}' | tr -d 'G')
+STORAGE_ALERT_THRESHOLD=90
+[ -f "$HOME/.config/makaron/makaron.conf" ] && . "$HOME/.config/makaron/makaron.conf"
+case "$STORAGE_ALERT_THRESHOLD" in (*[!0-9]*|"") STORAGE_ALERT_THRESHOLD=90 ;; esac
 
-# Format display
-if [ -z "$USED" ] || [ -z "$TOTAL" ]; then
-  STORAGE_DISPLAY="N/A"
+USED_PCT=$(df -H /System/Volumes/Data 2>/dev/null | tail -1 | awk '{print $5}' | tr -d '%')
+case "$USED_PCT" in (*[!0-9]*|"") USED_PCT=0 ;; esac
+
+if [ "$USED_PCT" -gt "$STORAGE_ALERT_THRESHOLD" ]; then
+  sketchybar --set "$NAME" drawing=on label="${USED_PCT}% full" \
+    icon.color="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}" \
+    label.color="${SPACE_FOCUSED_BORDER_COLOR:-0xffff5555}" 2>/dev/null
 else
-  STORAGE_DISPLAY="${USED}/${TOTAL} GB"
+  sketchybar --set "$NAME" drawing=off 2>/dev/null
 fi
-
-sketchybar --set "$NAME" label="$STORAGE_DISPLAY" \
-  label.color="${LABEL_COLOR:-0xffc0caf5}" 2>/dev/null
