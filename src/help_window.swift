@@ -47,6 +47,18 @@ final class Delegate: NSObject, NSApplicationDelegate {
         glass.layer?.borderWidth = 1
         glass.layer?.borderColor = NSColor.white.withAlphaComponent(0.22).cgColor
         glass.autoresizingMask = [.width, .height]
+        // The behind-window blur is composited by the window server; a CALayer
+        // mask does not clip it, so square corners peek out without maskImage.
+        let radius: CGFloat = 16
+        let maskEdge = radius * 2 + 1
+        let mask = NSImage(size: NSSize(width: maskEdge, height: maskEdge), flipped: false) { r in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: r, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        mask.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        mask.resizingMode = .stretch
+        glass.maskImage = mask
 
         let web = WKWebView(frame: glass.bounds)
         web.setValue(false, forKey: "drawsBackground")
