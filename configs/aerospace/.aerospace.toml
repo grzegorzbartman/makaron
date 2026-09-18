@@ -244,20 +244,6 @@ run = ['exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/aut
 
 # App-specific workspace assignments
 
-# Workspace 2: Code Editor
-[[on-window-detected]]
-if.app-id = "com.todesktop.230313mzl4w4u92"
-run = ["move-node-to-workspace 2"]
-
-# Workspace 10: Browsers
-[[on-window-detected]]
-if.app-id = "com.google.Chrome"
-run = ["move-node-to-workspace 10"]
-
-[[on-window-detected]]
-if.app-id = "org.chromium.Chromium"
-run = ["move-node-to-workspace 10"]
-
 # Workspace W: Communication
 [[on-window-detected]]
 if.app-id = "com.mimestream.Mimestream"
@@ -274,11 +260,6 @@ run = ["move-node-to-workspace W"]
 [[on-window-detected]]
 if.app-id = "com.apple.MobileSMS"
 run = ["move-node-to-workspace W"]
-
-# Workspace 1: Tasks
-[[on-window-detected]]
-if.app-id = "com.todoist.mac.Todoist"
-run = ["move-node-to-workspace 1"]
 
 # Workspace Q: Notes & Calendar
 [[on-window-detected]]
