@@ -3,10 +3,11 @@
 # Install AeroSpace
 install_cask "nikitabobko/tap/aerospace" "AeroSpace"
 
-# The app can exist from a manual install while the separate CLI binary is
-# missing. Adopt it into Homebrew so all cask artifacts are linked.
-if [ -d "/Applications/AeroSpace.app" ] && ! command -v aerospace &>/dev/null; then
-    echo "AeroSpace CLI missing - adopting the existing app into Homebrew..."
+# The app can exist from a manual install (or another Homebrew prefix) while
+# the CLI is missing from the active prefix. Adopt it so all cask artifacts are
+# linked where `brew services`-started plugins can find them.
+if [ -d "/Applications/AeroSpace.app" ] && ! brew list --cask aerospace &>/dev/null; then
+    echo "AeroSpace not managed by Homebrew - adopting the existing app..."
     brew_trust --cask "nikitabobko/tap/aerospace" || true
     if brew install --cask --adopt "nikitabobko/tap/aerospace" \
         && command -v aerospace &>/dev/null; then

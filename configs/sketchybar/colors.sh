@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# brew services starts the bar with a minimal PATH (its own prefix + system
+# dirs). Add the standard Homebrew prefixes so `aerospace` resolves in
+# sketchybarrc and every plugin even when it lives in another prefix.
+case ":$PATH:" in *:/opt/homebrew/bin:*) ;; *) export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin" ;; esac
+
 # Liquid glass palette following the system appearance.
 # plugins/appearance_change.sh reloads the bar when the appearance flips.
 if defaults read -g AppleInterfaceStyle >/dev/null 2>&1; then

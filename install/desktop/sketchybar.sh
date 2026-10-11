@@ -5,8 +5,17 @@ source "$MAKARON_PATH/install/helpers.sh"
 # Install SketchyBar (CRITICAL component)
 # Tap-qualified name is required: Homebrew >= 6.0 ignores the short name until
 # the tap or formula is trusted.
+# makaron-ui-full starts the bar with `brew services`, which only manages
+# formulae installed in the active prefix - a sketchybar binary on PATH from
+# another Homebrew (e.g. /opt/homebrew owned by a different account) is not enough.
 brew tap FelixKratz/formulae 2>/dev/null || true
-install_formula_critical "felixkratz/formulae/sketchybar" "SketchyBar" "sketchybar"
+if brew list --formula sketchybar &>/dev/null; then
+    echo "SketchyBar already installed"
+else
+    echo "Installing SketchyBar..."
+    brew_trust --formula "felixkratz/formulae/sketchybar"
+    brew install "felixkratz/formulae/sketchybar" || critical_install_failed "SketchyBar"
+fi
 
 # Compile memory stats binary (uses Mach API for accurate Activity Monitor values)
 if [ -f "$MAKARON_PATH/src/memory_stats.swift" ]; then

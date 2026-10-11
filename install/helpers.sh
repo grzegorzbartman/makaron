@@ -34,6 +34,23 @@ install_cask() {
     return 0
 }
 
+# Shared failure path for critical formulae - exits the install
+critical_install_failed() {
+    local name="$1"
+    echo ""
+    echo "═══════════════════════════════════════════════════════════════════"
+    echo "ERROR: Failed to install $name (critical component)"
+    echo ""
+    echo "This is often caused by outdated Command Line Tools."
+    echo "Please run:"
+    echo "  sudo rm -rf /Library/Developer/CommandLineTools"
+    echo "  sudo xcode-select --install"
+    echo ""
+    echo "Then run this installation script again."
+    echo "═══════════════════════════════════════════════════════════════════"
+    exit 1
+}
+
 # Helper for critical formula installs - exits on failure
 install_formula_critical() {
     local formula="$1"
@@ -48,18 +65,7 @@ install_formula_critical() {
     echo "Installing $name..."
     brew_trust --formula "$formula"
     if ! brew install "$formula"; then
-        echo ""
-        echo "═══════════════════════════════════════════════════════════════════"
-        echo "ERROR: Failed to install $name (critical component)"
-        echo ""
-        echo "This is often caused by outdated Command Line Tools."
-        echo "Please run:"
-        echo "  sudo rm -rf /Library/Developer/CommandLineTools"
-        echo "  sudo xcode-select --install"
-        echo ""
-        echo "Then run this installation script again."
-        echo "═══════════════════════════════════════════════════════════════════"
-        exit 1
+        critical_install_failed "$name"
     fi
 }
 

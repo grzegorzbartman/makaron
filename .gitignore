@@ -15,6 +15,8 @@ tmp
 # Compiled binaries (built from src/)
 bin/makaron-memory-stats
 bin/makaron-has-notch
+bin/makaron-storage-stats
+bin/makaron-help-window
 bin/makaron-bar
 
 # OpenCode planning directory

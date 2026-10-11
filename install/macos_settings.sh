@@ -16,17 +16,15 @@ snapshot_defaults() {
     mkdir -p "$MAKARON_DEFAULTS_SNAPSHOT_DIR"
     touch "$f"
 
-    local entry domain key flag val type
+    # The installer runs with `set -eEo pipefail`: every command here must
+    # tolerate an absent key or the whole install silently stops.
+    local entry domain key flag val type host
     for entry in "${MAKARON_DEFAULTS_KEYS[@]}"; do
         IFS='|' read -r domain key flag <<< "$entry"
         grep -q "^${domain}|${key}|" "$f" && continue
-        if [ "$flag" = "currentHost" ]; then
-            val=$(defaults -currentHost read "$domain" "$key" 2>/dev/null) || val="__ABSENT__"
-            type=$(defaults -currentHost read-type "$domain" "$key" 2>/dev/null | awk '{print $3}')
-        else
-            val=$(defaults read "$domain" "$key" 2>/dev/null) || val="__ABSENT__"
-            type=$(defaults read-type "$domain" "$key" 2>/dev/null | awk '{print $3}')
-        fi
+        host=(); [ "$flag" = "currentHost" ] && host=(-currentHost)
+        val=$(defaults "${host[@]}" read "$domain" "$key" 2>/dev/null) || val="__ABSENT__"
+        type=$(defaults "${host[@]}" read-type "$domain" "$key" 2>/dev/null | awk '{print $3}') || type=""
         printf '%s|%s|%s|%s|%s\n' "$domain" "$key" "$flag" "${type:-none}" "$val" >> "$f"
     done
 
@@ -123,7 +121,7 @@ configure_ds_store() {
 # Show Library folder
 configure_library_visibility() {
     echo "Making Library folder visible in home directory..."
-    chflags nohidden ~/Library
+    chflags nohidden ~/Library 2>/dev/null || true
     echo "Library folder made visible"
 }
 
