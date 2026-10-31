@@ -1,0 +1,36 @@
+#!/bin/bash
+# Toggle window gaps between 0 and the last non-zero value (bound to alt-shift-g).
+# The restore value is remembered per layout profile in ~/.local/state/makaron.
+
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKARON_PATH="${MAKARON_PATH:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+STATE_DIR="${MAKARON_STATE_DIR:-$HOME/.local/state/makaron}"
+
+# shellcheck source=bin/makaron-ui-helpers
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+profile="$(_get_layout_profile)"
+state_file="$STATE_DIR/gaps-last-$profile"
+current="$(_get_gap_size)"
+
+if [ "$current" -gt 0 ]; then
+    mkdir -p "$STATE_DIR"
+    echo "$current" > "$state_file"
+    target=0
+else
+    target=$(cat "$state_file" 2>/dev/null || true)
+    # Nothing remembered: fall back to the desktop gap, then to the default
+    if ! [[ "$target" =~ ^[0-9]+$ ]] || [ "$target" -eq 0 ] || [ "$target" -gt 40 ]; then
+        target=$(
+            AEROSPACE_GAP_SIZE=12
+            # shellcheck disable=SC1090
+            [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
+            echo "$AEROSPACE_GAP_SIZE"
+        )
+    fi
+    [[ "$target" =~ ^[0-9]+$ ]] && [ "$target" -gt 0 ] && [ "$target" -le 40 ] || target=12
+fi
+
+exec "$SCRIPT_DIR/makaron-gaps" "$target"

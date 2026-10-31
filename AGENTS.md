@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. The bar's `y_offset=4` in sketchybarrc must match `MAKARON_BAR_Y_OFFSET` in `bin/makaron-ui-helpers` - it is part of the window `outer.top` math.
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. In the `laptop` layout profile it is instead a flat edge-to-edge bar flush with the top (no margin, radius or border) that fills the notch strip. `sketchybarrc` takes height and `y_offset` from `_get_bar_height()` / `_get_bar_y_offset()` in `bin/makaron-ui-helpers` (desktop `y_offset` = `MAKARON_BAR_Y_OFFSET` = 4, laptop 0) because both are part of the window `outer.top` math; pill heights scale down with the bar (`ITEM_HEIGHT`).
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -95,11 +95,13 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 - `makaron-ui-helpers` is a shared library, not a user command. It contains AeroSpace, SketchyBar, layout, macOS settings, and UI mode helpers.
 
 ### Layout Commands
-- `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps.
+- `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps. Writes the key of the active layout profile (`AEROSPACE_GAP_SIZE` or `AEROSPACE_GAP_SIZE_LAPTOP`).
+- `makaron-gaps-toggle` - Toggle gaps between 0 and the last non-zero value (remembered per profile in `~/.local/state/makaron/gaps-last-<profile>`). Bound to `alt-shift-g`.
+- `makaron-layout [auto|desktop|laptop]` - Show or persist `MAKARON_LAYOUT_PROFILE`, then re-apply layout and reload the bar. The effective profile comes from `_get_layout_profile()` in `makaron-ui-helpers`: `auto` = `laptop` when `makaron-screen-info` (Swift, `src/screen_info.swift`, cached in `/tmp/makaron_<uid>_screen_v1`) reports a lone built-in display narrower than `MAKARON_LAPTOP_MAX_WIDTH` (1600 pt). `_get_gap_size()` / `_get_bar_height()` resolve to the profile's variables; `sketchybarrc` and `float-all-toggle.sh` source the helpers for the same values.
 - `makaron-help` - Keyboard shortcut overlay (bound to alt-shift-slash; also left click on the bar's M mark). The panel has a macOS-style close button; esc, click-away, or a second invocation also close it. Parses the live generated AeroSpace config (user overrides included) into HTML and shows it in the `makaron-help-window` glass panel; unknown user commands render verbatim. Second invocation closes the panel (toggle); falls back to the browser when the binary is missing. `--print-html` writes the HTML to stdout (tests).
 
 ### System Commands
-- `makaron-update` - Resets installed repo to the latest release tag (`stable` channel, default) or `origin/main` (`edge`), runs migrations, reloads UI. `--stable`/`--edge` persist the channel in `MAKARON_CHANNEL` (makaron.conf).
+- `makaron-update` - Resets installed repo to the latest release tag (`stable` channel, default) or `origin/main` (`edge`), runs migrations, reloads UI. `--stable`/`--edge` persist the channel in `MAKARON_CHANNEL`, `--laptop`/`--desktop`/`--auto-layout` persist `MAKARON_LAYOUT_PROFILE` (makaron.conf).
 - `makaron-version` - Prints `git describe` version and update channel.
 - `makaron-reinstall` - Removes `~/.local/share/makaron/`, re-clones, re-installs.
 - `makaron-select-packages` - Re-run optional package selection UI (gum-based).
@@ -315,8 +317,11 @@ SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right s
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
 AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
-AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40)
+MAKARON_LAYOUT_PROFILE=auto             # Layout profile: auto | desktop | laptop
+AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
+AEROSPACE_GAP_SIZE_LAPTOP=0             # Gap for the laptop profile
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
+SKETCHYBAR_HEIGHT_LAPTOP=32             # Flat laptop bar height (32 fills the notch strip)
 SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Storage label turns alert color above this usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
@@ -336,7 +341,7 @@ Users customize without forking via files in `~/.config/makaron/` (seeded as `*.
 - `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
 - `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
 - Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
-- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds both `sketchybarrc` and `_get_bar_height()` in `makaron-ui-helpers`, keeping bar height and `outer.top` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config.
+- `SKETCHYBAR_HEIGHT` / `SKETCHYBAR_HEIGHT_LAPTOP` (makaron.conf) feed `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync across profiles. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config.
 
 ## Migration System
 

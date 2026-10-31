@@ -253,6 +253,16 @@ check_makaron_conf() {
     fi
 }
 
+# Which layout profile is active and why (auto detection vs. makaron.conf).
+check_layout_profile() {
+    local helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
+    [ -f "$helpers" ] || return 0
+    MAKARON_CONF_PATH="$MAKARON_CONF"
+    # shellcheck source=bin/makaron-ui-helpers
+    source "$helpers"
+    add_result "ok" "layout-profile" "$(describe_layout_profile)"
+}
+
 check_desktop_layout() {
     local helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
     if [ ! -f "$helpers" ]; then
@@ -393,9 +403,11 @@ run_checks() {
         check_symlink "aerospace-symlink" "$AEROSPACE_LINK" "$AEROSPACE_GENERATED"
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
         check_swift_binary "notch-binary" "$MAKARON_PATH/bin/makaron-has-notch" "$MAKARON_PATH/src/has_notch.swift"
+        check_swift_binary "screen-binary" "$MAKARON_PATH/bin/makaron-screen-info" "$MAKARON_PATH/src/screen_info.swift"
         check_bin_permissions
         check_makaron_conf
         check_ui_services
+        check_layout_profile
         check_desktop_layout
     fi
 }

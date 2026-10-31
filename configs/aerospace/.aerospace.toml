@@ -139,8 +139,12 @@ persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
     alt-f = 'layout floating tiling'
     alt-shift-f = 'exec-and-forget $HOME/.local/share/makaron/configs/aerospace/scripts/float-all-toggle.sh'
 
-    # Monocle-style deep work: current window fullscreen, again to restore tiling
-    alt-m = 'fullscreen'
+    # Monocle-style deep work: current window fullscreen (edge to edge, no outer
+    # gaps), again to restore tiling
+    alt-m = 'fullscreen --no-outer-gaps'
+
+    # Toggle window gaps between 0 and the last non-zero value
+    alt-shift-g = 'exec-and-forget $HOME/.local/share/makaron/bin/makaron-gaps-toggle'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#focus
     ctrl-alt-left = 'focus left'

@@ -5,25 +5,129 @@ MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 UI_MODE_FILE="${UI_MODE_FILE:-$HOME/.local/state/makaron/ui-mode}"
 MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 
-# Notch detection cache — Swift cold-start (~1s) is too expensive to repeat.
-# Invalidate from display_change.sh on monitor hotplug.
+# Notch / screen detection caches — Swift cold-start (~1s) is too expensive to
+# repeat. Invalidated from display_change.sh on monitor hotplug.
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_notch_v2}"
+SCREEN_CACHE_FILE="${SCREEN_CACHE_FILE:-/tmp/makaron_$(id -u)_screen_v1}"
 
-# Floating-bar offset from the top edge. Must match y_offset in sketchybarrc.
+# Floating-bar offset from the top edge (desktop profile). sketchybarrc reads
+# it through _get_bar_y_offset, which is part of the window outer.top math.
 MAKARON_BAR_Y_OFFSET=4
 
-# Bar height, shared with sketchybarrc via SKETCHYBAR_HEIGHT in makaron.conf.
+# Built-in displays narrower than this (in points) get the laptop profile when
+# MAKARON_LAYOUT_PROFILE=auto: MacBook Neo (1408), Air 13 (1470) and Pro 14
+# (1512) at default scaling. "More Space" scaling and Air 15 / Pro 16 are above.
+MAKARON_LAPTOP_MAX_WIDTH=1600
+
+# --- Layout profile (desktop | laptop) ---
+
+# "<builtin_width> <builtin_height> <screen_count>" in points; built-in size
+# is "0 0" when the lid is closed or only external displays are active.
+_screen_probe() {
+    if [ ! -f "$SCREEN_CACHE_FILE" ]; then
+        local result="" fmt='^[0-9]+ [0-9]+ [0-9]+$'
+        if [ -x "$MAKARON_PATH/bin/makaron-screen-info" ]; then
+            result=$("$MAKARON_PATH/bin/makaron-screen-info" 2>/dev/null)
+        fi
+        if ! [[ "$result" =~ $fmt ]]; then
+            result=$(swift -e 'import AppKit
+var w = 0, h = 0
+for s in NSScreen.screens {
+    guard let id = s.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID,
+          CGDisplayIsBuiltin(id) != 0 else { continue }
+    w = Int(s.frame.width.rounded()); h = Int(s.frame.height.rounded()); break
+}
+print("\(w) \(h) \(NSScreen.screens.count)")' 2>/dev/null)
+        fi
+        if [[ "$result" =~ $fmt ]]; then
+            echo "$result" > "$SCREEN_CACHE_FILE" 2>/dev/null || true
+        else
+            # Probe failed: behave like a desktop but never cache it
+            result="0 0 0"
+        fi
+        echo "$result"
+        return
+    fi
+    cat "$SCREEN_CACHE_FILE" 2>/dev/null || echo "0 0 0"
+}
+
+invalidate_screen_cache() {
+    rm -f "$SCREEN_CACHE_FILE" 2>/dev/null || true
+}
+
+# Configured profile: auto (default) | desktop | laptop
+_get_layout_profile_setting() {
+    (
+        MAKARON_LAYOUT_PROFILE=auto
+        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
+        case "${MAKARON_LAYOUT_PROFILE:-}" in
+            desktop|laptop) echo "$MAKARON_LAYOUT_PROFILE" ;;
+            *) echo auto ;;
+        esac
+    )
+}
+
+# Effective profile. auto = laptop when the built-in display is the only
+# screen and is narrower than MAKARON_LAPTOP_MAX_WIDTH points.
+_get_layout_profile() {
+    local setting
+    setting="$(_get_layout_profile_setting)"
+    if [ "$setting" != "auto" ]; then
+        echo "$setting"
+        return
+    fi
+    local width count
+    read -r width _ count <<< "$(_screen_probe)"
+    if [ "${count:-0}" -eq 1 ] && [ "${width:-0}" -gt 0 ] &&
+        [ "$width" -lt "$MAKARON_LAPTOP_MAX_WIDTH" ]; then
+        echo laptop
+    else
+        echo desktop
+    fi
+}
+
+# Human-readable profile line for doctor / makaron-layout.
+describe_layout_profile() {
+    local setting profile width height count
+    setting="$(_get_layout_profile_setting)"
+    profile="$(_get_layout_profile)"
+    read -r width height count <<< "$(_screen_probe)"
+    local screen="no built-in display"
+    [ "${width:-0}" -gt 0 ] && screen="built-in ${width}x${height} pt"
+    echo "$profile ($setting; $screen, ${count:-0} screen(s); gap $(_get_gap_size)px, bar $(_get_bar_height)px)"
+}
+
+# makaron.conf key holding the gap / bar height for the active profile.
+_gap_conf_key() {
+    [ "$(_get_layout_profile)" = "laptop" ] && echo AEROSPACE_GAP_SIZE_LAPTOP || echo AEROSPACE_GAP_SIZE
+}
+
+_bar_height_conf_key() {
+    [ "$(_get_layout_profile)" = "laptop" ] && echo SKETCHYBAR_HEIGHT_LAPTOP || echo SKETCHYBAR_HEIGHT
+}
+
+# Bar height, shared with sketchybarrc via SKETCHYBAR_HEIGHT[_LAPTOP] in makaron.conf.
 _get_bar_height() {
     (
         SKETCHYBAR_HEIGHT=40
+        SKETCHYBAR_HEIGHT_LAPTOP=32
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        if [[ "${SKETCHYBAR_HEIGHT:-}" =~ ^[0-9]+$ ]] &&
-            [ "$SKETCHYBAR_HEIGHT" -ge 20 ] && [ "$SKETCHYBAR_HEIGHT" -le 80 ]; then
-            echo "$SKETCHYBAR_HEIGHT"
+        key="$(_bar_height_conf_key)"
+        value="${!key:-}"
+        if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 20 ] && [ "$value" -le 80 ]; then
+            echo "$value"
+        elif [ "$key" = "SKETCHYBAR_HEIGHT_LAPTOP" ]; then
+            echo 32
         else
             echo 40
         fi
     )
+}
+
+# The laptop bar is flat and flush with the top edge (fills the notch strip);
+# the desktop bar floats MAKARON_BAR_Y_OFFSET px below it.
+_get_bar_y_offset() {
+    [ "$(_get_layout_profile)" = "laptop" ] && echo 0 || echo "$MAKARON_BAR_Y_OFFSET"
 }
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
@@ -44,10 +148,14 @@ set_makaron_conf_value() {
 _get_gap_size() {
     (
         AEROSPACE_GAP_SIZE=12
+        AEROSPACE_GAP_SIZE_LAPTOP=0
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        if [[ "${AEROSPACE_GAP_SIZE:-}" =~ ^[0-9]+$ ]] &&
-            [ "$AEROSPACE_GAP_SIZE" -le 40 ]; then
-            echo "$AEROSPACE_GAP_SIZE"
+        key="$(_gap_conf_key)"
+        value="${!key:-}"
+        if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -le 40 ]; then
+            echo "$value"
+        elif [ "$key" = "AEROSPACE_GAP_SIZE_LAPTOP" ]; then
+            echo 0
         else
             echo 12
         fi
@@ -148,13 +256,14 @@ _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
-            local bar_top=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET + gap ))
+            local bar_bottom=$(( $(_get_bar_height) + $(_get_bar_y_offset) ))
+            local bar_top=$(( bar_bottom + gap ))
             if [ "$has_notch" = "true" ]; then
                 # The bar may extend below the notch strip; keep a full gap
                 # between the bar's bottom edge and the window tops.
                 local inset overhang
                 inset=$(_notch_top_inset)
-                overhang=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET - inset ))
+                overhang=$(( bar_bottom - inset ))
                 [ "$overhang" -lt 0 ] && overhang=0
                 echo "    outer.top = [{ monitor.\"Built-in\" = $((gap + overhang)) }, $bar_top]"
             else

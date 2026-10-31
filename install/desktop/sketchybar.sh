@@ -41,6 +41,14 @@ if [ -f "$MAKARON_PATH/src/has_notch.swift" ]; then
     }
 fi
 
+# Compile screen info binary (built-in display size for the laptop/desktop profile)
+if [ -f "$MAKARON_PATH/src/screen_info.swift" ]; then
+    echo "Compiling screen_info..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-screen-info" "$MAKARON_PATH/src/screen_info.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile screen_info.swift, falling back to swift -e"
+    }
+fi
+
 # Compile shortcut overlay panel (NSPanel + WKWebView, used by makaron-help)
 if [ -f "$MAKARON_PATH/src/help_window.swift" ]; then
     echo "Compiling help_window..."
