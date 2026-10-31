@@ -18,6 +18,7 @@ bin/makaron-has-notch
 bin/makaron-screen-info
 bin/makaron-storage-stats
 bin/makaron-help-window
+bin/makaron-audio-out
 bin/makaron-bar
 
 # OpenCode planning directory

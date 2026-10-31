@@ -49,6 +49,14 @@ if [ -f "$MAKARON_PATH/src/screen_info.swift" ]; then
     }
 fi
 
+# Compile audio output probe (CoreAudio device + volume for plugins/volume.sh)
+if [ -f "$MAKARON_PATH/src/audio_out.swift" ]; then
+    echo "Compiling audio_out..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-audio-out" "$MAKARON_PATH/src/audio_out.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile audio_out.swift, volume falls back to system_profiler"
+    }
+fi
+
 # Compile shortcut overlay panel (NSPanel + WKWebView, used by makaron-help)
 if [ -f "$MAKARON_PATH/src/help_window.swift" ]; then
     echo "Compiling help_window..."
