@@ -140,9 +140,9 @@ On a 13-inch MacBook Air, a 14-inch Pro at default scaling, or a MacBook Neo, si
 | Profile | Gaps | Bar height | When |
 |---|---|---|---|
 | `desktop` | `AEROSPACE_GAP_SIZE` (12) | `SKETCHYBAR_HEIGHT` (40) | external monitor connected, or a wide built-in display |
-| `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (0) | `SKETCHYBAR_HEIGHT_LAPTOP` (28) | built-in display is the only screen and is narrower than 1600 pt |
+| `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (0) | `SKETCHYBAR_HEIGHT_LAPTOP` (32) | built-in display is the only screen and is narrower than 1600 pt |
 
-`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The laptop bar is sized to sit inside the notch strip, so windows lose no vertical space to it.
+`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The laptop bar drops the floating look: it runs flat from edge to edge, flush with the top, and at 32 px fills the notch strip exactly, so windows lose no vertical space to it.
 
 ```bash
 makaron-layout            # show the active profile and why

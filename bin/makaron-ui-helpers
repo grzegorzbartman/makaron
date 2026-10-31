@@ -10,7 +10,8 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_notch_v2}"
 SCREEN_CACHE_FILE="${SCREEN_CACHE_FILE:-/tmp/makaron_$(id -u)_screen_v1}"
 
-# Floating-bar offset from the top edge. Must match y_offset in sketchybarrc.
+# Floating-bar offset from the top edge (desktop profile). sketchybarrc reads
+# it through _get_bar_y_offset, which is part of the window outer.top math.
 MAKARON_BAR_Y_OFFSET=4
 
 # Built-in displays narrower than this (in points) get the laptop profile when
@@ -109,18 +110,24 @@ _bar_height_conf_key() {
 _get_bar_height() {
     (
         SKETCHYBAR_HEIGHT=40
-        SKETCHYBAR_HEIGHT_LAPTOP=28
+        SKETCHYBAR_HEIGHT_LAPTOP=32
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
         key="$(_bar_height_conf_key)"
         value="${!key:-}"
         if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 20 ] && [ "$value" -le 80 ]; then
             echo "$value"
         elif [ "$key" = "SKETCHYBAR_HEIGHT_LAPTOP" ]; then
-            echo 28
+            echo 32
         else
             echo 40
         fi
     )
+}
+
+# The laptop bar is flat and flush with the top edge (fills the notch strip);
+# the desktop bar floats MAKARON_BAR_Y_OFFSET px below it.
+_get_bar_y_offset() {
+    [ "$(_get_layout_profile)" = "laptop" ] && echo 0 || echo "$MAKARON_BAR_Y_OFFSET"
 }
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
@@ -249,13 +256,14 @@ _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
-            local bar_top=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET + gap ))
+            local bar_bottom=$(( $(_get_bar_height) + $(_get_bar_y_offset) ))
+            local bar_top=$(( bar_bottom + gap ))
             if [ "$has_notch" = "true" ]; then
                 # The bar may extend below the notch strip; keep a full gap
                 # between the bar's bottom edge and the window tops.
                 local inset overhang
                 inset=$(_notch_top_inset)
-                overhang=$(( $(_get_bar_height) + MAKARON_BAR_Y_OFFSET - inset ))
+                overhang=$(( bar_bottom - inset ))
                 [ "$overhang" -lt 0 ] && overhang=0
                 echo "    outer.top = [{ monitor.\"Built-in\" = $((gap + overhang)) }, $bar_top]"
             else

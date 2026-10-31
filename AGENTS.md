@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. The bar's `y_offset=4` in sketchybarrc must match `MAKARON_BAR_Y_OFFSET` in `bin/makaron-ui-helpers` - it is part of the window `outer.top` math.
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. In the `laptop` layout profile it is instead a flat edge-to-edge bar flush with the top (no margin, radius or border) that fills the notch strip. `sketchybarrc` takes height and `y_offset` from `_get_bar_height()` / `_get_bar_y_offset()` in `bin/makaron-ui-helpers` (desktop `y_offset` = `MAKARON_BAR_Y_OFFSET` = 4, laptop 0) because both are part of the window `outer.top` math; pill heights scale down with the bar (`ITEM_HEIGHT`).
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -321,7 +321,7 @@ MAKARON_LAYOUT_PROFILE=auto             # Layout profile: auto | desktop | lapto
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
 AEROSPACE_GAP_SIZE_LAPTOP=0             # Gap for the laptop profile
 SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
-SKETCHYBAR_HEIGHT_LAPTOP=28             # Bar height for the laptop profile (fits the notch strip)
+SKETCHYBAR_HEIGHT_LAPTOP=32             # Flat laptop bar height (32 fills the notch strip)
 SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Storage label turns alert color above this usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)

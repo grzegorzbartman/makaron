@@ -11,17 +11,33 @@ if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
 fi
 SKETCHYBAR_COMPACT_MODE="${SKETCHYBAR_COMPACT_MODE:-false}"
 
-# Bar height follows the layout profile (desktop / laptop) resolved by the helpers.
+# Bar geometry follows the layout profile resolved by the helpers:
+#   desktop - floating liquid-glass bar (margin, corner radius, y_offset)
+#   laptop  - flat edge-to-edge bar flush with the top, filling the notch strip
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+BAR_PROFILE=desktop
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
   # shellcheck disable=SC1091
   source "$MAKARON_PATH/bin/makaron-ui-helpers"
+  BAR_PROFILE="$(_get_layout_profile)"
   BAR_HEIGHT="$(_get_bar_height)"
+  BAR_Y_OFFSET="$(_get_bar_y_offset)"
 else
   BAR_HEIGHT="${SKETCHYBAR_HEIGHT:-40}"
+  BAR_Y_OFFSET=4
 fi
-BAR_CORNER_RADIUS=16
-[ "$BAR_HEIGHT" -lt 32 ] && BAR_CORNER_RADIUS=$((BAR_HEIGHT / 2))
+if [ "$BAR_PROFILE" = "laptop" ]; then
+  BAR_MARGIN=0 BAR_CORNER_RADIUS=0 BAR_BORDER_WIDTH=0
+else
+  BAR_MARGIN=12 BAR_CORNER_RADIUS=16 BAR_BORDER_WIDTH=1
+  [ "$BAR_HEIGHT" -lt 32 ] && BAR_CORNER_RADIUS=$((BAR_HEIGHT / 2))
+fi
+# Pills (workspaces, brackets) keep at least 4px of air above and below.
+# Desktop pills are capsules; the flat laptop bar uses a small 6px radius.
+ITEM_HEIGHT=24
+[ $((BAR_HEIGHT - 8)) -lt "$ITEM_HEIGHT" ] && ITEM_HEIGHT=$((BAR_HEIGHT - 8))
+ITEM_RADIUS=$((ITEM_HEIGHT / 2))
+[ "$BAR_PROFILE" = "laptop" ] && ITEM_RADIUS=6
 
 source "$CONFIG_DIR/colors.sh"
 
@@ -32,10 +48,10 @@ source "$CONFIG_DIR/colors.sh"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-# Floating liquid-glass bar. y_offset=4 must match MAKARON_BAR_Y_OFFSET in
-# bin/makaron-ui-helpers (it is part of the window outer.top math).
-sketchybar --bar position=top height=$BAR_HEIGHT margin=12 y_offset=4 \
-           corner_radius=$BAR_CORNER_RADIUS border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+# Height and y_offset come from the helpers (they are part of the window
+# outer.top math), never hardcode them here.
+sketchybar --bar position=top height=$BAR_HEIGHT margin=$BAR_MARGIN y_offset=$BAR_Y_OFFSET \
+           corner_radius=$BAR_CORNER_RADIUS border_width=$BAR_BORDER_WIDTH border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####
@@ -102,7 +118,7 @@ sketchybar --add item makaron_update left \
                        icon.padding_left=8 icon.padding_right=2 \
                        label="Update" label.color=$UPDATE_COLOR \
                        label.padding_left=2 label.padding_right=8 \
-                       background.drawing=on background.corner_radius=12 background.height=24 \
+                       background.drawing=on background.corner_radius=$ITEM_RADIUS background.height=$ITEM_HEIGHT \
                        background.color=$UPDATE_BACKGROUND_COLOR \
                        script="$PLUGIN_DIR/update_check.sh" \
                        click_script="open -na Ghostty --args -e $HOME/.local/share/makaron/bin/makaron-update" \
@@ -135,8 +151,8 @@ if [ "$MONITOR_COUNT" -eq 1 ]; then
       label.font="Hack Nerd Font:Bold:10.0" \
       label.color=$SPACE_LABEL_COLOR \
       background.color=$SPACE_BACKGROUND_COLOR \
-      background.corner_radius=12 \
-      background.height=24 \
+      background.corner_radius=$ITEM_RADIUS \
+      background.height=$ITEM_HEIGHT \
       background.drawing=on \
       background.border_color=$SPACE_BORDER_COLOR \
       background.border_width=0 \
@@ -163,8 +179,8 @@ else
         label.font="Hack Nerd Font:Bold:10.0" \
         label.color=$SPACE_LABEL_COLOR \
         background.color=$SPACE_BACKGROUND_COLOR \
-        background.corner_radius=12 \
-        background.height=24 \
+        background.corner_radius=$ITEM_RADIUS \
+        background.height=$ITEM_HEIGHT \
         background.drawing=on \
         background.border_color=$SPACE_BORDER_COLOR \
         background.border_width=0 \
@@ -248,21 +264,21 @@ fi
 if [ "$SKETCHYBAR_COMPACT_MODE" != "true" ]; then
   sketchybar --add bracket system_bracket cpu memory storage \
              --set system_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                                  background.corner_radius=12 \
-                                  background.height=24
+                                  background.corner_radius=$ITEM_RADIUS \
+                                  background.height=$ITEM_HEIGHT
 fi
 
 # Group 2: Status (Battery + Volume + WiFi)
 sketchybar --add bracket status_bracket battery volume wifi \
            --set status_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                                background.corner_radius=12 \
-                                background.height=24
+                                background.corner_radius=$ITEM_RADIUS \
+                                background.height=$ITEM_HEIGHT
 
 # Group 3: Time (Clock)
 sketchybar --add bracket time_bracket clock \
            --set time_bracket background.color=$SPACE_BACKGROUND_COLOR \
-                              background.corner_radius=12 \
-                              background.height=24
+                              background.corner_radius=$ITEM_RADIUS \
+                              background.height=$ITEM_HEIGHT
 
 ##### User overrides (add/remove/restyle items) #####
 if [ -f "$HOME/.config/makaron/sketchybar.user.sh" ]; then
