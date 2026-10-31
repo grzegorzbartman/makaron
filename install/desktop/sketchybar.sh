@@ -25,6 +25,14 @@ if [ -f "$MAKARON_PATH/src/memory_stats.swift" ]; then
     }
 fi
 
+# Compile CPU stats binary (Mach tick deltas, matches Activity Monitor CPU load)
+if [ -f "$MAKARON_PATH/src/cpu_stats.swift" ]; then
+    echo "Compiling cpu_stats..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-cpu-stats" "$MAKARON_PATH/src/cpu_stats.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile cpu_stats.swift, falling back to ps"
+    }
+fi
+
 # Compile storage stats binary (Finder-style used%, counts purgeable as free)
 if [ -f "$MAKARON_PATH/src/storage_stats.swift" ]; then
     echo "Compiling storage_stats..."

@@ -14,6 +14,7 @@ tmp
 
 # Compiled binaries (built from src/)
 bin/makaron-memory-stats
+bin/makaron-cpu-stats
 bin/makaron-has-notch
 bin/makaron-screen-info
 bin/makaron-storage-stats

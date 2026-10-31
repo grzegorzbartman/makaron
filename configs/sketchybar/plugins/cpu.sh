@@ -8,15 +8,21 @@ CPU_ALERT_THRESHOLD=80
 [ -f "$HOME/.config/makaron/makaron.conf" ] && . "$HOME/.config/makaron/makaron.conf"
 case "$CPU_ALERT_THRESHOLD" in (*[!0-9]*|"") CPU_ALERT_THRESHOLD=80 ;; esac
 
-CPU_CORES=$(sysctl -n hw.ncpu)
-CPU_SUM=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 
-if [ -z "$CPU_SUM" ] || [ -z "$CPU_CORES" ] || [ "$CPU_CORES" -eq 0 ] 2>/dev/null; then
-  sketchybar --set "$NAME" label="N/A" 2>/dev/null
-  exit 0
-fi
-CPU_PCT=$((CPU_SUM / CPU_CORES))
-[ "$CPU_PCT" -gt 100 ] && CPU_PCT=100
+# Activity Monitor-style load from makaron-cpu-stats (Mach tick deltas);
+# fallback: per-process ps averages
+CPU_PCT=$("$MAKARON_PATH/bin/makaron-cpu-stats" 2>/dev/null)
+case "$CPU_PCT" in (*[!0-9]*|"")
+  CPU_CORES=$(sysctl -n hw.ncpu)
+  CPU_SUM=$(ps -A -o %cpu | awk '{s+=$1} END {printf "%.0f", s}')
+  if [ -z "$CPU_SUM" ] || [ -z "$CPU_CORES" ] || [ "$CPU_CORES" -eq 0 ] 2>/dev/null; then
+    sketchybar --set "$NAME" label="N/A" 2>/dev/null
+    exit 0
+  fi
+  CPU_PCT=$((CPU_SUM / CPU_CORES))
+  [ "$CPU_PCT" -gt 100 ] && CPU_PCT=100
+;; esac
 
 if [ "$CPU_PCT" -ge "$CPU_ALERT_THRESHOLD" ]; then
   COLOR="${ALERT_COLOR:-0xffff3b30}"
