@@ -2,15 +2,14 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-# Get WiFi SSID using system_profiler (works on macOS 15+)
-SSID=$(system_profiler SPAirPortDataType 2>/dev/null | awk '/Current Network Information:/{getline; if ($0 ~ /^            [^ ]/) {gsub(/^ +| *:$/, ""); print; exit}}')
+# Wi-Fi link state from ifconfig (instant; system_profiler takes seconds)
+WIFI_IF=$(networksetup -listallhardwareports 2>/dev/null | awk '/Wi-Fi|AirPort/{getline; print $2; exit}')
 
-if [ -z "$SSID" ]; then
-  ICON="󰖪"
-else
+if [ -n "$WIFI_IF" ] && ifconfig "$WIFI_IF" 2>/dev/null | grep -q "status: active"; then
   ICON="󰖩"
+else
+  ICON="󰖪"
 fi
 
 sketchybar --set "$NAME" icon="$ICON" label="" \
   icon.color="${ICON_COLOR:-0xffc0caf5}"
-
