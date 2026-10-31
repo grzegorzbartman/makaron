@@ -6,33 +6,44 @@
 source "$CONFIG_DIR/colors.sh"
 
 CACHE_FILE="/tmp/sketchybar_$(id -u)_audio_device"
-CACHE_DURATION=5  # seconds
+CACHE_DURATION=60  # seconds, fallback path only
 DEVICE_FILE="/tmp/sketchybar_$(id -u)_volume_out_device"
 TS_FILE="/tmp/sketchybar_$(id -u)_volume_ts"
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+AUDIO_BIN="$MAKARON_PATH/bin/makaron-audio-out"
 
 ACCENT="${SPACE_FOCUSED_BACKGROUND_COLOR:-0xff007aff}"
 IDLE_ICON="${ICON_COLOR:-0xffc0caf5}"
+
+# Output device + volume: compiled CoreAudio helper (~50ms), or the slow
+# osascript + system_profiler fallback (device cached)
+IS_HEADPHONES=false
+if [ -x "$AUDIO_BIN" ] && read -r TRANSPORT CUR_VOLUME <<EOF
+$("$AUDIO_BIN" 2>/dev/null)
+EOF
+then
+  [ "$TRANSPORT" = bluetooth ] && IS_HEADPHONES=true
+else
+  CUR_VOLUME=""
+  if [ -f "$CACHE_FILE" ] && [ $(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0))) -lt $CACHE_DURATION ]; then
+    IS_HEADPHONES=$(cat "$CACHE_FILE")
+  else
+    if system_profiler SPAudioDataType 2>/dev/null | grep -A 5 "Default Output Device: Yes" | grep -q "Transport: Bluetooth"; then
+      IS_HEADPHONES=true
+    fi
+    echo "$IS_HEADPHONES" > "$CACHE_FILE"
+  fi
+fi
 
 if [ "$SENDER" = "volume_change" ]; then
   VOLUME="$INFO"
   VOLUME_CHANGED=true
 else
   # Periodic/forced run: read volume, watch for output-device switches
-  VOLUME=$(osascript -e 'output volume of (get volume settings)' 2>/dev/null)
+  VOLUME="$CUR_VOLUME"
+  case "$VOLUME" in (*[!0-9]*|"") VOLUME=$(osascript -e 'output volume of (get volume settings)' 2>/dev/null) ;; esac
   case "$VOLUME" in (*[!0-9]*|"") exit 0 ;; esac
   VOLUME_CHANGED=false
-fi
-
-# Detect the output device (cached - system_profiler is slow)
-IS_HEADPHONES=false
-if [ -f "$CACHE_FILE" ] && [ $(($(date +%s) - $(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0))) -lt $CACHE_DURATION ]; then
-  IS_HEADPHONES=$(cat "$CACHE_FILE")
-else
-  AUDIO_INFO=$(system_profiler SPAudioDataType 2>/dev/null)
-  if echo "$AUDIO_INFO" | grep -A 5 "Default Output Device: Yes" | grep -q "Transport: Bluetooth"; then
-    IS_HEADPHONES=true
-  fi
-  echo "$IS_HEADPHONES" > "$CACHE_FILE"
 fi
 
 # Device switch since the last render? (first run only records)

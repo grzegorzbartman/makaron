@@ -404,6 +404,7 @@ run_checks() {
         check_swift_binary "memory-binary" "$MEMORY_BINARY" "$MAKARON_PATH/src/memory_stats.swift"
         check_swift_binary "notch-binary" "$MAKARON_PATH/bin/makaron-has-notch" "$MAKARON_PATH/src/has_notch.swift"
         check_swift_binary "screen-binary" "$MAKARON_PATH/bin/makaron-screen-info" "$MAKARON_PATH/src/screen_info.swift"
+        check_swift_binary "audio-binary" "$MAKARON_PATH/bin/makaron-audio-out" "$MAKARON_PATH/src/audio_out.swift"
         check_bin_permissions
         check_makaron_conf
         check_ui_services
