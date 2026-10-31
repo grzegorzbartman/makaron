@@ -18,6 +18,7 @@ Unless the user says otherwise, every change follows this flow:
   - Read this file, then `git status` and `git diff`.
   - Check for breakage risk for both new and existing users (the `makaron-update` path and `migrations/` folder).
   - Check that new keyboard shortcuts don't conflict with Polish characters (lowercase and uppercase: ą, ć, ę, ł, ń, ó, ś, ź, ż, Ą, Ć, Ę, Ł, Ń, Ó, Ś, Ź, Ż).
+- Run `tests/run.sh` (generator merge, makaron.conf regeneration, help overlay, self-contained migrations; each test runs in a throwaway `HOME`). CI runs it on `macos-latest` after compiling every `src/*.swift`.
 - Push the branch and open a Pull Request, then return the PR link to the user.
 
 ## Releasing
@@ -261,6 +262,7 @@ makaron/
 │   └── terminal/           # Terminal tools
 ├── migrations/             # Timestamped migration scripts
 ├── src/                    # Swift source files (compiled to bin/)
+├── tests/                  # tests/run.sh + test_*.sh (throwaway HOME per file)
 └── install.sh              # Bootstrap (clone + call main.sh)
 ```
 
