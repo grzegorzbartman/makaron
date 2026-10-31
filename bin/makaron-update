@@ -6,24 +6,39 @@ export MAKARON_PATH="$HOME/.local/share/makaron"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 SKIP_CONFIRM=false
 SET_CHANNEL=""
+SET_PROFILE=""
 for arg in "$@"; do
     case "$arg" in
         -y|--yes) SKIP_CONFIRM=true ;;
         --stable) SET_CHANNEL=stable ;;
         --edge) SET_CHANNEL=edge ;;
+        --laptop) SET_PROFILE=laptop ;;
+        --desktop) SET_PROFILE=desktop ;;
+        --auto-layout) SET_PROFILE=auto ;;
     esac
 done
 
-# Resolve update channel: flag persists the choice, conf holds it, default stable
-if [ -n "$SET_CHANNEL" ]; then
+# Persist a makaron.conf value (flags win over the existing line)
+set_conf_value() {
     mkdir -p "$(dirname "$MAKARON_CONF")"
     touch "$MAKARON_CONF"
-    if grep -q '^MAKARON_CHANNEL=' "$MAKARON_CONF"; then
-        sed -i '' "s/^MAKARON_CHANNEL=.*/MAKARON_CHANNEL=$SET_CHANNEL/" "$MAKARON_CONF"
+    if grep -q "^$1=" "$MAKARON_CONF"; then
+        sed -i '' "s/^$1=.*/$1=$2/" "$MAKARON_CONF"
     else
-        printf 'MAKARON_CHANNEL=%s\n' "$SET_CHANNEL" >> "$MAKARON_CONF"
+        printf '%s=%s\n' "$1" "$2" >> "$MAKARON_CONF"
     fi
+}
+
+# Resolve update channel: flag persists the choice, conf holds it, default stable
+if [ -n "$SET_CHANNEL" ]; then
+    set_conf_value MAKARON_CHANNEL "$SET_CHANNEL"
     echo "Update channel set to: $SET_CHANNEL"
+fi
+
+# Layout profile (auto | desktop | laptop); same as `makaron-layout <profile>`
+if [ -n "$SET_PROFILE" ]; then
+    set_conf_value MAKARON_LAYOUT_PROFILE "$SET_PROFILE"
+    echo "Layout profile set to: $SET_PROFILE"
 fi
 
 CHANNEL=stable

@@ -114,8 +114,10 @@ This command will:
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
 - **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
 - **`makaron-ui-stop`** - Stop UI components
-- **`makaron-gaps <0-40>`** - Set persistent AeroSpace window gaps
+- **`makaron-gaps <0-40>`** - Set persistent AeroSpace window gaps (for the active layout profile)
 - **`makaron-gaps-zero`** - Set window gaps to zero
+- **`makaron-gaps-toggle`** - Toggle gaps between zero and the last non-zero value (`alt-shift-g`)
+- **`makaron-layout [auto|desktop|laptop]`** - Show or set the layout profile (see [Small screens](#small-screens))
 - **`makaron-macos-config-reload`** - Apply macOS settings
 
 ### UI Modes
@@ -131,8 +133,28 @@ The default layout uses a `12px` gap. If the configured gap is `g`, a screen wit
 makaron-gaps 12
 ```
 
-> [!TIP]
-> On a small screen (13-inch MacBook), many people prefer `makaron-gaps 0` - every pixel goes to your windows. Also worth knowing there: `alt-comma` switches the workspace to the accordion layout (windows stacked almost full-width), which fits small screens better than side-by-side tiles; `alt-slash` switches back.
+### Small screens
+
+On a 13-inch MacBook Air, a 14-inch Pro at default scaling, or a MacBook Neo, side-by-side tiles get cramped and 12px gaps waste real estate. Makaron handles this with a **layout profile**:
+
+| Profile | Gaps | Bar height | When |
+|---|---|---|---|
+| `desktop` | `AEROSPACE_GAP_SIZE` (12) | `SKETCHYBAR_HEIGHT` (40) | external monitor connected, or a wide built-in display |
+| `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (0) | `SKETCHYBAR_HEIGHT_LAPTOP` (28) | built-in display is the only screen and is narrower than 1600 pt |
+
+`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The laptop bar is sized to sit inside the notch strip, so windows lose no vertical space to it.
+
+```bash
+makaron-layout            # show the active profile and why
+makaron-layout laptop     # force it (also: desktop, auto)
+makaron-gaps 6            # sets the gap of the active profile
+```
+
+Workflow tips that work well on one small screen:
+- Keep one app per workspace (`alt-1..0`) and treat workspaces as virtual monitors; tile only when two windows really belong side by side.
+- `alt-m` makes the focused window fill the screen edge to edge (no outer gaps) and restores the tiling on the second press.
+- `alt-shift-g` toggles gaps on and off without touching the config.
+- `alt-comma` switches the workspace to the accordion layout (windows stacked almost full-width); `alt-slash` switches back.
 
 ### Manual Commands
 
@@ -204,7 +226,8 @@ Highlights:
 - `alt-shift-1..0` - Move window to workspace
 - `alt-enter` - New terminal window
 - `alt-comma` / `alt-slash` - Accordion / tiled layout
-- `alt-m` - Fullscreen (monocle)
+- `alt-m` - Fullscreen (monocle, no outer gaps)
+- `alt-shift-g` - Toggle window gaps on / off
 
 ## Modular Installation
 

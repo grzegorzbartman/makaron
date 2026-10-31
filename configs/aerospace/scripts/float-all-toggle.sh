@@ -4,6 +4,7 @@
 # Positions are applied in ONE batched osascript call (no focus stealing).
 # State file lists the floated window ids; stale after windows close/reopen.
 
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 FLOAT_ALL_LAYOUT=cascade
 AEROSPACE_GAP_SIZE=12
@@ -11,6 +12,13 @@ SKETCHYBAR_HEIGHT=40
 # shellcheck disable=SC1090
 [ -f "$MAKARON_CONF" ] && source "$MAKARON_CONF"
 case "$FLOAT_ALL_LAYOUT" in cascade|grid) ;; *) FLOAT_ALL_LAYOUT=cascade ;; esac
+# Gap and bar height follow the layout profile (desktop / laptop)
+if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
+    # shellcheck disable=SC1091
+    source "$MAKARON_PATH/bin/makaron-ui-helpers"
+    AEROSPACE_GAP_SIZE="$(_get_gap_size)"
+    SKETCHYBAR_HEIGHT="$(_get_bar_height)"
+fi
 [[ "$AEROSPACE_GAP_SIZE" =~ ^[0-9]+$ ]] || AEROSPACE_GAP_SIZE=12
 [[ "$SKETCHYBAR_HEIGHT" =~ ^[0-9]+$ ]] || SKETCHYBAR_HEIGHT=40
 

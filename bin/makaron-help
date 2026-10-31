@@ -135,9 +135,10 @@ while IFS=$'\t' read -r mode key cmd; do
         "layout tiles horizontal vertical") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Tile windows (toggle orientation)")" ;;
         "layout accordion horizontal vertical") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Accordion (toggle orientation)")" ;;
         "layout floating tiling") SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Toggle floating for window")" ;;
-        fullscreen) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Fullscreen (monocle)")" ;;
+        fullscreen|fullscreen\ --no-outer-gaps) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Fullscreen (monocle)")" ;;
         *new-terminal.sh*) SEC_APPS="$SEC_APPS$(_row "$chips" "New terminal window")" ;;
         *float-all-toggle.sh*) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Float / unfloat all windows")" ;;
+        *makaron-gaps-toggle*) SEC_LAYOUT="$SEC_LAYOUT$(_row "$chips" "Toggle window gaps on / off")" ;;
         *makaron-help*) SEC_APPS="$SEC_APPS$(_row "$chips" "Show this overlay")" ;;
         *) SEC_OTHER="$SEC_OTHER$(_row "$chips" "<code>$(_esc_html "$cmd")</code>")" ;;
     esac

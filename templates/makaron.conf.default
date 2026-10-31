@@ -18,11 +18,20 @@ AEROSPACE_SWIPE_FINGERS=4
 # workspace); false = reversed.
 AEROSPACE_SWIPE_NATURAL=true
 
+# Layout profile: auto | desktop | laptop
+# auto picks "laptop" when the built-in display is the only screen and is
+# narrower than 1600 pt (MacBook Neo, Air 13, Pro 14 at default scaling);
+# plugging in a monitor switches back to "desktop" automatically.
+MAKARON_LAYOUT_PROFILE=auto
+
 # Window layout: gap between windows in px (0-40)
 AEROSPACE_GAP_SIZE=12
+AEROSPACE_GAP_SIZE_LAPTOP=0
 
 # SketchyBar height in px (20-80). Window layout adapts automatically.
+# The laptop bar fits inside the notch strip, so windows lose no space to it.
 SKETCHYBAR_HEIGHT=40
+SKETCHYBAR_HEIGHT_LAPTOP=28
 
 # SketchyBar: show the Makaron menu (M mark, click for actions) on the left
 SKETCHYBAR_LOGO=true

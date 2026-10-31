@@ -11,6 +11,18 @@ if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
 fi
 SKETCHYBAR_COMPACT_MODE="${SKETCHYBAR_COMPACT_MODE:-false}"
 
+# Bar height follows the layout profile (desktop / laptop) resolved by the helpers.
+MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
+if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
+  # shellcheck disable=SC1091
+  source "$MAKARON_PATH/bin/makaron-ui-helpers"
+  BAR_HEIGHT="$(_get_bar_height)"
+else
+  BAR_HEIGHT="${SKETCHYBAR_HEIGHT:-40}"
+fi
+BAR_CORNER_RADIUS=16
+[ "$BAR_HEIGHT" -lt 32 ] && BAR_CORNER_RADIUS=$((BAR_HEIGHT / 2))
+
 source "$CONFIG_DIR/colors.sh"
 
 ##### Bar Appearance #####
@@ -22,8 +34,8 @@ source "$CONFIG_DIR/colors.sh"
 
 # Floating liquid-glass bar. y_offset=4 must match MAKARON_BAR_Y_OFFSET in
 # bin/makaron-ui-helpers (it is part of the window outer.top math).
-sketchybar --bar position=top height=${SKETCHYBAR_HEIGHT:-40} margin=12 y_offset=4 \
-           corner_radius=16 border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+sketchybar --bar position=top height=$BAR_HEIGHT margin=12 y_offset=4 \
+           corner_radius=$BAR_CORNER_RADIUS border_width=1 border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####

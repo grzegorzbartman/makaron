@@ -1,0 +1,33 @@
+#!/bin/bash
+# Show or set the layout profile: auto | desktop | laptop.
+# laptop = AEROSPACE_GAP_SIZE_LAPTOP / SKETCHYBAR_HEIGHT_LAPTOP (makaron.conf);
+# auto picks laptop on a lone built-in display narrower than 1600 pt.
+
+set -u
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MAKARON_PATH="${MAKARON_PATH:-$(cd "$SCRIPT_DIR/.." && pwd)}"
+
+# shellcheck source=bin/makaron-ui-helpers
+source "$SCRIPT_DIR/makaron-ui-helpers"
+
+if [ "$#" -eq 0 ]; then
+    echo "Layout profile: $(describe_layout_profile)"
+    exit 0
+fi
+
+case "${1:-}" in
+    auto|desktop|laptop) ;;
+    *)
+        echo "Usage: makaron-layout [auto|desktop|laptop]" >&2
+        exit 2
+        ;;
+esac
+
+set_makaron_conf_value MAKARON_LAYOUT_PROFILE "$1"
+echo "Layout profile set to: $1 (active: $(_get_layout_profile))"
+MAKARON_APPLY_VERBOSE=1 apply_desktop_state
+
+if command -v sketchybar >/dev/null 2>&1 && sketchybar_service_started; then
+    sketchybar --reload
+fi
