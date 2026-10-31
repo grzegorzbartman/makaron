@@ -27,9 +27,8 @@ so your screen holds only what you are working on.
 
 - **Keyboard-driven workers** - Switch, tile, and resize windows without touching the mouse
 - **Deep-work setups** - Hidden Dock, hidden menu bar, one compact status bar
-- **AI-assisted workflows** - Claude Code, Codex, and Cursor ready right after install
 - **Terminal users** - Ghostty plus fast CLI tools (fzf, btop, lazygit)
-- **Developers** - Optional group with editors, containers, and language tooling
+- **Developers** - Optional group with containers and language tooling
 
 ## Requirements
 
@@ -52,23 +51,14 @@ After installation, reload your shell or open a new terminal.
 - **SketchyBar** - Custom top status bar with a translucent, macOS-native look; the disk indicator stays hidden until usage crosses its alert threshold
 - **Nerd Fonts** - Icon-capable fonts for the status bar and terminal
 
-### AI Tools
-- **Claude Code** - AI coding assistant
-- **Cursor** - AI-powered code editor
-- **Codex** - AI code assistant
-
 ### Productivity Tools
 - **Ghostty** - Fast, modern terminal emulator (configuration stays user-managed)
-- **Stats** - System monitor in menu bar
 - **btop** - System resource monitor
-- **Neovim** - Modern Vim-based text editor
 - **Upsun CLI** - Upsun command-line tool
 
 ### Development Tools (optional)
 - **Docker Desktop** - Container platform
 - **DDEV** - Local PHP development environment
-- **Sequel Ace** - MySQL/MariaDB database management
-- **VSCode** - Popular code editor
 - **Composer** - PHP dependency manager
 - **LazyDocker** - Terminal UI for Docker
 - **LazyGit** - Terminal UI for Git
@@ -241,7 +231,6 @@ install/
 ├── brew.sh             # Homebrew setup
 ├── desktop/            # AeroSpace, SketchyBar, fonts
 ├── terminal/           # Ghostty and terminal helpers
-├── editors/            # Editor application installers
 ├── development/        # Languages, frameworks, dev tools
 └── macos_settings.sh
 ```
@@ -345,8 +334,6 @@ Available settings:
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage widgets on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
-AEROSPACE_SWIPE_FINGERS=4               # Fingers used to switch workspaces
-AEROSPACE_SWIPE_NATURAL=true            # Use the natural macOS swipe direction
 AEROSPACE_GAP_SIZE=12                    # Window gap in pixels (0-40)
 CPU_ALERT_THRESHOLD=80                   # CPU turns alert color above this usage (%)
 MEMORY_ALERT_THRESHOLD=80                # Memory turns alert color above this usage (%)

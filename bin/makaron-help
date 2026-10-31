@@ -24,7 +24,6 @@ if [ -z "$CONF" ]; then
     [ -f "$CONF" ] || CONF="$MAKARON_PATH/configs/aerospace/.aerospace.toml"
 fi
 
-AEROSPACE_SWIPE_FINGERS=4
 # shellcheck disable=SC1090
 [ -f "$HOME/.config/makaron/makaron.conf" ] && source "$HOME/.config/makaron/makaron.conf"
 
@@ -177,7 +176,6 @@ else
 fi
 SERVICE_HEAD="Service mode"
 [ -n "$SERVICE_ENTRY" ] && SERVICE_HEAD="Service mode <span class=\"entry\">${SERVICE_ENTRY} then</span>"
-SWIPE_ROW=$(_row "<kbd>${AEROSPACE_SWIPE_FINGERS:-4}-finger swipe</kbd>" "Switch workspace")
 
 mkdir -p "$STATE_DIR"
 OUT="$HTML_FILE"
@@ -225,7 +223,7 @@ ${LOGO_HTML}
 <main>
 <div>$(_section "Workspaces" "$SEC_WS")$(_section "Move windows" "$SEC_MOVE")</div>
 <div>$(_section "Focus &amp; resize" "$SEC_FOCUS")$(_section "Layouts" "$SEC_LAYOUT")</div>
-<div>$(_section "Apps" "$SEC_APPS")$(_section "$SERVICE_HEAD" "$SEC_SERVICE")$(_section "Trackpad" "$SWIPE_ROW")$(_section "Other" "$SEC_OTHER")</div>
+<div>$(_section "Apps" "$SEC_APPS")$(_section "$SERVICE_HEAD" "$SEC_SERVICE")$(_section "Other" "$SEC_OTHER")</div>
 </main>
 <footer><span>${VERSION}</span><span>esc to close</span></footer>
 </body></html>

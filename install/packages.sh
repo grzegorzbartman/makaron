@@ -19,18 +19,6 @@ PKGS_TERMINAL=(
     "tree|tree|directory listing"
 )
 
-PKGS_EDITORS=(
-    "vscode|Visual Studio Code|code editor"
-    "cursor|Cursor|AI code editor"
-    "sublime|Sublime Text|text editor"
-    "neovim|Neovim + LazyVim|terminal editor"
-)
-
-PKGS_AI=(
-    "codex|Codex|AI coding tool"
-    "claude-code|Claude Code|AI coding CLI"
-)
-
 PKGS_DEV=(
     "composer|Composer|PHP dependency manager"
     "ddev|DDEV|local dev env"
@@ -43,12 +31,7 @@ PKGS_DEV=(
     "fnm|fnm|node version manager"
     "upsun|Upsun CLI|Platform.sh CLI"
     "docker|Docker|containers"
-    "sequel-ace|Sequel Ace|database GUI"
     "pipx|pipx|Python CLI tools"
-)
-
-PKGS_DESKTOP=(
-    "stats|Stats|system monitor menubar"
 )
 
 # ── Package Installer ────────────────────────────────────────────
@@ -63,20 +46,6 @@ install_package() {
         htop)       install_formula "htop" "htop" "htop" ;;
         ncdu)       install_formula "ncdu" "ncdu" "ncdu" ;;
         tree)       install_formula "tree" "tree" "tree" ;;
-        # Editors
-        vscode)     install_cask "visual-studio-code" "Visual Studio Code" ;;
-        cursor)     install_cask "cursor" "Cursor" ;;
-        sublime)    install_cask "sublime-text" "Sublime Text" ;;
-        neovim)     source "$MAKARON_PATH/install/editors/neovim_lazyvim.sh" ;;
-        # AI
-        codex)      install_cask "codex" "Codex" ;;
-        claude-code)
-            if command -v claude &>/dev/null; then
-                echo "Claude Code already installed"
-            else
-                install_cask "claude-code" "Claude Code"
-            fi
-            ;;
         # Development
         composer)   install_formula "composer" "Composer" "composer" ;;
         ddev)       install_formula "ddev/ddev/ddev" "DDEV" "ddev" ;;
@@ -89,10 +58,7 @@ install_package() {
         fnm)        source "$MAKARON_PATH/install/development/fnm.sh" ;;
         upsun)      install_formula "upsun/tap/platformsh-cli" "Upsun CLI" "platform" ;;
         docker)     install_cask "docker-desktop" "Docker" ;;
-        sequel-ace) install_cask "sequel-ace" "Sequel Ace" ;;
         pipx)       source "$MAKARON_PATH/install/development/pipx.sh" ;;
-        # Desktop extras
-        stats)      install_cask "stats" "Stats" ;;
     esac
 }
 
@@ -191,8 +157,7 @@ _show_group_selector() {
 
 _select_all_packages() {
     local all_pkgs=""
-    for entry in "${PKGS_TERMINAL[@]}" "${PKGS_AI[@]}" "${PKGS_EDITORS[@]}" \
-                 "${PKGS_DEV[@]}" "${PKGS_DESKTOP[@]}"; do
+    for entry in "${PKGS_TERMINAL[@]}" "${PKGS_DEV[@]}"; do
         all_pkgs="$all_pkgs ${entry%%|*}"
     done
     SELECTED_PACKAGES=$(echo "$all_pkgs" | xargs)
@@ -229,12 +194,9 @@ show_package_selector() {
         "Core installed: AeroSpace, SketchyBar, Ghostty, Fonts." \
         "Select additional packages below."
 
-    local total=5
+    local total=2
     _show_group_selector "Terminal Tools" 1 "$total" "${PKGS_TERMINAL[@]}"
-    _show_group_selector "AI Tools" 2 "$total" "${PKGS_AI[@]}"
-    _show_group_selector "Code Editors" 3 "$total" "${PKGS_EDITORS[@]}"
-    _show_group_selector "Development" 4 "$total" "${PKGS_DEV[@]}"
-    _show_group_selector "Desktop Extras" 5 "$total" "${PKGS_DESKTOP[@]}"
+    _show_group_selector "Development" 2 "$total" "${PKGS_DEV[@]}"
 
     SELECTED_PACKAGES=$(echo "$SELECTED_PACKAGES" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
 

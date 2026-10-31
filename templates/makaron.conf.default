@@ -11,13 +11,6 @@ SKETCHYBAR_COMPACT_MODE=false
 # The focused workspace is always drawn, even if it's empty.
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=true
 
-# AeroSpace trackpad swipe: number of fingers to switch workspaces
-AEROSPACE_SWIPE_FINGERS=4
-
-# AeroSpace trackpad swipe direction. true = match macOS (swipe left -> next
-# workspace); false = reversed.
-AEROSPACE_SWIPE_NATURAL=true
-
 # Layout profile: auto | desktop | laptop
 # auto picks "laptop" when the built-in display is the only screen and is
 # narrower than 1600 pt (MacBook Neo, Air 13, Pro 14 at default scaling);
