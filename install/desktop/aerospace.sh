@@ -21,9 +21,8 @@ if [ -d "/Applications/AeroSpace.app" ] && ! brew list --cask aerospace &>/dev/n
     fi
 fi
 
-# aerospace-swipe requires AeroSpace >= 0.21 (socket protocol v1). install_cask
-# skips already-installed apps, so existing users can be stuck on an older
-# build where trackpad swiping silently no-ops. Upgrade in place when needed.
+# Makaron targets AeroSpace >= 0.21. install_cask skips already-installed
+# apps, so existing users can be stuck on an older build. Upgrade in place.
 _aerospace_below_021() {
     local v major minor
     v="$(aerospace --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)"
@@ -33,7 +32,7 @@ _aerospace_below_021() {
 }
 
 if command -v aerospace &>/dev/null && _aerospace_below_021; then
-    echo "Upgrading AeroSpace to >= 0.21 (required by aerospace-swipe)..."
+    echo "Upgrading AeroSpace to >= 0.21..."
     brew upgrade --cask nikitabobko/tap/aerospace 2>/dev/null || true
     _aerospace_below_021 && { brew reinstall --cask nikitabobko/tap/aerospace || echo "Warning: AeroSpace upgrade failed (continuing...)"; }
 fi

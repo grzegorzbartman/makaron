@@ -2,7 +2,7 @@
 
 ## What Is Makaron
 
-Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for AI tools and optional developer tooling.
+Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for optional terminal and developer tooling.
 
 The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. In the `laptop` layout profile it is instead a flat edge-to-edge bar flush with the top (no margin, radius or border) that fills the notch strip. `sketchybarrc` takes height and `y_offset` from `_get_bar_height()` / `_get_bar_y_offset()` in `bin/makaron-ui-helpers` (desktop `y_offset` = `MAKARON_BAR_Y_OFFSET` = 4, laptop 0) because both are part of the window `outer.top` math; pill heights scale down with the bar (`ITEM_HEIGHT`).
 
@@ -201,11 +201,11 @@ curl -sL install.sh | bash
        |     |-- makaron-conf.sh
        |     |-- brew.sh
        |     |-- gum, jq
-       |     |-- desktop/ (aerospace, aerospace-swipe, sketchybar, fonts)
+       |     |-- desktop/ (aerospace, sketchybar, fonts)
        |     |-- terminal/ghostty.sh
        |
        |-- install/packages.sh       # Optional packages:
-       |     |-- Fresh install: gum UI per-app selection (5 groups)
+       |     |-- Fresh install: gum UI per-app selection (2 groups)
        |     └── Update/reinstall: installs from ~/.config/makaron/packages.conf
        |
        |-- macos_settings.sh
@@ -216,16 +216,13 @@ curl -sL install.sh | bash
 
 ### Mandatory vs Optional Packages
 
-**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, aerospace-swipe, SketchyBar, Nerd Fonts, Ghostty.
+**Mandatory** (always installed): Homebrew, Xcode CLT, gum, jq, AeroSpace, SketchyBar, Nerd Fonts, Ghostty.
 
-> aerospace-swipe talks to AeroSpace over the v0.21 socket protocol, so AeroSpace **>= 0.21** is required. `install/desktop/aerospace.sh` upgrades older installs in place (`install_cask` alone skips already-installed apps).
+> AeroSpace **>= 0.21** is required. `install/desktop/aerospace.sh` upgrades older installs in place (`install_cask` alone skips already-installed apps).
 
-**Optional** (user selects per-app via gum UI, grouped into 5 categories):
+**Optional** (user selects per-app via gum UI, grouped into 2 categories):
 - Terminal Tools: btop, ffmpeg, fzf, htop, ncdu, tree
-- Code Editors: VSCode, Cursor, Sublime Text, Neovim + LazyVim
-- AI Tools: Codex, Claude Code
-- Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Docker, Sequel Ace, pipx
-- Desktop Extras: Stats
+- Development: Composer, DDEV, gh, lazydocker, lazygit, Node.js, Yarn, pnpm, fnm, Upsun CLI, Docker, pipx
 
 Selections are stored in `~/.config/makaron/packages.conf` (survives update/reinstall). Re-run with `makaron-select-packages`.
 
@@ -258,7 +255,6 @@ makaron/
 │   ├── brew.sh             # Homebrew + CLT setup
 │   ├── desktop/            # AeroSpace, SketchyBar, fonts
 │   ├── development/        # Dev tools
-│   ├── editors/            # Text editor installers
 │   └── terminal/           # Terminal tools
 ├── migrations/             # Timestamped migration scripts
 ├── src/                    # Swift source files (compiled to bin/)
@@ -315,8 +311,6 @@ User-specific settings are stored outside the repo in `~/.config/makaron/makaron
 BATTERY_LOW_THRESHOLD=20                # Battery warning threshold (%)
 SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right side
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
-AEROSPACE_SWIPE_FINGERS=4               # Trackpad fingers to switch workspaces (aerospace-swipe)
-AEROSPACE_SWIPE_NATURAL=true            # Swipe direction; true matches macOS (swipe left -> next)
 MAKARON_LAYOUT_PROFILE=auto             # Layout profile: auto | desktop | laptop
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
 AEROSPACE_GAP_SIZE_LAPTOP=0             # Gap for the laptop profile
