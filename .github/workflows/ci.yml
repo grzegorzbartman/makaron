@@ -41,3 +41,27 @@ jobs:
 
       - name: Config template parses
         run: bash -n templates/makaron.conf.default
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Compile Swift helpers
+        run: |
+          rc=0
+          for f in src/*.swift; do
+            out="bin/makaron-$(basename "$f" .swift | tr _ -)"
+            swiftc -O -o "$out" "$f" || { echo "COMPILE FAIL: $f"; rc=1; }
+          done
+          exit "$rc"
+
+      - name: Smoke-run headless helpers
+        run: |
+          bin/makaron-cpu-stats | grep -qE '^[0-9]+$'
+          bin/makaron-memory-stats | grep -qE 'GB'
+          bin/makaron-storage-stats | grep -qE '^[0-9.]+/[0-9.]+ (TB|GB)$'
+          bin/makaron-audio-out | grep -qE '^(bluetooth|other) ([0-9]+|-)$'
+
+      - name: Tests
+        run: tests/run.sh
