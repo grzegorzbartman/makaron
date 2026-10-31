@@ -12,3 +12,15 @@ bash "$SWIPE" >/dev/null && pass "swipe cleanup runs" || fail "swipe cleanup fai
 assert_not_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_SWIPE_" "swipe vars removed"
 assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE=20" "other user values kept"
 bash "$SWIPE" >/dev/null && pass "swipe cleanup idempotent" || fail "second run failed"
+
+# makaron-migrate: runs only pending migrations from MAKARON_PATH, real ANSI colors
+STATE="$HOME/.local/state/makaron/migrations"
+mkdir -p "$STATE"
+for f in "$REPO"/migrations/*.sh; do [ "$f" = "$SWIPE" ] || touch "$STATE/$(basename "$f")"; done
+OUT="$HOME/migrate.out"
+/bin/bash "$REPO/bin/makaron-migrate" > "$OUT" 2>&1
+assert_contains "$OUT" "Running migration (1793443471)" "makaron-migrate runs the pending migration"
+[ -f "$STATE/1793443471.sh" ] && pass "pending migration marked completed" || fail "state file missing"
+assert_not_contains "$OUT" '\e[' "no literal \\e escapes (bash 3.2)"
+/bin/bash "$REPO/bin/makaron-migrate" > "$OUT" 2>&1
+assert_not_contains "$OUT" "Running migration (" "second run has nothing pending"
