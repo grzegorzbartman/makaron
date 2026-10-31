@@ -17,7 +17,7 @@ mkdir -p "$STATE_DIR"
 mkdir -p "$STATE_DIR/skipped"
 
 # Run any pending migrations
-for file in ~/.local/share/makaron/migrations/*.sh; do
+for file in "$MAKARON_PATH"/migrations/*.sh; do
   # Skip if no migration files exist
   if [[ ! -f "$file" ]]; then
     continue
@@ -26,13 +26,13 @@ for file in ~/.local/share/makaron/migrations/*.sh; do
   filename=$(basename "$file")
 
   if [[ ! -f "$STATE_DIR/$filename" && ! -f "$STATE_DIR/skipped/$filename" ]]; then
-    echo -e "\e[32m\nRunning migration (${filename%.sh})\e[0m"
+    echo -e "\033[32m\nRunning migration (${filename%.sh})\033[0m"
 
     if bash $file; then
       touch "$STATE_DIR/$filename"
-      echo -e "\e[32mMigration ${filename%.sh} completed successfully\e[0m"
+      echo -e "\033[32mMigration ${filename%.sh} completed successfully\033[0m"
     else
-      echo -e "\e[31mMigration ${filename%.sh} failed\e[0m"
+      echo -e "\033[31mMigration ${filename%.sh} failed\033[0m"
       if command -v gum &> /dev/null; then
         if gum confirm "Migration ${filename%.sh} failed. Skip and continue?"; then
           touch "$STATE_DIR/skipped/$filename"
@@ -52,4 +52,4 @@ for file in ~/.local/share/makaron/migrations/*.sh; do
   fi
 done
 
-echo -e "\e[32mAll migrations completed\e[0m"
+echo -e "\033[32mAll migrations completed\033[0m"
