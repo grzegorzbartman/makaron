@@ -21,15 +21,15 @@ printf '#!/bin/bash\nexit 0\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aero
 
     echo "1470 956 1" > "$SCREEN_CACHE_FILE"
     assert_eq "$(_get_layout_profile)" laptop "lone Air 13 -> laptop"
-    assert_eq "$(_get_gap_size)" 2 "laptop gap default 2"
+    assert_eq "$(_get_gap_size)" 6 "laptop gap default 6"
     assert_eq "$(_get_bar_height)" 32 "laptop bar 32"
     assert_eq "$(_get_bar_y_offset)" 0 "laptop bar flush with the top"
     assert_eq "$(_get_accordion_padding)" 12 "laptop accordion padding 12"
     assert_eq "$(_get_max_tiles)" 2 "laptop max tiles 2"
     apply_desktop_state >/dev/null
     assert_contains "$AEROSPACE_CONFIG_PATH" "accordion-padding = 12" "accordion-padding written (laptop)"
-    assert_contains "$AEROSPACE_CONFIG_PATH" '    inner.horizontal = 2' "gaps written (laptop)"
-    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.top = [{ monitor."Built-in" = 2 }, 34]' "outer.top (laptop, notch 32)"
+    assert_contains "$AEROSPACE_CONFIG_PATH" '    inner.horizontal = 6' "gaps written (laptop)"
+    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.top = [{ monitor."Built-in" = 6 }, 38]' "outer.top (laptop, notch 32)"
     verify_desktop_state >/dev/null && pass "verify in sync (laptop)" || fail "verify drift (laptop)"
 
     echo "1470 956 2" > "$SCREEN_CACHE_FILE"
