@@ -79,6 +79,7 @@ Makaron compiles small Swift helpers (e.g. `swiftc -O -o bin/makaron-memory-stat
 - `has_notch.swift` reads `NSScreen.safeAreaInsets` for notch detection (compiled to avoid the ~1s `swift -e` cold start).
 - `storage_stats.swift` uses `volumeAvailableCapacityForImportantUsage` to count purgeable space (e.g. Time Machine local snapshots) as free, matching Finder. `df` treats purgeable as used and over-reports. Prints `used/total unit` (e.g. `1.4/2 TB`).
 - `audio_out.swift` (`bin/makaron-audio-out`) reads the default output device transport and volume from CoreAudio (`bluetooth|other <0-100|->`), ~50ms instead of `osascript` + `system_profiler`.
+- `menubar.swift` (`bin/makaron-menubar always|desktop|fullscreen|never|status`) sets menu bar autohide the way System Settings does: `_HIHideMenuBar` + `AppleMenuBarVisibleInFullscreen` (NSGlobalDomain), `com.apple.controlcenter AutoHideMenuBarOption` (0-3), the SkyLight flag, then the `AppleInterfaceMenuBarHidingChangedNotification` / `AppleInterfaceFullScreenMenuBarVisibilityChangedNotification` distributed notifications. No Accessibility permission, no focus steal.
 - `help_window.swift` is the shortcut overlay panel (`bin/makaron-help-window`): borderless NSPanel + WKWebView over NSVisualEffectView glass; AeroSpace ignores non-standard panels so it is never tiled.
 
 ---
@@ -139,7 +140,7 @@ The function resolves the symlink target before editing to modify the actual con
 - Restart Dock only via `_restart_dock`, never bare `killall Dock`: Dock can exit 0 and launchd (`KeepAlive.SuccessfulExit=false`) then never respawns it, leaving no Dock and a stale bottom reserve. The helper uses `launchctl kickstart -k` and re-applies autohide through System Events.
 
 ### Menu Bar Autohide
-`_set_menubar_autohide()` uses AppleScript to quit and reopen System Settings on the Menu Bar pane, find the dropdown by its current value, then apply a toggle trick (opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting - UI click is the only reliable method.
+`_set_menubar_autohide()` ("Always" in full, "In Full Screen Only" in stop) calls `bin/makaron-menubar`, which applies the change live in under 0.2s. A bare `defaults write _HIHideMenuBar` updates the pref but not the screen: the window server only reacts to the distributed notification. `SLSSetMenuBarAutohideEnabled` alone flips a flag without moving the bar. When the binary is missing or fails, `_set_menubar_autohide_ui()` falls back to the old AppleScript UI click (quit/reopen System Settings on the Menu Bar pane, localized EN/PL/DE/FR dropdown values, opposite-then-target toggle trick; needs Accessibility). To verify, read the `Menubar` window bounds from `CGWindowListCopyWindowInfo` (y = 0 shown, negative hidden); `NSScreen.visibleFrame` follows the pref, not the screen.
 
 ---
 

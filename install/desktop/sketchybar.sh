@@ -65,6 +65,14 @@ if [ -f "$MAKARON_PATH/src/audio_out.swift" ]; then
     }
 fi
 
+# Compile menu bar autohide setter (prefs + notifications, replaces the System Settings UI click)
+if [ -f "$MAKARON_PATH/src/menubar.swift" ]; then
+    echo "Compiling menubar..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-menubar" "$MAKARON_PATH/src/menubar.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile menubar.swift, menu bar autohide falls back to System Settings UI"
+    }
+fi
+
 # Compile shortcut overlay panel (NSPanel + WKWebView, used by makaron-help)
 if [ -f "$MAKARON_PATH/src/help_window.swift" ]; then
     echo "Compiling help_window..."

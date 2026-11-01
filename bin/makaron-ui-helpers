@@ -489,11 +489,26 @@ verify_desktop_state() {
 
 # --- macOS Settings ---
 
-# Toggle menu bar autohide via AppleScript UI click (toggle trick).
-# macOS ignores defaults write / CFPreferences — must click the dropdown in System Settings.
+# Set menu bar autohide: "Always", "In Full Screen Only", or "Never".
+# makaron-menubar writes the prefs and posts the notifications System Settings uses (no UI, no focus steal);
+# the UI click below is the fallback when the binary is missing.
+_set_menubar_autohide() {
+    local mode helper="$MAKARON_PATH/bin/makaron-menubar"
+    case "$1" in
+        "Always") mode=always ;;
+        "In Full Screen Only") mode=fullscreen ;;
+        "Never") mode=never ;;
+    esac
+    if [ -n "$mode" ] && [ -x "$helper" ] && "$helper" "$mode" 2>/dev/null; then
+        return 0
+    fi
+    _set_menubar_autohide_ui "$1"
+}
+
+# Fallback: AppleScript UI click in System Settings (toggle trick); needs Accessibility, steals focus.
 # UI strings are localized, so every option carries its EN/PL/DE/FR variants
 # (extracted from ControlCenterSettings.appex Localizable.loctable).
-_set_menubar_autohide() {
+_set_menubar_autohide_ui() {
     local target="$1"  # "Always", "In Full Screen Only", or "Never"
 
     local always='"Always", "Zawsze", "Immer", "Toujours"'
