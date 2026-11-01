@@ -289,7 +289,7 @@ run = ["move-node-to-workspace 5"]
 export SPACE_FOCUSED_BACKGROUND_COLOR=0xffff375f  # change the focus color
 ```
 
-Your AeroSpace keys win over the base config; your window rules run before Makaron's routing/float rules. The `[gaps]` block stays managed by `makaron-gaps`. A broken override file never breaks the desktop - Makaron falls back to the base config and `makaron-doctor` tells you why. Layout scalars live in `~/.config/makaron/makaron.conf` (`AEROSPACE_GAP_SIZE`, `SKETCHYBAR_HEIGHT`, `AEROSPACE_AUTO_DWINDLE`).
+Your AeroSpace keys win over the base config; your window rules run before Makaron's routing/float rules, written either as `[[on-window-detected]]` tables or as the `on-window-detected = [ {...} ]` array used in the current AeroSpace docs. The `[gaps]` block stays managed by `makaron-gaps`. A broken override file never breaks the desktop - Makaron falls back to the base config and `makaron-doctor` tells you why. Layout scalars live in `~/.config/makaron/makaron.conf` (`AEROSPACE_GAP_SIZE`, `SKETCHYBAR_HEIGHT`, `AEROSPACE_AUTO_DWINDLE`, `AEROSPACE_FOCUS_FOLLOWS_MOUSE`).
 
 ## Uninstall
 

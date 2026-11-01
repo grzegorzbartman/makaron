@@ -393,6 +393,27 @@ check_aerospace_generated() {
     fi
 }
 
+# Ask the running AeroSpace to validate ~/.aerospace.toml: errors go to
+# stdout (nonzero exit), warnings to stderr (exit 0).
+check_aerospace_config() {
+    if ! command -v aerospace >/dev/null 2>&1 || ! pgrep -f "AeroSpace" >/dev/null 2>&1; then
+        add_result "skipped" "aerospace-config" "AeroSpace not running"
+        return
+    fi
+
+    local out err count
+    err=$(mktemp) || return 0
+    if ! out=$(aerospace reload-config --dry-run --no-gui 2>"$err"); then
+        add_result "fail" "aerospace-config" "rejected: $(grep -m1 . <<< "$out" | sed 's/^\[ERROR\] //')"
+    elif grep -q . "$err"; then
+        count=$(grep -c . "$err")
+        add_result "warn" "aerospace-config" "$(grep -m1 . "$err" | sed 's/^\[WARNING\] //')$([ "$count" -gt 1 ] && echo " (+$((count - 1)) more)")"
+    else
+        add_result "ok" "aerospace-config" "no warnings"
+    fi
+    rm -f "$err"
+}
+
 run_checks() {
     check_repo
 
@@ -409,6 +430,7 @@ run_checks() {
         check_bin_permissions
         check_makaron_conf
         check_ui_services
+        check_aerospace_config
         check_layout_profile
         check_desktop_layout
     fi
