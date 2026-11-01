@@ -148,14 +148,14 @@ set_makaron_conf_value() {
 _get_gap_size() {
     (
         AEROSPACE_GAP_SIZE=12
-        AEROSPACE_GAP_SIZE_LAPTOP=2
+        AEROSPACE_GAP_SIZE_LAPTOP=6
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
         key="$(_gap_conf_key)"
         value="${!key:-}"
         if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -le 40 ]; then
             echo "$value"
         elif [ "$key" = "AEROSPACE_GAP_SIZE_LAPTOP" ]; then
-            echo 2
+            echo 6
         else
             echo 12
         fi

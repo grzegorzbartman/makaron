@@ -35,3 +35,17 @@ printf 'AEROSPACE_GAP_SIZE_LAPTOP=6\n' > "$HOME/.config/makaron/makaron.conf"
 bash "$GAP" >/dev/null
 assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=6" "custom laptop gap kept"
 bash "$GAP" >/dev/null && pass "gap migration idempotent" || fail "gap migration second run failed"
+
+# Laptop gap default -> 6: bumps the old defaults 0 and 2, keeps a custom value
+GAP6="$REPO/migrations/1793536079.sh"
+printf 'AEROSPACE_GAP_SIZE=12\nAEROSPACE_GAP_SIZE_LAPTOP=2\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$GAP6" >/dev/null && pass "gap6 migration runs" || fail "gap6 migration failed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=6" "laptop gap 2 bumped to 6"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE=12" "desktop gap untouched (gap6)"
+printf 'AEROSPACE_GAP_SIZE_LAPTOP=0\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$GAP6" >/dev/null
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=6" "laptop gap 0 bumped to 6"
+printf 'AEROSPACE_GAP_SIZE_LAPTOP=4\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$GAP6" >/dev/null
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=4" "custom laptop gap kept (gap6)"
+bash "$GAP6" >/dev/null && pass "gap6 migration idempotent" || fail "gap6 second run failed"

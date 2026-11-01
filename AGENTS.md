@@ -321,7 +321,7 @@ SKETCHYBAR_COMPACT_MODE=false           # Hide CPU/memory/storage on the right s
 SKETCHYBAR_HIDE_EMPTY_WORKSPACES=false  # Hide empty, non-focused workspaces in the bar
 MAKARON_LAYOUT_PROFILE=auto             # Layout profile: auto | desktop | laptop
 AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
-AEROSPACE_GAP_SIZE_LAPTOP=2             # Gap for the laptop profile
+AEROSPACE_GAP_SIZE_LAPTOP=6             # Gap for the laptop profile
 AEROSPACE_ACCORDION_PADDING=30          # Accordion inset so stacked windows peek out (0-100)
 AEROSPACE_ACCORDION_PADDING_LAPTOP=12   # Same for the laptop profile
 AEROSPACE_LAPTOP_MAX_TILES=2            # Laptop: tiles side by side before the workspace flips to accordion (0 = off)

@@ -19,7 +19,7 @@ MAKARON_LAYOUT_PROFILE=auto
 
 # Window layout: gap between windows in px (0-40)
 AEROSPACE_GAP_SIZE=12
-AEROSPACE_GAP_SIZE_LAPTOP=2
+AEROSPACE_GAP_SIZE_LAPTOP=6
 
 # Accordion: px the active window is inset so the stacked ones peek out (0-100)
 AEROSPACE_ACCORDION_PADDING=30
