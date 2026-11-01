@@ -3,10 +3,10 @@
 # generated file that ~/.aerospace.toml points at. Never exits nonzero:
 # a broken user file falls back to the base config (status file records why).
 #
-# User file format (single-line values only):
+# User file format (multi-line arrays / inline tables are fine):
 #   key = value                       top-level or inside [table] - user wins
 #   [table] / [[on-window-detected]]  user tables merge, user rules run
-#                                     before base routing/float rules
+#   on-window-detected = [ {...} ]    before base routing/float rules
 # The [gaps] block is managed by makaron-gaps and cannot be overridden here.
 
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
@@ -24,15 +24,17 @@ if [ ! -f "$BASE" ]; then
     exit 0
 fi
 
-_get_auto_dwindle() {
+# Prints "<drop dwindle 0|1> <focus-follows-mouse true|false>" from makaron.conf
+_conf_flags() {
     (
-        AEROSPACE_AUTO_DWINDLE=true
+        AEROSPACE_AUTO_DWINDLE=true AEROSPACE_FOCUS_FOLLOWS_MOUSE=false
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        [ "${AEROSPACE_AUTO_DWINDLE:-true}" = "false" ] && echo 1 || echo 0
+        [ "${AEROSPACE_AUTO_DWINDLE:-true}" = "false" ] && printf '1 ' || printf '0 '
+        [ "${AEROSPACE_FOCUS_FOLLOWS_MOUSE:-false}" = "true" ] && echo true || echo false
     )
 }
 
-DROP_DWINDLE="$(_get_auto_dwindle)"
+read -r DROP_DWINDLE FOCUS_FOLLOWS_MOUSE <<< "$(_conf_flags)"
 USER_INPUT="$USER_FILE"
 [ -f "$USER_FILE" ] || USER_INPUT=/dev/null
 
@@ -46,9 +48,59 @@ tmp=$(mktemp "$GEN_DIR/.aerospace.toml.XXXXXX") || exit 0
 } > "$tmp"
 
 merge() {
-    awk -v drop_dwindle="$DROP_DWINDLE" -v ufile="$USER_INPUT" '
-    function trimkey(s) { sub(/[ \t]*=.*$/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-    function net(s,  t, n) { t = s; n = gsub(/[\[{]/, "", t); n -= gsub(/[\]}]/, "", t); return n }
+    awk -v drop_dwindle="$DROP_DWINDLE" -v ffm="$FOCUS_FOLLOWS_MOUSE" -v ufile="$USER_INPUT" '
+    function trimkey(s) { sub(/\n.*$/, "", s); sub(/[ \t]*=.*$/, "", s); gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    # Bracket balance of one line, ignoring strings and comments
+    function net(s,  t, n) {
+        t = s; gsub(/"([^"\\]|\\.)*"/, "", t); gsub(/'\''[^'\'']*'\''/, "", t); sub(/#.*$/, "", t)
+        n = gsub(/[\[{]/, "", t); n -= gsub(/[\]}]/, "", t); return n
+    }
+    # A rule array is never a valid table key, so accept it below any header
+    function user_kv(s,  key, id) {
+        key = trimkey(s)
+        if (key == "on-window-detected") { split_rules(s); return }
+        if (in_aot) { aot[aot_n] = aot[aot_n] "\n" s; return }
+        id = sec SUBSEP key
+        if (!(id in u_val)) u_keys[sec] = u_keys[sec] SUBSEP key
+        u_val[id] = s
+    }
+    function rule_kv(kv) {
+        gsub(/^[ \t\n]+|[ \t\n]+$/, "", kv)
+        if (kv != "") aot[aot_n] = aot[aot_n] "\n" kv
+    }
+    # on-window-detected = [ { k = v, ... }, ... ] -> [[on-window-detected]] blocks
+    function split_rules(s,  n, i, c, q, d, cur) {
+        s = substr(s, index(s, "=") + 1); n = length(s); q = ""; d = 0; cur = ""
+        for (i = 1; i <= n; i++) {
+            c = substr(s, i, 1)
+            if (q != "") {
+                cur = cur c
+                if (q == "\"" && c == "\\") { i++; cur = cur substr(s, i, 1) }
+                else if (c == q) q = ""
+                continue
+            }
+            if (c == "#") { while (i < n && substr(s, i + 1, 1) != "\n") i++; continue }
+            if (c == "\"" || c == "'\''") { if (d < 2) { bad = 1; return }; q = c; cur = cur c; continue }
+            if (c == "[" || c == "{") {
+                d++
+                if ((d == 1 && c != "[") || (d == 2 && c != "{")) { bad = 1; return }
+                if (d == 2) { aot[++aot_n] = "[[on-window-detected]]"; cur = "" }
+                if (d > 2) cur = cur c
+                continue
+            }
+            if (c == "]" || c == "}") {
+                d--
+                if (d < 0) { bad = 1; return }
+                if (d == 1) { rule_kv(cur); cur = "" }
+                if (d > 1) cur = cur c
+                continue
+            }
+            if (d == 2 && c == ",") { rule_kv(cur); cur = ""; continue }
+            if (d >= 2) { cur = cur c; continue }
+            if (c !~ /[ \t\n,]/) { bad = 1; return }
+        }
+        if (d != 0 || q != "") bad = 1
+    }
     function flush_extras(sec,  n, parts, i, id) {
         n = split(u_keys[sec], parts, SUBSEP)
         for (i = 1; i <= n; i++) {
@@ -66,6 +118,13 @@ merge() {
     }
     BEGIN { sec = "" }
     FILENAME == ufile {
+        if ($0 ~ /'\'''\'''\''|"""/) { bad = 1; next }
+        if (pend_d > 0) {
+            pend = pend "\n" $0; pend_d += net($0)
+            if (pend_d < 0) bad = 1
+            else if (pend_d == 0) user_kv(pend)
+            next
+        }
         if ($0 ~ /^[ \t]*$/ || $0 ~ /^[ \t]*#/) { if (in_aot) aot[aot_n] = aot[aot_n] "\n" $0; next }
         if ($0 ~ /^[ \t]*\[\[.*\]\][ \t]*$/) {
             if ($0 !~ /^[ \t]*\[\[on-window-detected\]\][ \t]*$/) { bad = 1; next }
@@ -77,18 +136,17 @@ merge() {
             next
         }
         if ($0 ~ /^[ \t]*[^ \t=#\[][^=]*=/) {
-            if ($0 ~ /'\'''\'''\''/ || net($0) != 0) { bad = 1; next }
-            if (in_aot) { aot[aot_n] = aot[aot_n] "\n" $0; next }
-            key = trimkey($0); id = sec SUBSEP key
-            if (!(id in u_val)) u_keys[sec] = u_keys[sec] SUBSEP key
-            u_val[id] = $0
+            pend_d = net($0)
+            if (pend_d < 0) bad = 1
+            else if (pend_d > 0) pend = $0
+            else user_kv($0)
             next
         }
         bad = 1; next
     }
     # ---- base file ----
     {
-        if (FNR == 1) sec = ""
+        if (FNR == 1) { sec = ""; if (pend_d > 0) bad = 1 }
         if (bad) next
         if (aot_region) {
             if ($0 ~ /^\[\[on-window-detected\]\][ \t]*$/) { b_n++; b_aot[b_n] = $0 }
@@ -123,6 +181,7 @@ merge() {
                 if (swallow < 0) swallow = 0
                 next
             }
+            if (sec == "" && key == "focus-follows-mouse.enabled") { print key " = " ffm; next }
         }
         print
     }
@@ -155,7 +214,7 @@ else
     } > "$tmp"
     STATUS="fallback user-toml-parse-error"
     echo "  ⚠️  ~/.config/makaron/aerospace.user.toml is invalid - using base config only" >&2
-    echo "     Allowed: single-line 'key = value', [tables], [[on-window-detected]] blocks" >&2
+    echo "     Allowed: 'key = value', [tables], [[on-window-detected]] or on-window-detected = [ {...} ]" >&2
 fi
 rm -f /tmp/makaron_aerospace_generate_err_$$
 
@@ -176,7 +235,7 @@ fi
 if [ "$STATUS" = "ok" ] && [ "$USER_INPUT" != "/dev/null" ] &&
     command -v aerospace >/dev/null 2>&1 && pgrep -f AeroSpace >/dev/null 2>&1; then
     if [ "$(readlink "$HOME/.aerospace.toml" 2>/dev/null)" = "$OUT" ] &&
-        ! aerospace reload-config --dry-run >/dev/null 2>&1; then
+        ! aerospace reload-config --dry-run --no-gui >/dev/null 2>&1; then
         if [ -f "$OUT.lastgood" ]; then
             cp "$OUT.lastgood" "$OUT"
         else

@@ -328,6 +328,7 @@ STORAGE_ALERT_THRESHOLD=90              # Storage label turns alert color above 
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
 MEMORY_ALERT_THRESHOLD=80               # Memory label turns alert color above this usage (%)
 AEROSPACE_AUTO_DWINDLE=true             # Dwindle auto-layout for new windows
+AEROSPACE_FOCUS_FOLLOWS_MOUSE=false     # Window under the pointer gets focus (AeroSpace focus-follows-mouse)
 FLOAT_ALL_LAYOUT=cascade                # float-all (alt-shift-f) arrangement: cascade | grid
 MAKARON_CHANNEL=stable                  # Update channel: stable | edge
 ```
@@ -337,12 +338,12 @@ MAKARON_CHANNEL=stable                  # Update channel: stable | edge
 ## User Overrides
 
 Users customize without forking via files in `~/.config/makaron/` (seeded as `*.example` by `install/makaron-conf.sh`, activated by renaming):
-- `aerospace.user.toml` - merged with `configs/aerospace/.aerospace.toml` by `bin/makaron-aerospace-generate` (bash+awk) into `~/.config/makaron/generated/aerospace.toml`; `~/.aerospace.toml` symlinks to the GENERATED file. Semantics: single-line `key = value` only; user keys win in named tables; user-only tables appended; user `[[on-window-detected]]` rules run after the auto-dwindle catch-all but before base routing/float rules (first-match-wins = user overrides routing); `[gaps]` is base-only (protects the sed/verify contract). Malformed user file -> base-only output + `fallback` status in `~/.local/state/makaron/aerospace-generate.status`, never nonzero exit. A merged config rejected by `aerospace reload-config --dry-run` is rolled back to `.lastgood`.
+- `aerospace.user.toml` - merged with `configs/aerospace/.aerospace.toml` by `bin/makaron-aerospace-generate` (bash+awk) into `~/.config/makaron/generated/aerospace.toml`; `~/.aerospace.toml` symlinks to the GENERATED file. Semantics: `key = value` (multi-line arrays/inline tables allowed, bracket balance ignores strings and comments); user keys win in named tables; user-only tables appended; user `[[on-window-detected]]` rules and the TOML 1.1 `on-window-detected = [ {...} ]` array (converted to `[[on-window-detected]]` blocks) run after the auto-dwindle catch-all but before base routing/float rules (first-match-wins = user overrides routing); `[gaps]` is base-only (protects the sed/verify contract). Malformed user file -> base-only output + `fallback` status in `~/.local/state/makaron/aerospace-generate.status`, never nonzero exit. A merged config rejected by `aerospace reload-config --dry-run --no-gui` is rolled back to `.lastgood`. Always pass `--no-gui` to `--dry-run`: without it AeroSpace pops an error dialog.
 - `colors.user.sh` - sourced at the end of `configs/sketchybar/colors.sh` (reaches sketchybarrc and all plugins).
 - `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
 - `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
 - Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
-- `SKETCHYBAR_HEIGHT` / `SKETCHYBAR_HEIGHT_LAPTOP` (makaron.conf) feed `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync across profiles. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config.
+- `SKETCHYBAR_HEIGHT` / `SKETCHYBAR_HEIGHT_LAPTOP` (makaron.conf) feed `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync across profiles. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config; `AEROSPACE_FOCUS_FOLLOWS_MOUSE` is substituted into the base `focus-follows-mouse.enabled` line (a user-file key still wins).
 
 ## Migration System
 
@@ -480,6 +481,7 @@ fi
 Use `makaron-doctor` to check system status:
 - Reports component/service health for AeroSpace and SketchyBar
 - Verifies symlinks, configs, and UI mode state
+- `aerospace-config` runs `aerospace reload-config --dry-run --no-gui` and reports errors (stdout, nonzero exit) and warnings (stderr), e.g. typos in `aerospace.user.toml`
 - Supports `--fix` for safe repairs and `--json` for machine-readable output
 
 ### Migration Not Running

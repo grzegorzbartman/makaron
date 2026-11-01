@@ -2,16 +2,28 @@
 # Rename this file to aerospace.user.toml to activate, then run:
 #   makaron-reload-aerospace-sketchybar
 #
-# Rules: single-line `key = value` only. Your keys win over the base config.
-# Your [[on-window-detected]] rules run BEFORE Makaron's routing/float rules,
+# Rules: `key = value` (values may span lines). Your keys win over the base
+# config. Your window rules run BEFORE Makaron's routing/float rules,
 # so a rule for the same app overrides the default. The [gaps] block is
 # managed by `makaron-gaps` and cannot be overridden here.
+# Top-level keys go above the first [table] header.
+
+# --- top-level option (focus follows mouse: prefer AEROSPACE_FOCUS_FOLLOWS_MOUSE in makaron.conf) ---
+# focus-follows-mouse.enabled = true
+
+# --- route apps to a workspace (syntax from the AeroSpace docs; find ids: aerospace list-apps) ---
+# on-window-detected = [
+#     {
+#         if = 'test %{app-bundle-id} = com.google.Chrome || test %{app-bundle-id} = org.mozilla.firefox',
+#         run = 'move-node-to-workspace 2',
+#     },
+# ]
 
 # --- add or rebind keys ---
 # [mode.main.binding]
 # alt-enter = 'exec-and-forget open -na Ghostty'
 
-# --- route an app to a workspace (find the id: aerospace list-apps) ---
+# --- the same routing in the [[on-window-detected]] table style ---
 # [[on-window-detected]]
 # if.app-id = "com.spotify.client"
 # run = ["move-node-to-workspace 5"]

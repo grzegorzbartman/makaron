@@ -39,6 +39,10 @@ MEMORY_ALERT_THRESHOLD=80
 # Auto-arrange new windows in a dwindle layout (set false to disable)
 AEROSPACE_AUTO_DWINDLE=true
 
+# Focus follows mouse: the window under the pointer gets focus (true | false)
+# Apply with: makaron-reload-aerospace-sketchybar
+AEROSPACE_FOCUS_FOLLOWS_MOUSE=false
+
 # Float-all toggle (alt-shift-f) window arrangement: cascade | grid
 FLOAT_ALL_LAYOUT=cascade
 
