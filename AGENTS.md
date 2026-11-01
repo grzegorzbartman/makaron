@@ -136,6 +136,7 @@ The function resolves the symlink target before editing to modify the actual con
 ### macOS Settings Per Mode
 - **Full**: dock autohide, window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar autohide.
 - **Stop**: dock visible, window grouping off, Three Finger Drag on (restored).
+- Restart Dock only via `_restart_dock`, never bare `killall Dock`: Dock can exit 0 and launchd (`KeepAlive.SuccessfulExit=false`) then never respawns it, leaving no Dock and a stale bottom reserve. The helper uses `launchctl kickstart -k` and re-applies autohide through System Events.
 
 ### Menu Bar Autohide
 `_set_menubar_autohide()` uses AppleScript to quit and reopen System Settings on the Menu Bar pane, find the dropdown by its current value, then apply a toggle trick (opposite value first, then target). macOS ignores `defaults write` and `CFPreferences` for this setting - UI click is the only reliable method.

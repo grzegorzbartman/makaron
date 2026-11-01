@@ -11,7 +11,7 @@ UI_MODE_FILE="$HOME/.local/state/makaron/ui-mode"
 
 if [ -f "$UI_MODE_FILE" ] && grep -q '^stop$' "$UI_MODE_FILE"; then
     defaults write com.apple.dock autohide -bool false
-    killall Dock 2>/dev/null || true
+    launchctl kickstart -k "gui/$(id -u)/com.apple.Dock.agent" 2>/dev/null || killall Dock 2>/dev/null || true
     echo "  ✓ Dock visible"
 else
     echo "  ✓ Not in stopped UI mode, nothing to do"
