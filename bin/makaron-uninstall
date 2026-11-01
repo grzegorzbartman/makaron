@@ -166,7 +166,8 @@ restore_defaults() {
         fi
     fi
 
-    killall Dock Finder SystemUIServer 2>/dev/null || true
+    _restart_dock 2>/dev/null || launchctl kickstart -k "gui/$(id -u)/com.apple.Dock.agent" 2>/dev/null || true
+    killall Finder SystemUIServer 2>/dev/null || true
 }
 
 uninstall_packages() {

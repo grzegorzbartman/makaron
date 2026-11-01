@@ -193,7 +193,7 @@ configure_apple_intelligence() {
 # Restart affected applications
 restart_applications() {
     echo "Applying changes by restarting system components..."
-    killall Dock
+    _restart_dock 2>/dev/null || launchctl kickstart -k "gui/$(id -u)/com.apple.Dock.agent"
     killall Finder
     killall SystemUIServer
     echo "Applications restarted"
