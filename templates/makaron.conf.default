@@ -19,7 +19,15 @@ MAKARON_LAYOUT_PROFILE=auto
 
 # Window layout: gap between windows in px (0-40)
 AEROSPACE_GAP_SIZE=12
-AEROSPACE_GAP_SIZE_LAPTOP=0
+AEROSPACE_GAP_SIZE_LAPTOP=2
+
+# Accordion: px the active window is inset so the stacked ones peek out (0-100)
+AEROSPACE_ACCORDION_PADDING=30
+AEROSPACE_ACCORDION_PADDING_LAPTOP=12
+
+# Laptop profile: tiles allowed side by side; one more flips the workspace to
+# accordion (a stack), back under the limit it returns to tiles. 0 = off.
+AEROSPACE_LAPTOP_MAX_TILES=2
 
 # SketchyBar height in px (20-80). Window layout adapts automatically.
 # The laptop bar is flat and edge to edge; at 32 it fills the notch strip

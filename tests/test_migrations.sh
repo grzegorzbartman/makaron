@@ -24,3 +24,14 @@ assert_contains "$OUT" "Running migration (1793443471)" "makaron-migrate runs th
 assert_not_contains "$OUT" '\e[' "no literal \\e escapes (bash 3.2)"
 /bin/bash "$REPO/bin/makaron-migrate" > "$OUT" 2>&1
 assert_not_contains "$OUT" "Running migration (" "second run has nothing pending"
+
+# Laptop gap default 0 -> 2: bumps only the old default, leaves other values
+GAP="$REPO/migrations/1793534390.sh"
+printf 'AEROSPACE_GAP_SIZE=12\nAEROSPACE_GAP_SIZE_LAPTOP=0\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$GAP" >/dev/null && pass "gap migration runs" || fail "gap migration failed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=2" "laptop gap bumped to 2"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE=12" "desktop gap untouched"
+printf 'AEROSPACE_GAP_SIZE_LAPTOP=6\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$GAP" >/dev/null
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=6" "custom laptop gap kept"
+bash "$GAP" >/dev/null && pass "gap migration idempotent" || fail "gap migration second run failed"

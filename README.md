@@ -127,10 +127,10 @@ makaron-gaps 12
 
 On a 13-inch MacBook Air, a 14-inch Pro at default scaling, or a MacBook Neo, side-by-side tiles get cramped and 12px gaps waste real estate. Makaron handles this with a **layout profile**:
 
-| Profile | Gaps | Bar height | When |
-|---|---|---|---|
-| `desktop` | `AEROSPACE_GAP_SIZE` (12) | `SKETCHYBAR_HEIGHT` (40) | external monitor connected, or a wide built-in display |
-| `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (0) | `SKETCHYBAR_HEIGHT_LAPTOP` (32) | built-in display is the only screen and is narrower than 1600 pt |
+| Profile | Gaps | Bar height | Accordion padding | When |
+|---|---|---|---|---|
+| `desktop` | `AEROSPACE_GAP_SIZE` (12) | `SKETCHYBAR_HEIGHT` (40) | `AEROSPACE_ACCORDION_PADDING` (30) | external monitor connected, or a wide built-in display |
+| `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (2) | `SKETCHYBAR_HEIGHT_LAPTOP` (32) | `AEROSPACE_ACCORDION_PADDING_LAPTOP` (12) | built-in display is the only screen and is narrower than 1600 pt |
 
 `MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The laptop bar drops the floating look: it runs flat from edge to edge, flush with the top, and at 32 px fills the notch strip exactly, so windows lose no vertical space to it.
 
@@ -139,6 +139,8 @@ makaron-layout            # show the active profile and why
 makaron-layout laptop     # force it (also: desktop, auto)
 makaron-gaps 6            # sets the gap of the active profile
 ```
+
+The laptop profile also caps side-by-side tiles: with `AEROSPACE_LAPTOP_MAX_TILES=2` (default) a third tiled window flips the workspace to the accordion layout, a stack where only the active window is visible and the others peek out by 12 px. Close a window and the workspace returns to tiles. Press `alt-slash` to tile by hand and Makaron leaves that workspace alone until it drops back under the limit. Set `0` to turn the guard off.
 
 Workflow tips that work well on one small screen:
 - Keep one app per workspace (`alt-1..0`) and treat workspaces as virtual monitors; tile only when two windows really belong side by side.

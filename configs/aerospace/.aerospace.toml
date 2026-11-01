@@ -18,13 +18,15 @@ after-startup-command = []
 # Passes both the focused and previous workspace so plugins can refresh
 # only the items that actually changed, instead of redrawing every space.
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE'
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE PREV_WORKSPACE=$AEROSPACE_PREV_WORKSPACE; $HOME/.local/share/makaron/configs/aerospace/scripts/tiles-guard.sh'
 ]
 
 # Trigger SketchyBar when window focus changes within a workspace.
 # Without this, app-icon rows in space items stay stale after alt-tabbing
 # between windows that live in the same workspace.
-on-focus-changed = ['exec-and-forget sketchybar --trigger aerospace_focus_change']
+# tiles-guard.sh (laptop profile) flips a workspace with more than
+# AEROSPACE_LAPTOP_MAX_TILES tiled windows to accordion and back.
+on-focus-changed = ['exec-and-forget sketchybar --trigger aerospace_focus_change; $HOME/.local/share/makaron/configs/aerospace/scripts/tiles-guard.sh']
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -289,14 +291,6 @@ run = ["layout floating"]
 
 [[on-window-detected]]
 if.app-id = "com.apple.Preview"
-run = ["layout floating"]
-
-[[on-window-detected]]
-if.app-id = "com.anthropic.claudefordesktop"
-run = ["layout floating"]
-
-[[on-window-detected]]
-if.app-id = "com.openai.chat"
 run = ["layout floating"]
 
 [[on-window-detected]]

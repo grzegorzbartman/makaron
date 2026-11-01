@@ -148,17 +148,49 @@ set_makaron_conf_value() {
 _get_gap_size() {
     (
         AEROSPACE_GAP_SIZE=12
-        AEROSPACE_GAP_SIZE_LAPTOP=0
+        AEROSPACE_GAP_SIZE_LAPTOP=2
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
         key="$(_gap_conf_key)"
         value="${!key:-}"
         if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -le 40 ]; then
             echo "$value"
         elif [ "$key" = "AEROSPACE_GAP_SIZE_LAPTOP" ]; then
-            echo 0
+            echo 2
         else
             echo 12
         fi
+    )
+}
+
+# Accordion padding (px the active window is inset so the stacked ones peek
+# out). Desktop keeps AeroSpace's 30; the laptop profile uses 12.
+_get_accordion_padding() {
+    (
+        AEROSPACE_ACCORDION_PADDING=30
+        AEROSPACE_ACCORDION_PADDING_LAPTOP=12
+        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
+        if [ "$(_get_layout_profile)" = "laptop" ]; then
+            key=AEROSPACE_ACCORDION_PADDING_LAPTOP fallback=12
+        else
+            key=AEROSPACE_ACCORDION_PADDING fallback=30
+        fi
+        value="${!key:-}"
+        if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -le 100 ]; then
+            echo "$value"
+        else
+            echo "$fallback"
+        fi
+    )
+}
+
+# Tiles the laptop profile allows side by side before the workspace flips to
+# accordion (scripts/tiles-guard.sh). 0 = off; always 0 on desktop.
+_get_max_tiles() {
+    [ "$(_get_layout_profile)" = "laptop" ] || { echo 0; return; }
+    (
+        AEROSPACE_LAPTOP_MAX_TILES=2
+        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
+        [[ "${AEROSPACE_LAPTOP_MAX_TILES:-}" =~ ^[0-9]+$ ]] && echo "$AEROSPACE_LAPTOP_MAX_TILES" || echo 2
     )
 }
 
@@ -339,6 +371,19 @@ _set_aerospace_gaps() {
     fi
 }
 
+# Top-level `accordion-padding = N` line (profile-dependent, like the gaps).
+_set_accordion_padding() {
+    local size="$1" config_file
+    config_file="$(_resolve_aerospace_config_path)"
+    [ ! -f "$config_file" ] && return 1
+    if grep -qE '^accordion-padding = ' "$config_file"; then
+        sed -i '' "s|^accordion-padding = .*|accordion-padding = ${size}|" "$config_file"
+        echo "  ✓ AeroSpace accordion padding set to ${size}px"
+    else
+        echo "  ⚠️  Could not set accordion-padding (hand-edited config?)"
+    fi
+}
+
 # ============================================================================
 # apply_desktop_state — single source of truth for layout (gaps + top).
 #
@@ -362,6 +407,7 @@ apply_desktop_state() {
 
     gap="$(_get_gap_size)"
     _set_aerospace_gaps "$gap"
+    _set_accordion_padding "$(_get_accordion_padding)"
     switch_aerospace_config "$ui_mode" "$gap"
 
     if command -v aerospace &> /dev/null && pgrep -f "AeroSpace" > /dev/null; then
@@ -478,6 +524,14 @@ verify_desktop_state() {
     actual_top="$(grep -E '^    outer\.top = ' "$config_file" | head -1)"
     if [ "$actual_top" != "$expected_top" ]; then
         echo "  ⚠️  outer.top does not match gap=$gap, notch=$has_notch"
+        drift=1
+    fi
+
+    local padding actual_padding
+    padding="$(_get_accordion_padding)"
+    actual_padding="$(grep -E '^accordion-padding = ' "$config_file" | awk '{print $3}')"
+    if [ "$actual_padding" != "$padding" ]; then
+        echo "  ⚠️  accordion-padding=${actual_padding:-missing}, expected $padding"
         drift=1
     fi
 
