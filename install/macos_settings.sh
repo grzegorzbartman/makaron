@@ -148,7 +148,7 @@ configure_menubar() {
     local ui_helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
 
     if [ -f "$ui_helpers" ]; then
-        # Reuse the same UI scripting path as the mode switchers because Sequoia ignores defaults.
+        # Same path as the mode switchers: makaron-menubar, System Settings UI as fallback.
         source "$ui_helpers"
         if _set_menubar_autohide "Always"; then
             echo "Menu bar autohide configured"
