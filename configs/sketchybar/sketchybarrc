@@ -43,11 +43,9 @@ source "$CONFIG_DIR/colors.sh"
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
 # Heights come from the helpers (they are part of the window outer.top math),
-# never hardcode them here. topmost=on lifts the bar above the macOS menu bar
-# (status level 25 vs 24): the autohidden menu bar slides out under the
-# pointer at the top edge and would otherwise swallow clicks on the bar.
+# never hardcode them here.
 sketchybar --bar position=top height=$BAR_HEIGHT notch_display_height=$NOTCH_BAR_HEIGHT \
-           margin=0 y_offset=0 corner_radius=0 border_width=0 topmost=on \
+           margin=0 y_offset=0 corner_radius=0 border_width=0 \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####
