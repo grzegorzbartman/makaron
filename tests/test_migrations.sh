@@ -49,3 +49,29 @@ printf 'AEROSPACE_GAP_SIZE_LAPTOP=4\n' > "$HOME/.config/makaron/makaron.conf"
 bash "$GAP6" >/dev/null
 assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=4" "custom laptop gap kept (gap6)"
 bash "$GAP6" >/dev/null && pass "gap6 migration idempotent" || fail "gap6 second run failed"
+
+# One flat bar: old desktop height 40 -> 32, laptop height key dropped, custom kept
+BAR="$REPO/migrations/1794738711.sh"
+printf 'SKETCHYBAR_HEIGHT=40\nSKETCHYBAR_HEIGHT_LAPTOP=32\nAEROSPACE_GAP_SIZE=12\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$BAR" >/dev/null && pass "flat bar migration runs" || fail "flat bar migration failed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT=32" "bar height 40 moved to 32"
+assert_not_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT_LAPTOP" "laptop bar key removed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE=12" "other values kept (flat bar)"
+printf 'SKETCHYBAR_HEIGHT=36\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$BAR" >/dev/null
+assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT=36" "custom bar height kept"
+bash "$BAR" >/dev/null && pass "flat bar migration idempotent" || fail "flat bar second run failed"
+
+# Tiles guard removal: conf key dropped, flipped workspace back to tiles, state cleared
+GUARD="$REPO/migrations/1794738883.sh"
+mkdir -p "$HOME/bin"
+printf '#!/bin/bash\necho "$*" >> "$HOME/aerospace.calls"\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aerospace"
+printf 'AEROSPACE_LAPTOP_MAX_TILES=2\nAEROSPACE_GAP_SIZE=12\n' > "$HOME/.config/makaron/makaron.conf"
+GSTATE="/tmp/makaron-$(id -u)-tiles-guard-zz9"; echo auto > "$GSTATE"
+PATH="$HOME/bin:$PATH" bash "$GUARD" >/dev/null && pass "guard removal runs" || fail "guard removal failed"
+assert_not_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_LAPTOP_MAX_TILES" "max tiles key removed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE=12" "other values kept (guard)"
+assert_contains "$HOME/aerospace.calls" "layout --workspace zz9 --root h_tiles" "flipped workspace back to tiles"
+[ ! -e "$GSTATE" ] && pass "guard state cleared" || { fail "guard state left"; rm -f "$GSTATE"; }
+PATH="$HOME/bin:$PATH" bash "$GUARD" >/dev/null && pass "guard removal idempotent" || fail "guard removal second run failed"
+rm -f "$HOME/bin/aerospace"

@@ -7,7 +7,7 @@
 # - 4+ windows: equal quadrants (each window 25%)
 
 sleep 0.05
-# A stacked (accordion) workspace has nothing to split; tiles-guard.sh owns it
+# A stacked (accordion) workspace has nothing to split; leave it as the user set it
 case "$(aerospace list-windows --focused --format '%{workspace-root-container-layout}' 2>/dev/null)" in
     *accordion) exit 0 ;;
 esac

@@ -8,11 +8,11 @@ MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 MAKARON_CONF="$HOME/.config/makaron/makaron.conf"
 FLOAT_ALL_LAYOUT=cascade
 AEROSPACE_GAP_SIZE=12
-SKETCHYBAR_HEIGHT=40
+SKETCHYBAR_HEIGHT=32
 # shellcheck disable=SC1090
 [ -f "$MAKARON_CONF" ] && source "$MAKARON_CONF"
 case "$FLOAT_ALL_LAYOUT" in cascade|grid) ;; *) FLOAT_ALL_LAYOUT=cascade ;; esac
-# Gap and bar height follow the layout profile (desktop / laptop)
+# Gap follows the layout profile (desktop / laptop); bar height from the helpers
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
     # shellcheck disable=SC1091
     source "$MAKARON_PATH/bin/makaron-ui-helpers"
@@ -20,7 +20,7 @@ if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
     SKETCHYBAR_HEIGHT="$(_get_bar_height)"
 fi
 [[ "$AEROSPACE_GAP_SIZE" =~ ^[0-9]+$ ]] || AEROSPACE_GAP_SIZE=12
-[[ "$SKETCHYBAR_HEIGHT" =~ ^[0-9]+$ ]] || SKETCHYBAR_HEIGHT=40
+[[ "$SKETCHYBAR_HEIGHT" =~ ^[0-9]+$ ]] || SKETCHYBAR_HEIGHT=32
 
 WS=$(aerospace list-workspaces --focused 2>/dev/null)
 [ -z "$WS" ] && exit 0
@@ -46,8 +46,9 @@ done <<< "$WINDOWS"
 
 sleep 0.1
 
-# Focused monitor visible frame (top-left coords). visibleFrame already
-# excludes the macOS menu bar, but not SketchyBar.
+# Focused monitor visible frame (top-left coords) + notch flag. visibleFrame
+# excludes the menu bar / notch strip; SketchyBar fills the notch strip, so only
+# screens without a notch reserve the bar height.
 MON_ID=$(aerospace list-monitors --focused --format '%{monitor-appkit-nsscreen-screens-id}' 2>/dev/null)
 GEOM=$(osascript -l JavaScript -e "
 ObjC.import('AppKit');
@@ -58,13 +59,14 @@ const s = screens.objectAtIndex(idx);
 const f = s.visibleFrame;
 const m = screens.objectAtIndex(0).frame;
 [Math.round(f.origin.x), Math.round(m.size.height - (f.origin.y + f.size.height)),
- Math.round(f.size.width), Math.round(f.size.height)].join(' ');
+ Math.round(f.size.width), Math.round(f.size.height), s.safeAreaInsets.top > 0 ? 1 : 0].join(' ');
 " 2>/dev/null)
 [ -z "$GEOM" ] && exit 0
-read -r MON_X MON_Y MON_W MON_H <<< "$GEOM"
+read -r MON_X MON_Y MON_W MON_H MON_NOTCH <<< "$GEOM"
 
 if pgrep -x sketchybar >/dev/null 2>&1; then
     BAR=$((SKETCHYBAR_HEIGHT + AEROSPACE_GAP_SIZE))
+    [ "${MON_NOTCH:-0}" = "1" ] && BAR=$AEROSPACE_GAP_SIZE
     MON_Y=$((MON_Y + BAR))
     MON_H=$((MON_H - BAR))
 fi

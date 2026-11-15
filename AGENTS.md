@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for optional terminal and developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 40px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is a floating liquid-glass bar (margin, corner radius, blur, 1px specular border, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`. In the `laptop` layout profile it is instead a flat edge-to-edge bar flush with the top (no margin, radius or border) that fills the notch strip. `sketchybarrc` takes height and `y_offset` from `_get_bar_height()` / `_get_bar_y_offset()` in `bin/makaron-ui-helpers` (desktop `y_offset` = `MAKARON_BAR_Y_OFFSET` = 4, laptop 0) because both are part of the window `outer.top` math; pill heights scale down with the bar (`ITEM_HEIGHT`).
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 32px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is one flat edge-to-edge bar flush with the top (no margin, radius or border; blur, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`, the same in every layout profile. On a notched built-in display SketchyBar's `notch_display_height` is the notch strip height (`_get_notch_bar_height()`, from `makaron-has-notch`; it scales with the display resolution), so the bar's bottom edge lines up with the notch. `sketchybarrc` takes both heights from `_get_bar_height()` / `_get_notch_bar_height()` in `bin/makaron-ui-helpers` because they are part of the window `outer.top` math; pill heights scale down with the shorter bar (`ITEM_HEIGHT`). `topmost=on` (layer 25) keeps the bar above the autohidden macOS menu bar (layer 24), which slides out at the top edge and would otherwise swallow clicks. `display_change.sh` reloads the bar when the notch height changes (resolution switch).
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -101,8 +101,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ### Layout Commands
 - `makaron-gaps <0-40>` and `makaron-gaps-zero` - Persist and apply AeroSpace gaps. Writes the key of the active layout profile (`AEROSPACE_GAP_SIZE` or `AEROSPACE_GAP_SIZE_LAPTOP`).
 - `makaron-gaps-toggle` - Toggle gaps between 0 and the last non-zero value (remembered per profile in `~/.local/state/makaron/gaps-last-<profile>`). Bound to `alt-shift-g`.
-- `makaron-layout [auto|desktop|laptop]` - Show or persist `MAKARON_LAYOUT_PROFILE`, then re-apply layout and reload the bar. The effective profile comes from `_get_layout_profile()` in `makaron-ui-helpers`: `auto` = `laptop` when `makaron-screen-info` (Swift, `src/screen_info.swift`, cached in `/tmp/makaron_<uid>_screen_v1`) reports a lone built-in display narrower than `MAKARON_LAPTOP_MAX_WIDTH` (1600 pt). `_get_gap_size()` / `_get_bar_height()` / `_get_accordion_padding()` resolve to the profile's variables; `sketchybarrc` and `float-all-toggle.sh` source the helpers for the same values. `apply_desktop_state` also rewrites the top-level `accordion-padding` line (30 desktop / 12 laptop), so it is managed like `[gaps]`.
-- `configs/aerospace/scripts/tiles-guard.sh` - runs from `on-focus-changed` and `exec-on-workspace-change` (after the SketchyBar triggers; closing a non-focused window fires neither, so the next focus or workspace switch catches up). In the laptop profile, more than `AEROSPACE_LAPTOP_MAX_TILES` (2) tiled windows in the focused workspace -> `flatten-workspace-tree` + `layout --root h_accordion`; back under the limit a workspace it flipped returns to `h_tiles`. State per workspace in `/tmp/makaron-<uid>-tiles-guard-<ws>` (`auto` = flipped by the guard, `user` = the user tiled it again, left alone). Floating windows are not counted (`%{window-layout}`). `auto-dwindle.sh` exits on accordion roots so the two never fight. `0` disables; always off on desktop.
+- `makaron-layout [auto|desktop|laptop]` - Show or persist `MAKARON_LAYOUT_PROFILE`, then re-apply layout and reload the bar. The effective profile comes from `_get_layout_profile()` in `makaron-ui-helpers`: `auto` = `laptop` when `makaron-screen-info` (Swift, `src/screen_info.swift`, cached in `/tmp/makaron_<uid>_screen_v1`) reports a lone built-in display narrower than `MAKARON_LAPTOP_MAX_WIDTH` (1600 pt). `_get_gap_size()` / `_get_accordion_padding()` resolve to the profile's variables (bar height is profile-independent); `sketchybarrc` and `float-all-toggle.sh` source the helpers for the same values. `apply_desktop_state` also rewrites the top-level `accordion-padding` line (30 desktop / 12 laptop), so it is managed like `[gaps]`.
 - `makaron-help` - Keyboard shortcut overlay (bound to alt-shift-slash; also left click on the bar's M mark). The panel has a macOS-style close button; esc, click-away, or a second invocation also close it. Parses the live generated AeroSpace config (user overrides included) into HTML and shows it in the `makaron-help-window` glass panel; unknown user commands render verbatim. Second invocation closes the panel (toggle); falls back to the browser when the binary is missing. `--print-html` writes the HTML to stdout (tests).
 
 ### System Commands
@@ -127,9 +126,9 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.bottom`, and `outer.right`.
 
-For gap `g`, bar height `h`, bar y-offset `y` (4) and notch-strip height `i` (from `makaron-has-notch`), the top reserve is:
-- **Full mode + no notch:** `outer.top = h + y + g`
-- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g + max(0, h + y - i) }, h + y + g]` - the overhang term keeps a full gap below the bar, which extends past the notch strip.
+For gap `g` and bar height `h`, the top reserve is:
+- **Full mode + no notch:** `outer.top = h + g`
+- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g }, h + g]` - on the built-in screen the bar is exactly the notch strip, which `visibleFrame` already excludes.
 
 Notch detection uses `NSScreen.safeAreaInsets.top`, never model names. MacBook Neo and MacBook Air M1 built-in displays are handled as screens without a notch. External monitors are always handled without a notch. Display changes invalidate the cache and reapply the same persisted gap.
 
@@ -324,9 +323,7 @@ AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
 AEROSPACE_GAP_SIZE_LAPTOP=6             # Gap for the laptop profile
 AEROSPACE_ACCORDION_PADDING=30          # Accordion inset so stacked windows peek out (0-100)
 AEROSPACE_ACCORDION_PADDING_LAPTOP=12   # Same for the laptop profile
-AEROSPACE_LAPTOP_MAX_TILES=2            # Laptop: tiles side by side before the workspace flips to accordion (0 = off)
-SKETCHYBAR_HEIGHT=40                    # Bar height (20-80); outer.top adapts
-SKETCHYBAR_HEIGHT_LAPTOP=32             # Flat laptop bar height (32 fills the notch strip)
+SKETCHYBAR_HEIGHT=32                    # Bar height without a notch (20-80); notched displays use the notch strip height
 SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Storage label turns alert color above this usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
@@ -347,7 +344,7 @@ Users customize without forking via files in `~/.config/makaron/` (seeded as `*.
 - `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
 - `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
 - Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
-- `SKETCHYBAR_HEIGHT` / `SKETCHYBAR_HEIGHT_LAPTOP` (makaron.conf) feed `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync across profiles. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config; `AEROSPACE_FOCUS_FOLLOWS_MOUSE` is substituted into the base `focus-follows-mouse.enabled` line (a user-file key still wins).
+- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config; `AEROSPACE_FOCUS_FOLLOWS_MOUSE` is substituted into the base `focus-follows-mouse.enabled` line (a user-file key still wins).
 
 ## Migration System
 

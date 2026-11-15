@@ -11,33 +11,27 @@ if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
 fi
 SKETCHYBAR_COMPACT_MODE="${SKETCHYBAR_COMPACT_MODE:-false}"
 
-# Bar geometry follows the layout profile resolved by the helpers:
-#   desktop - floating liquid-glass bar (margin, corner radius, y_offset)
-#   laptop  - flat edge-to-edge bar flush with the top, filling the notch strip
+# Flat edge-to-edge bar flush with the top. On the notched built-in display it
+# is exactly the notch strip tall (notch_display_height), so its bottom edge
+# lines up with the notch; other screens use SKETCHYBAR_HEIGHT. Both come from
+# the helpers because they are part of the window outer.top math.
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
-BAR_PROFILE=desktop
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
   # shellcheck disable=SC1091
   source "$MAKARON_PATH/bin/makaron-ui-helpers"
-  BAR_PROFILE="$(_get_layout_profile)"
   BAR_HEIGHT="$(_get_bar_height)"
-  BAR_Y_OFFSET="$(_get_bar_y_offset)"
+  NOTCH_BAR_HEIGHT="$(_get_notch_bar_height)"
 else
-  BAR_HEIGHT="${SKETCHYBAR_HEIGHT:-40}"
-  BAR_Y_OFFSET=4
+  BAR_HEIGHT="${SKETCHYBAR_HEIGHT:-32}"
+  NOTCH_BAR_HEIGHT=0
 fi
-if [ "$BAR_PROFILE" = "laptop" ]; then
-  BAR_MARGIN=0 BAR_CORNER_RADIUS=0 BAR_BORDER_WIDTH=0
-else
-  BAR_MARGIN=12 BAR_CORNER_RADIUS=16 BAR_BORDER_WIDTH=1
-  [ "$BAR_HEIGHT" -lt 32 ] && BAR_CORNER_RADIUS=$((BAR_HEIGHT / 2))
-fi
-# Pills (workspaces, brackets) keep at least 4px of air above and below.
-# Desktop pills are capsules; the flat laptop bar uses a small 6px radius.
+# Pills (workspaces, brackets) keep at least 4px of air above and below,
+# sized for the shorter of the two bar heights.
+MIN_BAR_HEIGHT=$BAR_HEIGHT
+[ "$NOTCH_BAR_HEIGHT" -gt 0 ] && [ "$NOTCH_BAR_HEIGHT" -lt "$MIN_BAR_HEIGHT" ] && MIN_BAR_HEIGHT=$NOTCH_BAR_HEIGHT
 ITEM_HEIGHT=24
-[ $((BAR_HEIGHT - 8)) -lt "$ITEM_HEIGHT" ] && ITEM_HEIGHT=$((BAR_HEIGHT - 8))
-ITEM_RADIUS=$((ITEM_HEIGHT / 2))
-[ "$BAR_PROFILE" = "laptop" ] && ITEM_RADIUS=6
+[ $((MIN_BAR_HEIGHT - 8)) -lt "$ITEM_HEIGHT" ] && ITEM_HEIGHT=$((MIN_BAR_HEIGHT - 8))
+ITEM_RADIUS=6
 
 source "$CONFIG_DIR/colors.sh"
 
@@ -48,10 +42,12 @@ source "$CONFIG_DIR/colors.sh"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-# Height and y_offset come from the helpers (they are part of the window
-# outer.top math), never hardcode them here.
-sketchybar --bar position=top height=$BAR_HEIGHT margin=$BAR_MARGIN y_offset=$BAR_Y_OFFSET \
-           corner_radius=$BAR_CORNER_RADIUS border_width=$BAR_BORDER_WIDTH border_color=${BAR_BORDER_COLOR:-0x40ffffff} \
+# Heights come from the helpers (they are part of the window outer.top math),
+# never hardcode them here. topmost=on lifts the bar above the macOS menu bar
+# (status level 25 vs 24): the autohidden menu bar slides out under the
+# pointer at the top edge and would otherwise swallow clicks on the bar.
+sketchybar --bar position=top height=$BAR_HEIGHT notch_display_height=$NOTCH_BAR_HEIGHT \
+           margin=0 y_offset=0 corner_radius=0 border_width=0 topmost=on \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 
 ##### Changing Defaults #####

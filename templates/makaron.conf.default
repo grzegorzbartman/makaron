@@ -25,15 +25,10 @@ AEROSPACE_GAP_SIZE_LAPTOP=6
 AEROSPACE_ACCORDION_PADDING=30
 AEROSPACE_ACCORDION_PADDING_LAPTOP=12
 
-# Laptop profile: tiles allowed side by side; one more flips the workspace to
-# accordion (a stack), back under the limit it returns to tiles. 0 = off.
-AEROSPACE_LAPTOP_MAX_TILES=2
-
-# SketchyBar height in px (20-80). Window layout adapts automatically.
-# The laptop bar is flat and edge to edge; at 32 it fills the notch strip
-# exactly, so windows lose no space to it.
-SKETCHYBAR_HEIGHT=40
-SKETCHYBAR_HEIGHT_LAPTOP=32
+# SketchyBar height in px (20-80) on screens without a notch. Window layout
+# adapts automatically. On a notched built-in display the flat bar always
+# matches the notch strip (its height depends on the display resolution).
+SKETCHYBAR_HEIGHT=32
 
 # SketchyBar: show the Makaron menu (M mark, click for actions) on the left
 SKETCHYBAR_LOGO=true

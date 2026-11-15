@@ -10,10 +10,6 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_notch_v2}"
 SCREEN_CACHE_FILE="${SCREEN_CACHE_FILE:-/tmp/makaron_$(id -u)_screen_v1}"
 
-# Floating-bar offset from the top edge (desktop profile). sketchybarrc reads
-# it through _get_bar_y_offset, which is part of the window outer.top math.
-MAKARON_BAR_Y_OFFSET=4
-
 # Built-in displays narrower than this (in points) get the laptop profile when
 # MAKARON_LAYOUT_PROFILE=auto: MacBook Neo (1408), Air 13 (1470) and Pro 14
 # (1512) at default scaling. "More Space" scaling and Air 15 / Pro 16 are above.
@@ -94,40 +90,37 @@ describe_layout_profile() {
     read -r width height count <<< "$(_screen_probe)"
     local screen="no built-in display"
     [ "${width:-0}" -gt 0 ] && screen="built-in ${width}x${height} pt"
-    echo "$profile ($setting; $screen, ${count:-0} screen(s); gap $(_get_gap_size)px, bar $(_get_bar_height)px)"
+    local bar="bar $(_get_bar_height)px"
+    _has_builtin_notch && bar="$bar, notch $(_get_notch_bar_height)px"
+    echo "$profile ($setting; $screen, ${count:-0} screen(s); gap $(_get_gap_size)px, $bar)"
 }
 
-# makaron.conf key holding the gap / bar height for the active profile.
+# makaron.conf key holding the gap for the active profile.
 _gap_conf_key() {
     [ "$(_get_layout_profile)" = "laptop" ] && echo AEROSPACE_GAP_SIZE_LAPTOP || echo AEROSPACE_GAP_SIZE
 }
 
-_bar_height_conf_key() {
-    [ "$(_get_layout_profile)" = "laptop" ] && echo SKETCHYBAR_HEIGHT_LAPTOP || echo SKETCHYBAR_HEIGHT
-}
-
-# Bar height, shared with sketchybarrc via SKETCHYBAR_HEIGHT[_LAPTOP] in makaron.conf.
+# Flat edge-to-edge bar height on screens without a notch (SKETCHYBAR_HEIGHT,
+# 20-80, default 32). Shared with sketchybarrc and the outer.top math.
 _get_bar_height() {
     (
-        SKETCHYBAR_HEIGHT=40
-        SKETCHYBAR_HEIGHT_LAPTOP=32
+        SKETCHYBAR_HEIGHT=32
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        key="$(_bar_height_conf_key)"
-        value="${!key:-}"
-        if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 20 ] && [ "$value" -le 80 ]; then
-            echo "$value"
-        elif [ "$key" = "SKETCHYBAR_HEIGHT_LAPTOP" ]; then
-            echo 32
+        if [[ "$SKETCHYBAR_HEIGHT" =~ ^[0-9]+$ ]] && [ "$SKETCHYBAR_HEIGHT" -ge 20 ] && [ "$SKETCHYBAR_HEIGHT" -le 80 ]; then
+            echo "$SKETCHYBAR_HEIGHT"
         else
-            echo 40
+            echo 32
         fi
     )
 }
 
-# The laptop bar is flat and flush with the top edge (fills the notch strip);
-# the desktop bar floats MAKARON_BAR_Y_OFFSET px below it.
-_get_bar_y_offset() {
-    [ "$(_get_layout_profile)" = "laptop" ] && echo 0 || echo "$MAKARON_BAR_Y_OFFSET"
+# Bar height on the notched built-in display (SketchyBar notch_display_height):
+# exactly the notch strip, so the bar's bottom edge lines up with the notch at
+# any scaling. Falls back to the regular height when there is no notch.
+_get_notch_bar_height() {
+    local inset
+    inset=$(_notch_top_inset)
+    [ "$inset" -gt 0 ] && echo "$inset" || _get_bar_height
 }
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
@@ -180,17 +173,6 @@ _get_accordion_padding() {
         else
             echo "$fallback"
         fi
-    )
-}
-
-# Tiles the laptop profile allows side by side before the workspace flips to
-# accordion (scripts/tiles-guard.sh). 0 = off; always 0 on desktop.
-_get_max_tiles() {
-    [ "$(_get_layout_profile)" = "laptop" ] || { echo 0; return; }
-    (
-        AEROSPACE_LAPTOP_MAX_TILES=2
-        [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
-        [[ "${AEROSPACE_LAPTOP_MAX_TILES:-}" =~ ^[0-9]+$ ]] && echo "$AEROSPACE_LAPTOP_MAX_TILES" || echo 2
     )
 }
 
@@ -282,22 +264,16 @@ _resolve_aerospace_config_path() {
 # Compute the canonical `outer.top = ...` line for the given mode/gap/notch state.
 # Single source of truth for switch_aerospace_config.
 #
-# full mode: reserve SketchyBar + gap without a notch. A notched built-in screen
-# uses only the gap because the notch/menu-bar area absorbs the bar.
+# full mode: reserve SketchyBar + gap without a notch. On a notched built-in
+# screen the bar is exactly the notch strip (notch_display_height), which
+# visibleFrame already excludes, so only the gap remains.
 _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
-            local bar_bottom=$(( $(_get_bar_height) + $(_get_bar_y_offset) ))
-            local bar_top=$(( bar_bottom + gap ))
+            local bar_top=$(( $(_get_bar_height) + gap ))
             if [ "$has_notch" = "true" ]; then
-                # The bar may extend below the notch strip; keep a full gap
-                # between the bar's bottom edge and the window tops.
-                local inset overhang
-                inset=$(_notch_top_inset)
-                overhang=$(( bar_bottom - inset ))
-                [ "$overhang" -lt 0 ] && overhang=0
-                echo "    outer.top = [{ monitor.\"Built-in\" = $((gap + overhang)) }, $bar_top]"
+                echo "    outer.top = [{ monitor.\"Built-in\" = $gap }, $bar_top]"
             else
                 echo "    outer.top = $bar_top"
             fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Show or set the layout profile: auto | desktop | laptop.
-# laptop = AEROSPACE_GAP_SIZE_LAPTOP / SKETCHYBAR_HEIGHT_LAPTOP (makaron.conf);
+# laptop = AEROSPACE_GAP_SIZE_LAPTOP / AEROSPACE_ACCORDION_PADDING_LAPTOP (makaron.conf);
 # auto picks laptop on a lone built-in display narrower than 1600 pt.
 
 set -u
