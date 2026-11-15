@@ -10,6 +10,11 @@ MAKARON_CONF_PATH="${MAKARON_CONF_PATH:-$HOME/.config/makaron/makaron.conf}"
 NOTCH_CACHE_FILE="${NOTCH_CACHE_FILE:-/tmp/makaron_$(id -u)_notch_v2}"
 SCREEN_CACHE_FILE="${SCREEN_CACHE_FILE:-/tmp/makaron_$(id -u)_screen_v1}"
 
+# How far the bar extends below the notch strip on a notched display. The
+# autohidden macOS menu bar slides out over exactly that strip (it cannot be
+# disabled, and it covers SketchyBar), so this band stays clickable.
+MAKARON_NOTCH_BAR_OVERHANG=8
+
 # Built-in displays narrower than this (in points) get the laptop profile when
 # MAKARON_LAYOUT_PROFILE=auto: MacBook Neo (1408), Air 13 (1470) and Pro 14
 # (1512) at default scaling. "More Space" scaling and Air 15 / Pro 16 are above.
@@ -115,12 +120,12 @@ _get_bar_height() {
 }
 
 # Bar height on the notched built-in display (SketchyBar notch_display_height):
-# exactly the notch strip, so the bar's bottom edge lines up with the notch at
-# any scaling. Falls back to the regular height when there is no notch.
+# the notch strip (its height follows the display scaling) plus
+# MAKARON_NOTCH_BAR_OVERHANG. Falls back to the regular height without a notch.
 _get_notch_bar_height() {
     local inset
     inset=$(_notch_top_inset)
-    [ "$inset" -gt 0 ] && echo "$inset" || _get_bar_height
+    [ "$inset" -gt 0 ] && echo $((inset + MAKARON_NOTCH_BAR_OVERHANG)) || _get_bar_height
 }
 
 # Gap fields written to ~/.aerospace.toml by _set_aerospace_gaps.
@@ -264,16 +269,18 @@ _resolve_aerospace_config_path() {
 # Compute the canonical `outer.top = ...` line for the given mode/gap/notch state.
 # Single source of truth for switch_aerospace_config.
 #
-# full mode: reserve SketchyBar + gap without a notch. On a notched built-in
-# screen the bar is exactly the notch strip (notch_display_height), which
-# visibleFrame already excludes, so only the gap remains.
+# full mode: reserve SketchyBar + gap without a notch. visibleFrame of a notched
+# built-in screen already excludes the notch strip, so only the part of the bar
+# below it (notch_display_height - inset) plus the gap remains.
 _expected_outer_top_line() {
     local mode="$1" gap="$2" has_notch="$3"
     case "$mode" in
         full)
             local bar_top=$(( $(_get_bar_height) + gap ))
             if [ "$has_notch" = "true" ]; then
-                echo "    outer.top = [{ monitor.\"Built-in\" = $gap }, $bar_top]"
+                local overhang=$(( $(_get_notch_bar_height) - $(_notch_top_inset) ))
+                [ "$overhang" -lt 0 ] && overhang=0
+                echo "    outer.top = [{ monitor.\"Built-in\" = $((gap + overhang)) }, $bar_top]"
             else
                 echo "    outer.top = $bar_top"
             fi

@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for optional terminal and developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 32px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is one flat edge-to-edge bar flush with the top (no margin, radius or border; blur, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`, the same in every layout profile. On a notched built-in display SketchyBar's `notch_display_height` is the notch strip height (`_get_notch_bar_height()`, from `makaron-has-notch`; it scales with the display resolution), so the bar's bottom edge lines up with the notch. `sketchybarrc` takes both heights from `_get_bar_height()` / `_get_notch_bar_height()` in `bin/makaron-ui-helpers` because they are part of the window `outer.top` math; pill heights scale down with the shorter bar (`ITEM_HEIGHT`). `display_change.sh` reloads the bar when the notch height changes (resolution switch).
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 32px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is one flat edge-to-edge bar flush with the top (no margin, radius or border; blur, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`, the same in every layout profile. On a notched built-in display SketchyBar's `notch_display_height` is the notch strip height (from `makaron-has-notch`; it scales with the display resolution) plus `MAKARON_NOTCH_BAR_OVERHANG` (8): the autohidden macOS menu bar slides out over exactly the notch strip on hover, draws above SketchyBar (system `MenuBarAgent`, same window level, ordered in front; `topmost` does not help) and cannot be disabled, so the overhang keeps a clickable band below it. `sketchybarrc` takes both heights from `_get_bar_height()` / `_get_notch_bar_height()` in `bin/makaron-ui-helpers` because they are part of the window `outer.top` math; pill heights scale down with the shorter bar (`ITEM_HEIGHT`). `display_change.sh` reloads the bar when the notch height changes (resolution switch).
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -128,7 +128,7 @@ All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.hori
 
 For gap `g` and bar height `h`, the top reserve is:
 - **Full mode + no notch:** `outer.top = h + g`
-- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g }, h + g]` - on the built-in screen the bar is exactly the notch strip, which `visibleFrame` already excludes.
+- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g + (n - i) }, h + g]` for notch bar height `n` (`_get_notch_bar_height`) and notch strip `i` - `visibleFrame` already excludes the strip, so only the overhang below it is reserved.
 
 Notch detection uses `NSScreen.safeAreaInsets.top`, never model names. MacBook Neo and MacBook Air M1 built-in displays are handled as screens without a notch. External monitors are always handled without a notch. Display changes invalidate the cache and reapply the same persisted gap.
 

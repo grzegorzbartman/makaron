@@ -47,8 +47,8 @@ done <<< "$WINDOWS"
 sleep 0.1
 
 # Focused monitor visible frame (top-left coords) + notch flag. visibleFrame
-# excludes the menu bar / notch strip; SketchyBar fills the notch strip, so only
-# screens without a notch reserve the bar height.
+# excludes the menu bar / notch strip, so a notched screen reserves only the
+# part of SketchyBar below the notch.
 MON_ID=$(aerospace list-monitors --focused --format '%{monitor-appkit-nsscreen-screens-id}' 2>/dev/null)
 GEOM=$(osascript -l JavaScript -e "
 ObjC.import('AppKit');
@@ -66,7 +66,8 @@ read -r MON_X MON_Y MON_W MON_H MON_NOTCH <<< "$GEOM"
 
 if pgrep -x sketchybar >/dev/null 2>&1; then
     BAR=$((SKETCHYBAR_HEIGHT + AEROSPACE_GAP_SIZE))
-    [ "${MON_NOTCH:-0}" = "1" ] && BAR=$AEROSPACE_GAP_SIZE
+    [ "${MON_NOTCH:-0}" = "1" ] && declare -F _get_notch_bar_height >/dev/null &&
+        BAR=$(( $(_get_notch_bar_height) - $(_notch_top_inset) + AEROSPACE_GAP_SIZE ))
     MON_Y=$((MON_Y + BAR))
     MON_H=$((MON_H - BAR))
 fi

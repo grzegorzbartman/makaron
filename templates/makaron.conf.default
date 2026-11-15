@@ -26,8 +26,8 @@ AEROSPACE_ACCORDION_PADDING=30
 AEROSPACE_ACCORDION_PADDING_LAPTOP=12
 
 # SketchyBar height in px (20-80) on screens without a notch. Window layout
-# adapts automatically. On a notched built-in display the flat bar always
-# matches the notch strip (its height depends on the display resolution).
+# adapts automatically. On a notched built-in display the flat bar fills the
+# notch strip (its height depends on the display resolution) plus 8 px below it.
 SKETCHYBAR_HEIGHT=32
 
 # SketchyBar: show the Makaron menu (M mark, click for actions) on the left

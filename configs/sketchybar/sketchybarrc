@@ -12,8 +12,9 @@ fi
 SKETCHYBAR_COMPACT_MODE="${SKETCHYBAR_COMPACT_MODE:-false}"
 
 # Flat edge-to-edge bar flush with the top. On the notched built-in display it
-# is exactly the notch strip tall (notch_display_height), so its bottom edge
-# lines up with the notch; other screens use SKETCHYBAR_HEIGHT. Both come from
+# is the notch strip plus a small overhang (notch_display_height): the macOS
+# menu bar slides out over the strip on hover, the overhang stays clickable.
+# Other screens use SKETCHYBAR_HEIGHT. Both come from
 # the helpers because they are part of the window outer.top math.
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then

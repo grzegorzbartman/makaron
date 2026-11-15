@@ -117,7 +117,7 @@ This command will:
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | configured gaps |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-The default layout uses a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `32 + g` pixels above windows for SketchyBar (`SKETCHYBAR_HEIGHT`), while a notched built-in display uses `g`: there the flat bar is exactly as tall as the notch strip, so its bottom edge lines up with the notch at any display resolution. External monitors always use `32 + g`. For example:
+The default layout uses a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `32 + g` pixels above windows for SketchyBar (`SKETCHYBAR_HEIGHT`), while a notched built-in display uses `8 + g`: there the flat bar fills the notch strip (whatever its height at the current resolution) and reaches 8 px below it, so it stays clickable when the macOS menu bar slides out over the strip. External monitors always use `32 + g`. For example:
 
 ```bash
 makaron-gaps 12
@@ -132,7 +132,7 @@ On a 13-inch MacBook Air, a 14-inch Pro at default scaling, or a MacBook Neo, si
 | `desktop` | `AEROSPACE_GAP_SIZE` (12) | `AEROSPACE_ACCORDION_PADDING` (30) | external monitor connected, or a wide built-in display |
 | `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (6) | `AEROSPACE_ACCORDION_PADDING_LAPTOP` (12) | built-in display is the only screen and is narrower than 1600 pt |
 
-`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The bar is the same in both profiles: flat from edge to edge, flush with the top, filling the notch strip exactly on a notched display, so windows lose no vertical space to it.
+`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The bar is the same in both profiles: flat from edge to edge, flush with the top, filling the notch strip on a notched display, so windows lose only 8 px to it.
 
 ```bash
 makaron-layout            # show the active profile and why
