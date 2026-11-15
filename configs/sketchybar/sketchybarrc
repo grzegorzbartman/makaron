@@ -11,27 +11,20 @@ if [ -f "$HOME/.config/makaron/makaron.conf" ]; then
 fi
 SKETCHYBAR_COMPACT_MODE="${SKETCHYBAR_COMPACT_MODE:-false}"
 
-# Flat edge-to-edge bar flush with the top. On the notched built-in display it
-# is the notch strip plus a small overhang (notch_display_height): the macOS
-# menu bar slides out over the strip on hover, the overhang stays clickable.
-# Other screens use SKETCHYBAR_HEIGHT. Both come from
-# the helpers because they are part of the window outer.top math.
+# Flat edge-to-edge bar at the bottom edge; the macOS menu bar stays visible
+# at the top and the Dock on the left. The height comes from the helpers
+# because it is part of the window outer.bottom math.
 MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
 if [ -f "$MAKARON_PATH/bin/makaron-ui-helpers" ]; then
   # shellcheck disable=SC1091
   source "$MAKARON_PATH/bin/makaron-ui-helpers"
   BAR_HEIGHT="$(_get_bar_height)"
-  NOTCH_BAR_HEIGHT="$(_get_notch_bar_height)"
 else
   BAR_HEIGHT="${SKETCHYBAR_HEIGHT:-32}"
-  NOTCH_BAR_HEIGHT=0
 fi
-# Pills (workspaces, brackets) keep at least 4px of air above and below,
-# sized for the shorter of the two bar heights.
-MIN_BAR_HEIGHT=$BAR_HEIGHT
-[ "$NOTCH_BAR_HEIGHT" -gt 0 ] && [ "$NOTCH_BAR_HEIGHT" -lt "$MIN_BAR_HEIGHT" ] && MIN_BAR_HEIGHT=$NOTCH_BAR_HEIGHT
+# Pills (workspaces, brackets) keep at least 4px of air above and below.
 ITEM_HEIGHT=24
-[ $((MIN_BAR_HEIGHT - 8)) -lt "$ITEM_HEIGHT" ] && ITEM_HEIGHT=$((MIN_BAR_HEIGHT - 8))
+[ $((BAR_HEIGHT - 8)) -lt "$ITEM_HEIGHT" ] && ITEM_HEIGHT=$((BAR_HEIGHT - 8))
 ITEM_RADIUS=6
 
 source "$CONFIG_DIR/colors.sh"
@@ -43,9 +36,9 @@ source "$CONFIG_DIR/colors.sh"
 # If you are looking for other colors, see the color picker:
 # https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
 
-# Heights come from the helpers (they are part of the window outer.top math),
-# never hardcode them here.
-sketchybar --bar position=top height=$BAR_HEIGHT notch_display_height=$NOTCH_BAR_HEIGHT \
+# Height comes from the helpers (part of the window outer.bottom math), never
+# hardcode it here.
+sketchybar --bar position=bottom height=$BAR_HEIGHT \
            margin=0 y_offset=0 corner_radius=0 border_width=0 \
            color=$BAR_COLOR background.color=$BAR_BACKGROUND_COLOR background.blur=${BAR_BLUR:-0}
 

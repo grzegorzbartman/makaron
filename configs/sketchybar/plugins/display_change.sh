@@ -26,26 +26,20 @@ fi
 
 printf '%s\n' "$CURRENT_MONITOR_COUNT" > "$MONITOR_COUNT_FILE" || exit 0
 
-# Re-apply desktop state on every display change: notch presence and the notch
-# strip height (it scales with the display resolution) can change even when the
-# monitor count stays the same.
+# Re-apply desktop state on every display change (the bottom reserve follows
+# the configured bar height; the layout profile can flip with a monitor).
 if [ "$PREVIOUS_MONITOR_COUNT" != "0" ]; then
   sleep 0.5
 
+  if [ "$CURRENT_MONITOR_COUNT" != "$PREVIOUS_MONITOR_COUNT" ]; then
+    sketchybar --reload
+  fi
+
   MAKARON_PATH="${MAKARON_PATH:-$HOME/.local/share/makaron}"
   UI_HELPERS="$MAKARON_PATH/bin/makaron-ui-helpers"
-  NOTCH_HEIGHT_FILE="/tmp/sketchybar_${RUNTIME_ID}_notch_bar_height"
-  RELOAD=false
-  [ "$CURRENT_MONITOR_COUNT" != "$PREVIOUS_MONITOR_COUNT" ] && RELOAD=true
-
   if [ -f "$UI_HELPERS" ]; then
     # shellcheck source=/dev/null
     source "$UI_HELPERS"
-    NOTCH_HEIGHT="$(_get_notch_bar_height)"
-    [ "$NOTCH_HEIGHT" != "$(cat "$NOTCH_HEIGHT_FILE" 2>/dev/null)" ] && RELOAD=true
-    printf '%s\n' "$NOTCH_HEIGHT" > "$NOTCH_HEIGHT_FILE" 2>/dev/null || true
+    apply_desktop_state 2>/dev/null || true
   fi
-
-  [ "$RELOAD" = true ] && sketchybar --reload
-  declare -F apply_desktop_state >/dev/null && { apply_desktop_state 2>/dev/null || true; }
 fi

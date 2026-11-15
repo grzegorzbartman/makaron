@@ -82,12 +82,11 @@ focus-follows-mouse.enabled = false
     inner.horizontal = 0
     inner.vertical =   0
     outer.left =       0
-    outer.bottom =     0
-    # outer.top is measured from visibleFrame top (below menu bar / notch) — not physical screen top.
-    # Dynamically set by switch_aerospace_config() in makaron-ui-helpers.
-    # Full mode:    40 (SketchyBar height)
-    # Full + notch: [{ monitor."Built-in" = 0 }, 40]
-    outer.top = 40
+    outer.top =        0
+    # SketchyBar sits at the bottom edge (menu bar on top and Dock on the left
+    # are visible and already outside visibleFrame). Set by
+    # switch_aerospace_config() in makaron-ui-helpers: bar height + gap.
+    outer.bottom = 32
     outer.right =      0
 
 # Workspace assignment for dual monitor setup

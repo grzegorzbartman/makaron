@@ -4,7 +4,7 @@
 
 Makaron is a macOS desktop environment manager for focused, keyboard-driven work. It orchestrates AeroSpace for tiling windows, SketchyBar as a fixed top status bar, Ghostty as the terminal, and install/update scripts for optional terminal and developer tooling.
 
-The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode reserves the 32px SketchyBar height plus the configured gap on screens without a notch. SketchyBar is one flat edge-to-edge bar flush with the top (no margin, radius or border; blur, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`, the same in every layout profile. On a notched built-in display SketchyBar's `notch_display_height` is the notch strip height (from `makaron-has-notch`; it scales with the display resolution) plus `MAKARON_NOTCH_BAR_OVERHANG` (8): the autohidden macOS menu bar slides out over exactly the notch strip on hover, draws above SketchyBar (system `MenuBarAgent`, same window level, ordered in front; `topmost` does not help) and cannot be disabled, so the overhang keeps a clickable band below it. `sketchybarrc` takes both heights from `_get_bar_height()` / `_get_notch_bar_height()` in `bin/makaron-ui-helpers` because they are part of the window `outer.top` math; pill heights scale down with the shorter bar (`ITEM_HEIGHT`). `display_change.sh` reloads the bar when the notch height changes (resolution switch).
+The desktop layout defaults to 12px window gaps, a persistent user setting. Full UI mode keeps the macOS menu bar visible at the top, pins the Dock to the left (always shown) and puts SketchyBar at the bottom edge, reserving its 32px height plus the configured gap there. The autohidden menu bar used to slide out over a top bar (system `MenuBarAgent`, same window level, ordered in front; `topmost` did not help) and hover reveal cannot be disabled, hence the bottom bar. SketchyBar is one flat edge-to-edge bar (no margin, radius or border; blur, SF Pro labels) with an appearance-aware light/dark palette in `configs/sketchybar/colors.sh`, the same in every layout profile. `sketchybarrc` takes its height from `_get_bar_height()` in `bin/makaron-ui-helpers` because it is part of the window `outer.bottom` math; pill heights scale down with the bar (`ITEM_HEIGHT`).
 
 ## General Guidelines
 - Read this file for context before making changes.
@@ -93,7 +93,7 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 
 | Command | Components | Dock | Menu Bar |
 |---|---|---|---|
-| `makaron-ui-full` | AeroSpace + SketchyBar | Hidden (autohide) | Hidden (autohide) |
+| `makaron-ui-full` | AeroSpace + SketchyBar (bottom) | Left, always visible | Visible (never autohide) |
 | `makaron-ui-stop` | Nothing | Visible | Visible |
 
 - `makaron-ui-helpers` is a shared library, not a user command. It contains AeroSpace, SketchyBar, layout, macOS settings, and UI mode helpers.
@@ -122,25 +122,21 @@ Two mutually exclusive modes, persisted in `~/.local/state/makaron/ui-mode`:
 ## UI Modes Detail
 
 ### AeroSpace Layout
-`switch_aerospace_config()` in `makaron-ui-helpers` updates `outer.top` in `~/.aerospace.toml`.
+`switch_aerospace_config()` in `makaron-ui-helpers` updates `outer.bottom` in `~/.aerospace.toml`.
 
-All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.bottom`, and `outer.right`.
+All five regular gap fields use `AEROSPACE_GAP_SIZE` (default `12`): `inner.horizontal`, `inner.vertical`, `outer.left`, `outer.top`, and `outer.right`.
 
-For gap `g` and bar height `h`, the top reserve is:
-- **Full mode + no notch:** `outer.top = h + g`
-- **Full mode + built-in notch:** `outer.top = [{ monitor."Built-in" = g + (n - i) }, h + g]` for notch bar height `n` (`_get_notch_bar_height`) and notch strip `i` - `visibleFrame` already excludes the strip, so only the overhang below it is reserved.
-
-Notch detection uses `NSScreen.safeAreaInsets.top`, never model names. MacBook Neo and MacBook Air M1 built-in displays are handled as screens without a notch. External monitors are always handled without a notch. Display changes invalidate the cache and reapply the same persisted gap.
+For gap `g` and bar height `h`, full mode reserves `outer.bottom = h + g` (`_expected_outer_bottom_line`). The visible menu bar (and notch strip) and the left Dock are already outside `visibleFrame`, so `outer.top` and `outer.left` are just `g` on every screen; the notch needs no special case. Display changes reapply the same persisted gap.
 
 The function resolves the symlink target before editing to modify the actual config file.
 
 ### macOS Settings Per Mode
-- **Full**: dock autohide, window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar autohide.
-- **Stop**: dock visible, window grouping off, Three Finger Drag on (restored).
+- **Full**: Dock on the left and always visible (`orientation=left`, autohide off), window grouping on (required for AeroSpace), Three Finger Drag off (enables Mission Control), menu bar never autohides.
+- **Stop**: Dock visible at the bottom, window grouping off, Three Finger Drag on (restored), menu bar "In Full Screen Only".
 - Restart Dock only via `_restart_dock`, never bare `killall Dock`: Dock can exit 0 and launchd (`KeepAlive.SuccessfulExit=false`) then never respawns it, leaving no Dock and a stale bottom reserve. The helper uses `launchctl kickstart -k` and re-applies autohide through System Events.
 
 ### Menu Bar Autohide
-`_set_menubar_autohide()` ("Always" in full, "In Full Screen Only" in stop) calls `bin/makaron-menubar`, which applies the change live in under 0.2s. A bare `defaults write _HIHideMenuBar` updates the pref but not the screen: the window server only reacts to the distributed notification. `SLSSetMenuBarAutohideEnabled` alone flips a flag without moving the bar. When the binary is missing or fails, `_set_menubar_autohide_ui()` falls back to the old AppleScript UI click (quit/reopen System Settings on the Menu Bar pane, localized EN/PL/DE/FR dropdown values, opposite-then-target toggle trick; needs Accessibility). To verify, read the `Menubar` window bounds from `CGWindowListCopyWindowInfo` (y = 0 shown, negative hidden); `NSScreen.visibleFrame` follows the pref, not the screen.
+`_set_menubar_autohide()` ("Never" in full, "In Full Screen Only" in stop) calls `bin/makaron-menubar`, which applies the change live in under 0.2s. A bare `defaults write _HIHideMenuBar` updates the pref but not the screen: the window server only reacts to the distributed notification. `SLSSetMenuBarAutohideEnabled` alone flips a flag without moving the bar. When the binary is missing or fails, `_set_menubar_autohide_ui()` falls back to the old AppleScript UI click (quit/reopen System Settings on the Menu Bar pane, localized EN/PL/DE/FR dropdown values, opposite-then-target toggle trick; needs Accessibility). To verify, read the `Menubar` window bounds from `CGWindowListCopyWindowInfo` (y = 0 shown, negative hidden); `NSScreen.visibleFrame` follows the pref, not the screen.
 
 ---
 
@@ -323,7 +319,7 @@ AEROSPACE_GAP_SIZE=12                   # Persistent gap (0-40), desktop profile
 AEROSPACE_GAP_SIZE_LAPTOP=6             # Gap for the laptop profile
 AEROSPACE_ACCORDION_PADDING=30          # Accordion inset so stacked windows peek out (0-100)
 AEROSPACE_ACCORDION_PADDING_LAPTOP=12   # Same for the laptop profile
-SKETCHYBAR_HEIGHT=32                    # Bar height without a notch (20-80); notched displays use the notch strip height
+SKETCHYBAR_HEIGHT=32                    # Bottom bar height (20-80); outer.bottom adapts
 SKETCHYBAR_LOGO=true                    # Makaron menu (outline M mark) on the left
 STORAGE_ALERT_THRESHOLD=90              # Storage label turns alert color above this usage (%)
 CPU_ALERT_THRESHOLD=80                  # CPU label turns alert color above this usage (%)
@@ -344,7 +340,7 @@ Users customize without forking via files in `~/.config/makaron/` (seeded as `*.
 - `sketchybar.user.sh` - sourced in a subshell right before the final `sketchybar --update`.
 - `icons.user.sh` - defines `makaron_user_app_icon()` consulted before the built-in icon map in `plugins/aerospace.sh`.
 - Regeneration runs in: install (`install/desktop/aerospace.sh`), `makaron-update`, `makaron-reload-aerospace-sketchybar`, and `makaron-doctor --fix`. Always follow regeneration with `apply_desktop_state`.
-- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.top` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config; `AEROSPACE_FOCUS_FOLLOWS_MOUSE` is substituted into the base `focus-follows-mouse.enabled` line (a user-file key still wins).
+- `SKETCHYBAR_HEIGHT` (makaron.conf) feeds `_get_bar_height()` in `makaron-ui-helpers`, which `sketchybarrc` sources, keeping bar height and `outer.bottom` in sync. `AEROSPACE_AUTO_DWINDLE=false` drops the dwindle catch-all from the generated config; `AEROSPACE_FOCUS_FOLLOWS_MOUSE` is substituted into the base `focus-follows-mouse.enabled` line (a user-file key still wins).
 
 ## Migration System
 

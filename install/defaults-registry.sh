@@ -41,6 +41,7 @@ MAKARON_DEFAULTS_KEYS=(
     "com.apple.desktopservices|DSDontWriteNetworkStores|"
     "com.apple.desktopservices|DSDontWriteUSBStores|"
     "com.apple.dock|autohide|"
+    "com.apple.dock|orientation|"
     "com.apple.dock|autohide-delay|"
     "com.apple.dock|autohide-time-modifier|"
     "com.apple.dock|expose-animation-duration|"

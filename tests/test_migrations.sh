@@ -75,3 +75,15 @@ assert_contains "$HOME/aerospace.calls" "layout --workspace zz9 --root h_tiles" 
 [ ! -e "$GSTATE" ] && pass "guard state cleared" || { fail "guard state left"; rm -f "$GSTATE"; }
 PATH="$HOME/bin:$PATH" bash "$GUARD" >/dev/null && pass "guard removal idempotent" || fail "guard removal second run failed"
 rm -f "$HOME/bin/aerospace"
+
+# Bottom bar: records the Dock position in the snapshot once; stop mode touches nothing
+BOTTOM="$REPO/migrations/1794739731.sh"
+mkdir -p "$HOME/.local/state/makaron/defaults-snapshot"
+: > "$HOME/.local/state/makaron/defaults-snapshot/values"
+echo stop > "$HOME/.local/state/makaron/ui-mode"
+bash "$BOTTOM" > "$HOME/bottom.out" 2>&1 && pass "bottom bar migration runs (stop)" || fail "bottom bar migration failed"
+assert_contains "$HOME/bottom.out" "not in full mode" "stop mode: macOS settings left alone"
+assert_contains "$HOME/.local/state/makaron/defaults-snapshot/values" "com.apple.dock|orientation|" "Dock position snapshotted"
+bash "$BOTTOM" >/dev/null
+[ "$(grep -c '^com.apple.dock|orientation|' "$HOME/.local/state/makaron/defaults-snapshot/values")" = 1 ] \
+    && pass "snapshot written once" || fail "snapshot duplicated"

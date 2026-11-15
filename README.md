@@ -9,8 +9,8 @@
 
 <p align="center">
 A keyboard-driven macOS setup for focused work: AeroSpace tiling windows, a minimal SketchyBar status bar,<br>
-the Ghostty terminal, and AI assistants installed in one step - with the Dock and menu bar hidden<br>
-so your screen holds only what you are working on.
+the Ghostty terminal, and AI assistants installed in one step - with a slim Dock on the left and the status bar<br>
+at the bottom, so your screen holds only what you are working on.
 </p>
 
 > **Why "Makaron"?** The name comes from the Polish word for "pasta", which sounds similar to "Mac" at the beginning - a playful nod to macOS while keeping a Polish identity.
@@ -26,7 +26,7 @@ so your screen holds only what you are working on.
 ## Perfect For
 
 - **Keyboard-driven workers** - Switch, tile, and resize windows without touching the mouse
-- **Deep-work setups** - Hidden Dock, hidden menu bar, one compact status bar
+- **Deep-work setups** - Dock on the left, the macOS menu bar on top, one compact status bar at the bottom
 - **Terminal users** - Ghostty plus fast CLI tools (fzf, btop, lazygit)
 - **Developers** - Optional group with containers and language tooling
 
@@ -102,7 +102,7 @@ This command will:
 - **`makaron-reinstall`** - Complete reinstall from scratch
 - **`makaron-migrate`** - Run pending migrations
 - **`makaron-doctor`** - Concise health check with optional safe repairs (`--fix`, `--json`)
-- **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar, hidden Dock/menu bar)
+- **`makaron-ui-full`** - Start full UI (AeroSpace + SketchyBar at the bottom, Dock on the left, menu bar visible)
 - **`makaron-ui-stop`** - Stop UI components
 - **`makaron-gaps <0-40>`** - Set persistent AeroSpace window gaps (for the active layout profile)
 - **`makaron-gaps-zero`** - Set window gaps to zero
@@ -117,7 +117,7 @@ This command will:
 | `makaron-ui-full` | AeroSpace + SketchyBar | Hidden | Hidden | configured gaps |
 | `makaron-ui-stop` | Nothing | Visible | Visible | UI state not applied |
 
-The default layout uses a `12px` gap. If the configured gap is `g`, a screen without a notch reserves `32 + g` pixels above windows for SketchyBar (`SKETCHYBAR_HEIGHT`), while a notched built-in display uses `8 + g`: there the flat bar fills the notch strip (whatever its height at the current resolution) and reaches 8 px below it, so it stays clickable when the macOS menu bar slides out over the strip. External monitors always use `32 + g`. For example:
+The default layout uses a `12px` gap. If the configured gap is `g`, every screen reserves `32 + g` pixels at the bottom for SketchyBar (`SKETCHYBAR_HEIGHT`) and `g` below the macOS menu bar and next to the Dock on the left. For example:
 
 ```bash
 makaron-gaps 12
@@ -132,7 +132,7 @@ On a 13-inch MacBook Air, a 14-inch Pro at default scaling, or a MacBook Neo, si
 | `desktop` | `AEROSPACE_GAP_SIZE` (12) | `AEROSPACE_ACCORDION_PADDING` (30) | external monitor connected, or a wide built-in display |
 | `laptop` | `AEROSPACE_GAP_SIZE_LAPTOP` (6) | `AEROSPACE_ACCORDION_PADDING_LAPTOP` (12) | built-in display is the only screen and is narrower than 1600 pt |
 
-`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The bar is the same in both profiles: flat from edge to edge, flush with the top, filling the notch strip on a notched display, so windows lose only 8 px to it.
+`MAKARON_LAYOUT_PROFILE=auto` (default) picks the profile from the built-in display's size in points, not the model name, so Air 13 (1470 pt), Pro 14 (1512 pt) and Neo (1408 pt) get `laptop`, while "More Space" scaling, Air 15 and Pro 16 stay on `desktop`. Docking a monitor switches back to `desktop` on the fly. The bar is the same in both profiles: flat from edge to edge along the bottom of the screen.
 
 ```bash
 makaron-layout            # show the active profile and why

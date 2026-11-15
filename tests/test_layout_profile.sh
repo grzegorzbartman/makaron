@@ -14,7 +14,6 @@ printf '#!/bin/bash\nexit 0\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aero
     cp "$REPO/templates/makaron.conf.default" "$MAKARON_CONF_PATH"
     cp "$REPO/configs/aerospace/.aerospace.toml" "$AEROSPACE_CONFIG_PATH"
     echo full > "$UI_MODE_FILE"
-    echo "1 32" > "$NOTCH_CACHE_FILE"
     # shellcheck source=/dev/null
     source "$REPO/bin/makaron-ui-helpers"
     FAILED=0
@@ -22,20 +21,13 @@ printf '#!/bin/bash\nexit 0\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aero
     echo "1470 956 1" > "$SCREEN_CACHE_FILE"
     assert_eq "$(_get_layout_profile)" laptop "lone Air 13 -> laptop"
     assert_eq "$(_get_gap_size)" 6 "laptop gap default 6"
-    assert_eq "$(_get_bar_height)" 32 "bar 32 without a notch"
-    assert_eq "$(_get_notch_bar_height)" 40 "notch bar = notch strip (32) + 8 overhang"
+    assert_eq "$(_get_bar_height)" 32 "bar height 32"
     assert_eq "$(_get_accordion_padding)" 12 "laptop accordion padding 12"
     apply_desktop_state >/dev/null
     assert_contains "$AEROSPACE_CONFIG_PATH" "accordion-padding = 12" "accordion-padding written (laptop)"
     assert_contains "$AEROSPACE_CONFIG_PATH" '    inner.horizontal = 6' "gaps written (laptop)"
-    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.top = [{ monitor."Built-in" = 14 }, 38]' "outer.top (laptop, notch 32): gap + overhang"
-    echo "1 38" > "$NOTCH_CACHE_FILE"
-    assert_eq "$(_get_notch_bar_height)" 46 "notch bar follows a taller notch (38 + 8)"
-    apply_desktop_state >/dev/null
-    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.top = [{ monitor."Built-in" = 14 }, 38]' "outer.top: notch screen reserves gap + overhang"
-    echo "0 0" > "$NOTCH_CACHE_FILE"
-    assert_eq "$(_get_notch_bar_height)" 32 "no notch -> notch bar = bar height"
-    echo "1 32" > "$NOTCH_CACHE_FILE"
+    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.top =        6' "outer.top = gap (menu bar visible)"
+    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.bottom = 38' "outer.bottom = bar 32 + gap 6"
     verify_desktop_state >/dev/null && pass "verify in sync (laptop)" || fail "verify drift (laptop)"
 
     echo "1470 956 2" > "$SCREEN_CACHE_FILE"
@@ -45,6 +37,7 @@ printf '#!/bin/bash\nexit 0\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aero
     assert_eq "$(_get_accordion_padding)" 30 "desktop accordion padding 30"
     apply_desktop_state >/dev/null
     assert_contains "$AEROSPACE_CONFIG_PATH" "accordion-padding = 30" "accordion-padding written (desktop)"
+    assert_contains "$AEROSPACE_CONFIG_PATH" '    outer.bottom = 44' "outer.bottom = bar 32 + gap 12 (desktop)"
     verify_desktop_state >/dev/null && pass "verify in sync (desktop)" || fail "verify drift (desktop)"
 
     echo "1710 1112 1" > "$SCREEN_CACHE_FILE"

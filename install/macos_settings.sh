@@ -128,7 +128,9 @@ configure_library_visibility() {
 # Dock settings
 configure_dock() {
     echo "Configuring Dock settings..."
-    defaults write com.apple.dock autohide -bool true
+    # Always visible on the left: SketchyBar owns the bottom edge
+    defaults write com.apple.dock autohide -bool false
+    defaults write com.apple.dock orientation -string left
     defaults write com.apple.Dock autohide-delay -float 0
     defaults write com.apple.dock autohide-time-modifier -float 0
     defaults write com.apple.dock expose-animation-duration -float 0.1
@@ -144,24 +146,24 @@ configure_dock() {
 
 # Menu bar autohide
 configure_menubar() {
-    echo "Configuring menu bar to autohide..."
+    echo "Configuring menu bar to stay visible..."
     local ui_helpers="$MAKARON_PATH/bin/makaron-ui-helpers"
 
     if [ -f "$ui_helpers" ]; then
         # Same path as the mode switchers: makaron-menubar, System Settings UI as fallback.
         source "$ui_helpers"
-        if _set_menubar_autohide "Always"; then
-            echo "Menu bar autohide configured"
+        if _set_menubar_autohide "Never"; then
+            echo "Menu bar set to always visible"
             return
         fi
     fi
 
-    if defaults write NSGlobalDomain _HIHideMenuBar -bool true 2>/dev/null; then
+    if defaults write NSGlobalDomain _HIHideMenuBar -bool false 2>/dev/null; then
         echo "Menu bar autohide preference updated"
-        echo "Note: macOS Sequoia may ignore this until changed via System Settings UI"
+        echo "Note: macOS may ignore this until changed via System Settings UI"
     else
-        echo "⚠️  Could not enable menu bar autohide automatically."
-        echo "   Please enable it in System Settings > Control Center > Menu Bar > Automatically hide and show the menu bar > Always"
+        echo "⚠️  Could not show the menu bar automatically."
+        echo "   Please set System Settings > Control Center > Menu Bar > Automatically hide and show the menu bar > Never"
     fi
 }
 
