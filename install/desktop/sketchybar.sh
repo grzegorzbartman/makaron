@@ -73,6 +73,14 @@ if [ -f "$MAKARON_PATH/src/menubar.swift" ]; then
     }
 fi
 
+# Compile Dock autohide helper (CoreDock, no Automation permission; plugins/dock_check.sh)
+if [ -f "$MAKARON_PATH/src/dock.swift" ]; then
+    echo "Compiling dock..."
+    swiftc -O -o "$MAKARON_PATH/bin/makaron-dock" "$MAKARON_PATH/src/dock.swift" 2>/dev/null || {
+        echo "Warning: Failed to compile dock.swift, Dock autohide falls back to System Events"
+    }
+fi
+
 # Compile shortcut overlay panel (NSPanel + WKWebView, used by makaron-help)
 if [ -f "$MAKARON_PATH/src/help_window.swift" ]; then
     echo "Compiling help_window..."

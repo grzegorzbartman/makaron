@@ -201,6 +201,13 @@ sketchybar --add item appearance_check left \
            --set appearance_check drawing=off update_freq=10 \
            script="$PLUGIN_DIR/appearance_change.sh"
 
+##### Dock Reserve Check #####
+# Re-toggle Dock autohide when a respawned Dock keeps its space reserved
+sketchybar --add item dock_check left \
+           --set dock_check drawing=off update_freq=10 \
+           script="$PLUGIN_DIR/dock_check.sh" \
+           --subscribe dock_check system_woke display_change
+
 ##### Monitor Change Detection #####
 # Automatically reload SketchyBar when monitors are connected/disconnected
 sketchybar --add item display_change_detector left \
