@@ -22,7 +22,15 @@ printf '#!/bin/bash\nexit 0\n' > "$HOME/bin/aerospace"; chmod +x "$HOME/bin/aero
     echo "1470 956 1" > "$SCREEN_CACHE_FILE"
     assert_eq "$(_get_layout_profile)" laptop "lone Air 13 -> laptop"
     assert_eq "$(_get_gap_size)" 6 "laptop gap default 6"
-    assert_eq "$(_get_bar_height)" 32 "laptop bar 32"
+    assert_eq "$(_get_bar_height)" 32 "laptop bar auto = notch 32"
+    echo "1 38" > "$NOTCH_CACHE_FILE"
+    assert_eq "$(_get_bar_height)" 38 "laptop bar auto = notch 38 (More Space)"
+    echo "0 0" > "$NOTCH_CACHE_FILE"
+    assert_eq "$(_get_bar_height)" 32 "laptop bar auto without notch 32"
+    set_makaron_conf_value SKETCHYBAR_HEIGHT_LAPTOP 34
+    assert_eq "$(_get_bar_height)" 34 "laptop bar explicit 34 wins"
+    set_makaron_conf_value SKETCHYBAR_HEIGHT_LAPTOP auto
+    echo "1 32" > "$NOTCH_CACHE_FILE"
     assert_eq "$(_get_bar_y_offset)" 0 "laptop bar flush with the top"
     assert_eq "$(_get_accordion_padding)" 12 "laptop accordion padding 12"
     assert_eq "$(_get_max_tiles)" 2 "laptop max tiles 2"

@@ -49,3 +49,14 @@ printf 'AEROSPACE_GAP_SIZE_LAPTOP=4\n' > "$HOME/.config/makaron/makaron.conf"
 bash "$GAP6" >/dev/null
 assert_contains "$HOME/.config/makaron/makaron.conf" "AEROSPACE_GAP_SIZE_LAPTOP=4" "custom laptop gap kept (gap6)"
 bash "$GAP6" >/dev/null && pass "gap6 migration idempotent" || fail "gap6 second run failed"
+
+# Laptop bar height default -> auto: switches the old default 32, keeps a custom value
+BARH="$REPO/migrations/1795251546.sh"
+printf 'SKETCHYBAR_HEIGHT=40\nSKETCHYBAR_HEIGHT_LAPTOP=32\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$BARH" >/dev/null && pass "bar height migration runs" || fail "bar height migration failed"
+assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT_LAPTOP=auto" "laptop bar 32 switched to auto"
+assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT=40" "desktop bar untouched"
+printf 'SKETCHYBAR_HEIGHT_LAPTOP=36\n' > "$HOME/.config/makaron/makaron.conf"
+bash "$BARH" >/dev/null
+assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT_LAPTOP=36" "custom laptop bar kept"
+bash "$BARH" >/dev/null && pass "bar height migration idempotent" || fail "bar height second run failed"
