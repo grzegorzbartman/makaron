@@ -110,10 +110,15 @@ _bar_height_conf_key() {
 _get_bar_height() {
     (
         SKETCHYBAR_HEIGHT=40
-        SKETCHYBAR_HEIGHT_LAPTOP=32
+        SKETCHYBAR_HEIGHT_LAPTOP=auto
         [ -f "$MAKARON_CONF_PATH" ] && source "$MAKARON_CONF_PATH"
         key="$(_bar_height_conf_key)"
         value="${!key:-}"
+        # auto = height of the notch strip (37.5pt at "More Space" scaling), 32 without a notch
+        if [ "$key" = "SKETCHYBAR_HEIGHT_LAPTOP" ] && ! [[ "$value" =~ ^[0-9]+$ ]]; then
+            value=32
+            _has_builtin_notch && value="$(_notch_top_inset)"
+        fi
         if [[ "$value" =~ ^[0-9]+$ ]] && [ "$value" -ge 20 ] && [ "$value" -le 80 ]; then
             echo "$value"
         elif [ "$key" = "SKETCHYBAR_HEIGHT_LAPTOP" ]; then

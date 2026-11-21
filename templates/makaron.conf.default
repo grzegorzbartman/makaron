@@ -30,10 +30,10 @@ AEROSPACE_ACCORDION_PADDING_LAPTOP=12
 AEROSPACE_LAPTOP_MAX_TILES=2
 
 # SketchyBar height in px (20-80). Window layout adapts automatically.
-# The laptop bar is flat and edge to edge; at 32 it fills the notch strip
-# exactly, so windows lose no space to it.
+# The laptop bar is flat and edge to edge; auto matches the notch strip
+# height (32 at default scaling, 38 at "More Space"; 32 without a notch).
 SKETCHYBAR_HEIGHT=40
-SKETCHYBAR_HEIGHT_LAPTOP=32
+SKETCHYBAR_HEIGHT_LAPTOP=auto
 
 # SketchyBar: show the Makaron menu (M mark, click for actions) on the left
 SKETCHYBAR_LOGO=true
