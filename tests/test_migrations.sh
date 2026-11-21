@@ -60,3 +60,13 @@ printf 'SKETCHYBAR_HEIGHT_LAPTOP=36\n' > "$HOME/.config/makaron/makaron.conf"
 bash "$BARH" >/dev/null
 assert_contains "$HOME/.config/makaron/makaron.conf" "SKETCHYBAR_HEIGHT_LAPTOP=36" "custom laptop bar kept"
 bash "$BARH" >/dev/null && pass "bar height migration idempotent" || fail "bar height second run failed"
+
+# Dock helper: compiles makaron-dock into MAKARON_PATH, second run is a no-op
+if command -v swiftc >/dev/null 2>&1; then
+    DOCKM="$REPO/migrations/1795252301.sh"
+    mkdir -p "$HOME/mk/src" "$HOME/mk/bin" && cp "$REPO/src/dock.swift" "$HOME/mk/src/"
+    MAKARON_PATH="$HOME/mk" bash "$DOCKM" >/dev/null && pass "dock migration runs" || fail "dock migration failed"
+    [ -x "$HOME/mk/bin/makaron-dock" ] && pass "makaron-dock compiled" || fail "makaron-dock missing"
+    MAKARON_PATH="$HOME/mk" bash "$DOCKM" > "$HOME/dock.out" 2>&1
+    assert_contains "$HOME/dock.out" "already current" "dock migration idempotent"
+fi

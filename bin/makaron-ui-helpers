@@ -677,10 +677,12 @@ EOF
 # killall Dock can exit 0, and launchd (KeepAlive SuccessfulExit=false) then never respawns it;
 # a respawned Dock may also keep the stale bottom reserve until autohide is toggled.
 _restart_dock() {
-    local autohide=false opposite=true i
+    local autohide=false opposite=true i state
     [ "$(defaults read com.apple.dock autohide 2>/dev/null)" = 1 ] && autohide=true opposite=false
     launchctl kickstart -k "gui/$(id -u)/com.apple.Dock.agent" 2>/dev/null || killall Dock 2>/dev/null
     for i in {1..20}; do pgrep -x Dock >/dev/null && break; sleep 0.25; done
+    [ "$autohide" = true ] && state=on || state=off
+    "$MAKARON_PATH/bin/makaron-dock" "$state" 2>/dev/null && return
     osascript -e "tell application \"System Events\" to set autohide of dock preferences to $opposite" \
         -e 'delay 0.5' \
         -e "tell application \"System Events\" to set autohide of dock preferences to $autohide" >/dev/null 2>&1 || true
